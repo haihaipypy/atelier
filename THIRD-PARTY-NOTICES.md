@@ -21,5 +21,5 @@
 ## 模型服务条款
 
 - Cloudflare Workers AI：受 [Cloudflare 服务条款](https://www.cloudflare.com/terms/) 与 Black Forest Labs 模型许可约束。
-- 腾讯云混元：受 [腾讯云服务条款](https://cloud.tencent.com/document/product/301) 约束。
+- 自定义模型（OpenAI 兼容接口）：受对应服务商的条款约束，与本仓库无关。
 - 生成结果的使用权以对应平台条款为准；本仓库不对生成内容的合规性作担保。
