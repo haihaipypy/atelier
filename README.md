@@ -228,7 +228,7 @@ npx wrangler secret put CUSTOM_MODEL      # 例：gpt-image-1
 
 ```bash
 npm run sync              # 同步最新图库索引
-npm run dryrun            # 52 项自检，不需要任何密钥
+npm run dryrun            # 61 项自检，不需要任何密钥
 npm run dev               # wrangler dev，本地 Cloudflare 环境
 ```
 
@@ -297,6 +297,30 @@ node scripts/preview-server.mjs   # 默认 http://localhost:8099
 填完可以点「测试连通」发一次极小的文生图请求，验证配置是否正确。
 三张参考图通过 `extra_body.image` 以数组传入，`response_format` 固定 `b64_json`，
 返回兼容 `data[0].b64_json`、`data[0].url`、`images[0]` 三种结构。
+
+### 5. 报错怎么读
+
+自定义模型的失败提示会带上**上游原文**和**实际请求地址**，形如：
+
+```
+测试失败：自定义模型返回 403：密钥无权访问该模型，或服务商拦截了来源地区/IP
+（上游：Country, region, or territory not supported · unsupported_country_region_territory）
+｜请求地址：https://api.example.com/v1/images/generations
+```
+
+| 上游状态 | 面板提示的判断 | 常见真实原因 |
+|---|---|---|
+| 401 | API Key 无效或已过期 | Key 复制错、被撤销、前后带空格 |
+| 402 | 账户余额不足 | 没充值 |
+| 403 | 密钥无权访问该模型，或服务商拦截了来源地区/IP | 未开通该模型；OpenAI 类服务对**云函数出口 IP** 常直接 403（`unsupported_country_region_territory`），换网关或自建中转 |
+| 404 | 接口路径不存在 | Base URL 多了或少了 `/v1`，看提示里的请求地址 |
+| 422 / 400 | 上游不接受这组参数 | `size`、`model`、`response_format` 不被支持，用「额外参数」覆盖 |
+| 429 | 触发限流或额度用尽 | 免费额度用尽或并发超限 |
+| 5xx | 原样透传上游状态 | 服务商故障，稍后重试 |
+
+> 403 是最容易被误判成「代码有问题」的一类：它几乎总是**凭据权限**或**出口 IP 被拦**，
+> 而不是本站请求格式错误。原文里出现 `unsupported_country_region_territory`
+> 就是后者——请求从 Cloudflare 的节点发出，被对方按地区拒了。
 
 ---
 
@@ -450,7 +474,7 @@ atelier/
 ├── scripts/
 │   ├── sync-catalogs.mjs   #   图库同步（支持 --offline / --only）
 │   ├── preview-server.mjs  #   本地预览（静态 + API 单端口）
-│   └── dry-run.mjs         #   端到端自检（52 项断言，无需密钥）
+│   └── dry-run.mjs         #   端到端自检（61 项断言，无需密钥）
 ├── .github/workflows/
 │   └── sync-catalogs.yml   #   每日自动同步
 ├── wrangler.jsonc          # 部署配置
@@ -484,9 +508,9 @@ atelier/
 
 ## 验证状态
 
-- `dry-run.mjs`：**52 项断言全绿**，覆盖能力探测、演示生成、素材校验、multipart 字段名、3043 重试、
+- `dry-run.mjs`：**61 项断言全绿**，覆盖能力探测、演示生成、素材校验、multipart 字段名、3043 重试、
   未绑定快速失败、假 binding 走通真实调用链、非法模型回落、配额耗尽转 429、
-  自定义接口端到端、代理白名单
+  自定义接口端到端、403/429/422 错误分类、代理白名单
 - 浏览器端完整交互（1080×675 / 1280×800 / 1440×900）：预览 → 确认 → 三板块选齐 → 生成 → 渲染，
   控制台零报错
 - 图库同步实测：1,267 + 893 + 440 条，日文残留 0

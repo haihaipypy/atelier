@@ -534,8 +534,10 @@ async function generate() {
     const j = await r.json();
     if (!r.ok || j.error) {
       // 把 Workers AI 的错误码与 Ray ID 一起显示：3043 这类内部错误只能靠 Ray 让 Cloudflare 定位
+      // 自定义模型的错误已在上游 message 里自带原文，不重复拼
       const d = j.detail || {};
-      const tag = d.code ? `（错误码 ${d.code}${d.ray ? ` · Ray ${d.ray}` : ''}）` : '';
+      const tag =
+        !d.upstreamStatus && d.code ? `（错误码 ${d.code}${d.ray ? ` · Ray ${d.ray}` : ''}）` : '';
       throw new Error(`${j.error || `生成失败（HTTP ${r.status}）`}${tag}`);
     }
 
@@ -832,7 +834,12 @@ async function testCfg() {
       body: JSON.stringify(c),
     });
     const j = await r.json();
-    if (!j.ok) throw new Error(j.error || '测试失败');
+    if (!j.ok) {
+      // 把请求地址一起显示：403/404 多半是 Base URL 拼错，没有地址没法排查
+      const d = j.detail || {};
+      const where = d.endpoint ? `｜请求地址：${d.endpoint}` : '';
+      throw new Error(`${j.error || '测试失败'}${where}`);
+    }
     cfgMsg(`连通成功，耗时 ${(j.ms / 1000).toFixed(1)}s。下方为返回样例（用于确认是真实出图接口）。`, true);
     $('#cfgSample').src = j.sample;
     $('#cfgSample').hidden = false;

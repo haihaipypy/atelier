@@ -293,6 +293,24 @@ try {
   await srv2.close();
 }
 
+for (const [code, expectStatus, pattern, label] of [
+  [403, 400, /无权访问|地区\/IP/, '403 → 说明权限或来源地区被拦'],
+  [429, 429, /限流|额度/, '429 → 透传限流状态'],
+  [422, 400, /不接受这组参数/, '422 → 提示参数不被接受'],
+]) {
+  const s = await startFakeImageServer({ fail: code });
+  try {
+    await generateCustom({ images: [], prompt: 'x', size: '1024x1024', profile: { baseUrl: `http://127.0.0.1:${s.port}/v1`, apiKey: 'k', model: 'm', ready: true } });
+    check(`${code} 应抛错`, false);
+  } catch (e) {
+    check(`${code} → HTTP ${expectStatus}`, e.status === expectStatus, `status=${e.status}`);
+    check(label, pattern.test(e.message), e.message);
+    check(`${code} → 带出上游原文`, /上游：/.test(e.message) && e.detail?.upstreamStatus === code, e.message);
+  } finally {
+    await s.close();
+  }
+}
+
 console.log('\n[17] 图片代理：白名单与错误处理');
 {
   const bad = await handleRequest(new Request('https://x/api/proxy?url=' + encodeURIComponent('https://evil.example/a.png')), {});

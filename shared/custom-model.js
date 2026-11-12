@@ -179,18 +179,36 @@ export async function generateCustom({ images, prompt, size, profile, signal }) 
   }
 
   if (!res.ok) {
-    const msg = json?.error?.message || json?.message || raw.slice(0, 300);
+    // 上游原文一定要带出去：403 这类错误的真正原因只在上游 message / code 里
+    const upstream = String(json?.error?.message || json?.message || raw || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 160);
+    const code = String(json?.error?.code || json?.error?.type || '').trim();
     const hint =
       res.status === 401
         ? 'API Key 无效或已过期'
-        : res.status === 404
-          ? `接口路径不存在，当前请求 ${endpoint}。请确认 Base URL 是否需要带 /v1`
-          : res.status === 429
-            ? '触发限流或额度用尽'
-            : '';
-    throw new HttpError(res.status === 401 || res.status === 404 ? 400 : 502,
-      `自定义模型返回 ${res.status}${hint ? '：' + hint : ''}`,
-      { upstream: msg, endpoint });
+        : res.status === 402
+          ? '账户余额不足'
+          : res.status === 403
+            ? '密钥无权访问该模型，或服务商拦截了来源地区/IP（云函数出口 IP 被拦是常见原因）'
+            : res.status === 404
+              ? `接口路径不存在，当前请求 ${endpoint}。请确认 Base URL 是否需要带 /v1`
+              : res.status === 429
+                ? '触发限流或额度用尽'
+                : res.status === 400 || res.status === 422
+                  ? '上游不接受这组参数（size / model / response_format 可能不支持）'
+                  : '';
+    const detail = upstream ? `（上游：${upstream}${code ? ` · ${code}` : ''}）` : '';
+    // 4xx 是配置或凭据问题，不该当成网关故障（502）报给前端
+    const status = res.status === 429 ? 429 : res.status >= 500 ? 502 : 400;
+    throw new HttpError(status, `自定义模型返回 ${res.status}${hint ? '：' + hint : ''}${detail}`, {
+      upstream,
+      code,
+      upstreamStatus: res.status,
+      endpoint,
+      model: profile.model,
+    });
   }
 
   const item = json?.data?.[0] || json?.images?.[0] || json?.output?.[0] || null;
