@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Atelier · 角色服装合成工坊</title>
+<meta name="description" content="从服装库、脸型库、姿势库各选一张，交给 AI 合成一张完整人物图。基于 Cloudflare Workers AI，克隆即可部署。" />
+<meta name="color-scheme" content="light dark" />
+<link rel="preconnect" href="https://ai-costume-gallery.pages.dev" />
+<link rel="preconnect" href="https://ai-portrait-gallery.pages.dev" />
+<link rel="preconnect" href="https://ai-pose-gallery.pages.dev" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 19.5 12 4l8 15.5M7.6 14h8.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="brand-text">Atelier<small>角色服装合成工坊</small></span>
+  </a>
+  <nav class="tabs" role="tablist" aria-label="素材板块">
+    <button role="tab" data-slot="outfit" aria-selected="true">① 服装</button>
+    <button role="tab" data-slot="face" aria-selected="false">② 脸</button>
+    <button role="tab" data-slot="pose" aria-selected="false">③ 姿势</button>
+  </nav>
+  <div class="top-actions">
+    <span class="engine-badge" id="engineBadge" title="当前生成通道">通道检测中…</span>
+    <a class="ghost" id="repoLink" href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- 左侧：图库 -->
+  <section class="panel library" aria-labelledby="libTitle">
+    <div class="lib-head">
+      <h2 id="libTitle">服装库</h2>
+      <p class="lib-meta" id="libMeta">加载中…</p>
+    </div>
+    <div class="lib-tools">
+      <input type="search" id="search" placeholder="搜编号、颜色、品类…（空格分隔 = 同时满足）" autocomplete="off" />
+      <select id="catFilter" aria-label="分类筛选"><option value="">全部分类</option></select>
+    </div>
+    <div class="grid" id="grid" role="listbox" aria-label="素材列表"></div>
+    <div class="lib-foot">
+      <nav class="pager" id="pager" aria-label="分页">
+        <button class="pg-btn" id="pgFirst" aria-label="第一页">«</button>
+        <button class="pg-btn" id="pgPrev" aria-label="上一页">‹</button>
+        <span class="pg-pages" id="pgPages"></span>
+        <button class="pg-btn" id="pgNext" aria-label="下一页">›</button>
+        <button class="pg-btn" id="pgLast" aria-label="最后一页">»</button>
+      </nav>
+      <span class="count" id="count"></span>
+    </div>
+  </section>
+
+  <!-- 右侧：合成台 -->
+  <aside class="panel studio" aria-labelledby="studioTitle">
+    <div class="studio-head">
+      <h2 id="studioTitle">合成台</h2>
+      <button class="text-btn" id="resetBtn">清空</button>
+    </div>
+
+    <div class="slots" id="slots">
+      <div class="slot" data-slot="outfit">
+        <div class="slot-label">① 服装</div>
+        <div class="slot-thumb" data-empty="未选"></div>
+        <button class="slot-upload" data-upload="outfit" title="上传自己的图片">↑</button>
+      </div>
+      <div class="slot" data-slot="face">
+        <div class="slot-label">② 脸</div>
+        <div class="slot-thumb" data-empty="未选"></div>
+        <button class="slot-upload" data-upload="face" title="上传自己的图片">↑</button>
+      </div>
+      <div class="slot" data-slot="pose">
+        <div class="slot-label">③ 姿势</div>
+        <div class="slot-thumb" data-empty="未选"></div>
+        <button class="slot-upload" data-upload="pose" title="上传自己的图片">↑</button>
+      </div>
+    </div>
+
+    <details class="advanced" open>
+      <summary>生成设置</summary>
+      <div class="adv-body">
+        <label>输出画幅
+          <select id="ratio">
+            <option value="3:4" selected>竖版 3:4（人像）</option>
+            <option value="1:1">方形 1:1</option>
+            <option value="9:16">竖长 9:16</option>
+            <option value="4:3">横版 4:3</option>
+          </select>
+        </label>
+        <label class="wide">生成通道
+          <select id="engine">
+            <option value="cloudflare">Cloudflare Workers AI</option>
+            <option value="custom">自定义模型（OpenAI 兼容接口）</option>
+          </select>
+        </label>
+        <label id="modelRow" class="wide" hidden>Cloudflare 模型
+          <select id="model"></select>
+        </label>
+        <label id="customModelRow" class="wide" hidden>自定义模型
+          <select id="customModel"></select>
+        </label>
+        <div class="wide cfg-entry">
+          <button type="button" class="mini-btn" id="openModelCfg">配置自定义模型 →</button>
+          <span class="cfg-entry-note">用自己的 OpenAI 兼容图像接口（如中转站、自建服务）</span>
+        </div>
+        <label>渲染风格
+          <select id="style">
+            <option value="photorealistic" selected>写实摄影</option>
+            <option value="anime">二次元插画</option>
+          </select>
+        </label>
+        <label class="wide">补充描述（可选）
+          <input id="extra" placeholder="例如：add a straw hat, soft afternoon sunlight" />
+        </label>
+        <label class="wide">自定义 Prompt（留空则用内置模板）
+          <textarea id="promptOverride" rows="3" spellcheck="false"></textarea>
+        </label>
+      </div>
+    </details>
+
+    <div class="actions">
+      <button class="primary" id="genBtn" disabled>
+        <span class="spinner" hidden></span><span class="label">生成合成图</span>
+      </button>
+      <p class="hint" id="hint">从左侧选齐 服装 / 脸 / 姿势 三个素材后即可生成。</p>
+    </div>
+
+    <div class="result" id="result">
+      <div class="placeholder">
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M4 5.5h16v13H4zM4 15l4.5-4.5 4 4L16 11l4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>结果会显示在这里</span>
+      </div>
+    </div>
+    <div class="result-meta" id="resultMeta"></div>
+  </aside>
+</main>
+
+<!-- 自定义模型配置抽屉 -->
+<div class="drawer" id="modelDrawer" hidden>
+  <div class="drawer-card" role="dialog" aria-labelledby="cfgTitle">
+    <div class="drawer-head">
+      <h3 id="cfgTitle">自定义模型</h3>
+      <button class="text-btn" id="cfgClose" aria-label="关闭">✕</button>
+    </div>
+    <p class="drawer-desc">
+      填写任何 <b>OpenAI 兼容</b> 的图像接口即可。密钥保存在服务端（KV），不会下发到浏览器。
+    </p>
+
+    <label>Base URL
+      <input id="cfgBaseUrl" placeholder="https://apihub.example.com/v1" spellcheck="false" />
+      <small>只需填到 <code>/v1</code>，程序会自动拼 <code>/images/generations</code></small>
+    </label>
+    <label>API Key
+      <input id="cfgApiKey" type="password" placeholder="sk-..." spellcheck="false" autocomplete="off" />
+      <small id="cfgKeyHint"></small>
+    </label>
+    <label>模型名称
+      <input id="cfgModel" placeholder="例如 agnes-image-2.5-flash、gpt-image-1" spellcheck="false" />
+    </label>
+    <label>参考图传递方式
+      <select id="cfgSendMode">
+        <option value="auto" selected>自动（data URI，最通用）</option>
+        <option value="url">传公网 URL</option>
+      </select>
+    </label>
+    <details>
+      <summary>额外参数（JSON，可选）</summary>
+      <textarea id="cfgExtra" rows="3" spellcheck="false" placeholder='{"quality":"high"}'></textarea>
+    </details>
+
+    <div class="drawer-actions">
+      <button class="primary" id="cfgSave">保存</button>
+      <button class="ghost-btn" id="cfgTest">测试连通</button>
+      <button class="text-btn" id="cfgClear">清除</button>
+    </div>
+    <div class="cfg-msg" id="cfgMsg"></div>
+    <img id="cfgSample" hidden alt="测试生成的样例图" />
+    <p class="cfg-note" id="cfgPersistNote"></p>
+  </div>
+</div>
+
+<!-- 大图查看 -->
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lb-close" id="lbClose" aria-label="关闭">✕</button>
+  <img id="lbImg" alt="" />
+  <div class="lb-bar">
+    <span id="lbCaption"></span>
+    <div class="lb-actions">
+      <a id="lbOpen" target="_blank" rel="noopener">打开原图 ↗</a>
+      <button class="primary" id="lbConfirm">确认选择</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden />
+<script type="module" src="/app.js"></script>
+</body>
+</html>

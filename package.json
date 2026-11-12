@@ -1,0 +1,15 @@
+{
+  "name": "atelier-compose",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-catalogs.mjs",
+    "sync:offline": "node scripts/sync-catalogs.mjs --offline",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "dryrun": "node scripts/dry-run.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

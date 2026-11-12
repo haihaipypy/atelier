@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "atelier-compose",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-01-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./web/public",
+    "binding": "ASSETS"
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "FLUX_MODEL": "@cf/black-forest-labs/flux-2-klein-9b"
+  }
+}

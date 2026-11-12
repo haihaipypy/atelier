@@ -1,0 +1,60 @@
+{
+ "items": [
+  {
+   "id": "face-001",
+   "title": "空气刘海短发 · 浅棕",
+   "thumb": "/samples/face.webp",
+   "full": "/samples/face.webp",
+   "cats": [
+    "短发"
+   ],
+   "tags": [
+    "空气刘海",
+    "浅棕",
+    "日系"
+   ]
+  },
+  {
+   "id": "face-002",
+   "title": "长直发 · 黑发",
+   "thumb": "/samples/face.webp",
+   "full": "/samples/face.webp",
+   "cats": [
+    "长发"
+   ],
+   "tags": [
+    "黑发",
+    "直发",
+    "清冷"
+   ]
+  },
+  {
+   "id": "face-003",
+   "title": "短卷发 · 栗色",
+   "thumb": "/samples/face.webp",
+   "full": "/samples/face.webp",
+   "cats": [
+    "短发"
+   ],
+   "tags": [
+    "卷发",
+    "栗色",
+    "元气"
+   ]
+  },
+  {
+   "id": "face-004",
+   "title": "半扎发 · 深棕",
+   "thumb": "/samples/face.webp",
+   "full": "/samples/face.webp",
+   "cats": [
+    "中长发"
+   ],
+   "tags": [
+    "半扎",
+    "深棕",
+    "温柔"
+   ]
+  }
+ ]
+}

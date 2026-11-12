@@ -1,0 +1,92 @@
+{
+ "items": [
+  {
+   "id": "outfit-001",
+   "title": "春季 · 米白荷叶边上衣 + 粉色短裙",
+   "thumb": "/samples/outfit.webp",
+   "full": "/samples/outfit.webp",
+   "cats": [
+    "春装"
+   ],
+   "tags": [
+    "米白",
+    "荷叶边",
+    "针织",
+    "短裙",
+    "草帽"
+   ]
+  },
+  {
+   "id": "outfit-002",
+   "title": "通勤 · 长款风衣 + 白鞋",
+   "thumb": "/samples/outfit.webp",
+   "full": "/samples/outfit.webp",
+   "cats": [
+    "春装"
+   ],
+   "tags": [
+    "卡其",
+    "风衣",
+    "白色",
+    "帆布鞋"
+   ]
+  },
+  {
+   "id": "outfit-003",
+   "title": "夏日 · 吊带碎花长裙",
+   "thumb": "/samples/outfit.webp",
+   "full": "/samples/outfit.webp",
+   "cats": [
+    "夏装"
+   ],
+   "tags": [
+    "碎花",
+    "吊带",
+    "长裙",
+    "凉鞋"
+   ]
+  },
+  {
+   "id": "outfit-004",
+   "title": "派对 · 丝绒短外套 + 亮片裙",
+   "thumb": "/samples/outfit.webp",
+   "full": "/samples/outfit.webp",
+   "cats": [
+    "派对"
+   ],
+   "tags": [
+    "丝绒",
+    "亮片",
+    "短外套"
+   ]
+  },
+  {
+   "id": "outfit-005",
+   "title": "极简 · 白衬衫 + 阔腿裤",
+   "thumb": "/samples/outfit.webp",
+   "full": "/samples/outfit.webp",
+   "cats": [
+    "通勤"
+   ],
+   "tags": [
+    "白衬衫",
+    "阔腿裤",
+    "极简"
+   ]
+  },
+  {
+   "id": "outfit-006",
+   "title": "冬装 · 羽绒服 + 针织围巾",
+   "thumb": "/samples/outfit.webp",
+   "full": "/samples/outfit.webp",
+   "cats": [
+    "冬装"
+   ],
+   "tags": [
+    "羽绒",
+    "围巾",
+    "针织"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,69 @@
+{
+ "items": [
+  {
+   "id": "pose-001",
+   "title": "P001 侧坐 · 屈膝平视",
+   "thumb": "/samples/pose.webp",
+   "full": "/samples/pose.webp",
+   "cats": [
+    "坐姿"
+   ],
+   "tags": [
+    "正面",
+    "全身"
+   ]
+  },
+  {
+   "id": "pose-002",
+   "title": "P014 站立 · S 形重心",
+   "thumb": "/samples/pose.webp",
+   "full": "/samples/pose.webp",
+   "cats": [
+    "站姿"
+   ],
+   "tags": [
+    "正面",
+    "全身"
+   ]
+  },
+  {
+   "id": "pose-003",
+   "title": "P032 蹲姿 · 单手撑地",
+   "thumb": "/samples/pose.webp",
+   "full": "/samples/pose.webp",
+   "cats": [
+    "蹲姿"
+   ],
+   "tags": [
+    "侧面",
+    "全身"
+   ]
+  },
+  {
+   "id": "pose-004",
+   "title": "P047 倚靠 · 回头看",
+   "thumb": "/samples/pose.webp",
+   "full": "/samples/pose.webp",
+   "cats": [
+    "站姿"
+   ],
+   "tags": [
+    "背面",
+    "回头"
+   ]
+  },
+  {
+   "id": "pose-005",
+   "title": "P058 平躺 · 屈膝仰拍",
+   "thumb": "/samples/pose.webp",
+   "full": "/samples/pose.webp",
+   "cats": [
+    "躺姿"
+   ],
+   "tags": [
+    "仰拍",
+    "全身"
+   ]
+  }
+ ]
+}

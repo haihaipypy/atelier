@@ -1,0 +1,194 @@
+/**
+ * 角色服装合成：prompt 构造 + Cloudflare Workers AI 适配
+ *
+ * 设计原则
+ * 1. 固定用「一句英文 prompt + 三张参考图的固定顺序」调用，
+ *    顺序为：0=服装 1=脸 2=姿势。模型对 image index 的引用依赖顺序。
+ * 2. 适配器只负责「三张图 + prompt → Workers AI 的 multipart 请求体」，
+ *    不掺业务逻辑，换模型只改 MODEL 常量。
+ * 3. 是否可用由 AI binding 是否存在决定，前端 /api/config 据此降级为演示模式。
+ */
+
+export const SLOTS = ['outfit', 'face', 'pose'];
+
+/**
+ * 默认模型。可换的候选（都在 Workers AI 目录内，均支持多参考图）：
+ *   @cf/black-forest-labs/flux-2-klein-9b   4 步蒸馏，输入图须 < 512，约 1,363 Neurons/张
+ *   @cf/black-forest-labs/flux-2-klein-4b   更便宜更快，约 1,024 Neurons/张
+ *   @cf/black-forest-labs/flux-2-dev        质量最好、输入图无 512 限制，但步数多、最贵
+ * 改环境变量 FLUX_MODEL 即可切换，无需改代码。
+ */
+export const MODELS = {
+  'flux-2-klein-9b': {
+    label: 'FLUX.2 klein 9B',
+    modelId: '@cf/black-forest-labs/flux-2-klein-9b',
+    note: '默认。质量与成本平衡，输入图需 <512',
+  },
+  'flux-2-klein-4b': {
+    label: 'FLUX.2 klein 4B',
+    modelId: '@cf/black-forest-labs/flux-2-klein-4b',
+    note: '最省额度，适合调试',
+  },
+  'flux-2-dev': {
+    label: 'FLUX.2 dev',
+    modelId: '@cf/black-forest-labs/flux-2-dev',
+    note: '保真最好，输入图无 512 限制，费用最高',
+  },
+};
+export const DEFAULT_MODEL = '@cf/black-forest-labs/flux-2-klein-9b';
+
+/**
+ * 构造合成指令。要点：
+ * - 明确每张参考图的职责（角色分工是 prompt 结构里最关键的一环）
+ * - 明确「必须保留什么」「必须替换什么」，避免模型照抄服装图的空白人体
+ * - 姿势线稿要显式说明「只取骨架与角度，不要线稿风格」
+ */
+export function buildPrompt({ style = 'photorealistic', extra = '' } = {}) {
+  const styleLine = {
+    photorealistic:
+      'Photorealistic editorial fashion photography, realistic skin texture, natural light, ' +
+      'clean seamless studio background, full-body shot, 85mm lens, sharp focus.',
+    anime:
+      'High-quality anime illustration, clean cel shading with soft gradients, ' +
+      'full-body character illustration, simple gradient background.',
+  }[style] || 'Photorealistic editorial photography.';
+
+  const parts = [
+    'Compose ONE single new image of one person, using the three reference images below.',
+    'Reference image 1 defines the OUTFIT ONLY: copy its garments, colors, fabric, patterns, ' +
+      'accessories and footwear exactly as shown. Ignore the empty body inside it — do not render ' +
+      'a mannequin, do not leave the torso hollow, and do not copy its standing front view.',
+    'Reference image 2 defines the FACE ONLY: use this exact face identity, facial features, ' +
+      'hairstyle and hair color for the person.',
+    'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
+      'placement, leg crossing, hand positions and viewpoint exactly. Ignore its line-art style, ' +
+      'its blank face and its simplified proportions — the result must be a finished rendered image.',
+    'The person is dressed in the outfit from image 1, has the face from image 2, and holds the ' +
+      'pose from image 3. Keep anatomy correct and proportions natural in the new pose.',
+    styleLine,
+    extra,
+  ];
+  return parts.filter(Boolean).join(' ');
+}
+
+/** 把 dataURL 解析成 { mime, bytes } */
+export function parseDataUrl(dataUrl) {
+  const m = /^data:([^;,]+);base64,(.+)$/s.exec(dataUrl || '');
+  if (!m) throw new HttpError(400, '图片格式无效，需要 data:image/...;base64 形式');
+  const bin = atob(m[2]);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return { mime: m[1], bytes };
+}
+
+export class HttpError extends Error {
+  constructor(status, message, detail) {
+    super(message);
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
+export function assertThreeImages(images) {
+  if (!Array.isArray(images) || images.length !== 3) {
+    throw new HttpError(400, '需要恰好三张参考图：服装、脸、姿势');
+  }
+  for (const [i, img] of images.entries()) {
+    if (!img || typeof img !== 'string' || !img.startsWith('data:image/')) {
+      throw new HttpError(400, `第 ${i + 1} 张参考图缺失或格式错误`);
+    }
+    // 单张 base64 限制，避免有人塞原图把请求体撑爆
+    if (img.length > 2_400_000) {
+      throw new HttpError(413, `第 ${i + 1} 张参考图过大，请压缩到 1.8MB 以内`);
+    }
+  }
+}
+
+/* ────────────────────────────── Cloudflare ────────────────────────────── */
+
+/**
+ * FLUX.2 klein / dev 走 multipart：prompt + input_image_0..3。
+ * 官方要求所有输入图 < 512x512，超出会被拒；前端已经按此缩放。
+ */
+export function buildCloudflareForm({ images, prompt, modelId, width = 1024, height = 1024, seed }) {
+  const out = new FormData();
+  out.append('prompt', prompt);
+  out.append('width', String(width));
+  out.append('height', String(height));
+  if (seed != null) out.append('seed', String(seed));
+  images.forEach((dataUrl, i) => {
+    const { mime, bytes } = parseDataUrl(dataUrl);
+    out.append(`input_image_${i}`, new Blob([bytes], { type: mime }), `ref-${i}.png`);
+  });
+  return { modelId, form: out };
+}
+
+/* ───────────────────────────── 统一入口 ───────────────────────────── */
+
+/**
+ * 调 Workers AI 生成合成图。
+ *
+ * @param {object} p
+ * @param {string[]} p.images  顺序固定：服装 / 脸 / 姿势
+ * @param {object}   p.env     Worker 的 env（读 AI binding 与 FLUX_MODEL）
+ * @param {Function} p.aiRun   env.AI.run 的绑定版本（丢失 this 会报错，必须 bind）
+ */
+export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style }) {
+  assertThreeImages(images);
+
+  if (typeof aiRun !== 'function') {
+    throw new HttpError(501, '未绑定 Workers AI（缺少 [ai] binding）', {
+      hint: 'wrangler.jsonc 中加入 "ai": { "binding": "AI" }',
+    });
+  }
+
+  const finalPrompt = prompt || buildPrompt({ style });
+  // 优先级：请求里显式指定（白名单校验）→ 环境变量 → 默认
+  const allowed = new Set(Object.values(MODELS).map((m) => m.modelId));
+  const wanted = model || env.FLUX_MODEL || DEFAULT_MODEL;
+  const modelId = allowed.has(wanted) ? wanted : DEFAULT_MODEL;
+  const { form } = buildCloudflareForm({ images, prompt: finalPrompt, modelId, width, height, seed });
+
+  // Workers AI 的 multipart 入参需要先把 FormData 序列化成流再传入
+  const serialized = new Response(form);
+  const started = Date.now();
+
+  let res;
+  try {
+    res = await aiRun(modelId, {
+      multipart: { body: serialized.body, contentType: serialized.headers.get('content-type') },
+    });
+  } catch (e) {
+    // 最常见的两类：配额用完 / 输入图超 512
+    const msg = String(e?.message || e);
+    if (/neuron|quota|limit|exceed/i.test(msg)) {
+      throw new HttpError(429, '今日 Workers AI 免费额度可能已用完（每日 10,000 Neurons，UTC 0 点重置）', {
+        raw: msg,
+      });
+    }
+    if (/512|image size|dimension/i.test(msg)) {
+      throw new HttpError(400, '参考图尺寸超限：FLUX.2 klein 要求每张输入图小于 512×512', { raw: msg });
+    }
+    throw new HttpError(502, `Workers AI 调用失败：${msg}`);
+  }
+
+  // 官方返回 { image: base64 }；不同封装可能给 Uint8Array 或 data: URI，统一收口
+  const raw = res?.image ?? res?.result?.image ?? res;
+  const meta = { model: modelId, prompt: finalPrompt, ms: Date.now() - started };
+
+  if (typeof raw === 'string') {
+    const b64 = raw.startsWith('data:') ? raw.split(',')[1] : raw;
+    const mime = raw.startsWith('data:') ? raw.slice(5, raw.indexOf(';')) : 'image/png';
+    return { b64, mime, ...meta };
+  }
+  if (raw instanceof Uint8Array || raw instanceof ArrayBuffer) {
+    const bytes = raw instanceof Uint8Array ? raw : new Uint8Array(raw);
+    let bin = '';
+    const CHUNK = 0x8000;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      bin += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    return { b64: btoa(bin), mime: 'image/png', ...meta };
+  }
+  throw new HttpError(502, 'Workers AI 返回结构无法识别', res);
+}

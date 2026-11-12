@@ -1,0 +1,4 @@
+# 本地开发时的额外变量（复制为 .dev.vars，勿提交）
+# AI binding 已写在 wrangler.jsonc 中，本地 wrangler dev 会自动可用
+# 可选：指定模型
+# FLUX_MODEL=@cf/black-forest-labs/flux-2-dev

@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-11-12T01:05:24.304Z",
+  "outfit": {
+    "count": 1267,
+    "label": "服装"
+  },
+  "face": {
+    "count": 893,
+    "label": "脸型"
+  },
+  "pose": {
+    "count": 440,
+    "label": "姿势"
+  }
+}

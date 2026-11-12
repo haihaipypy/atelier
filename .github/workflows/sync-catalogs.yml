@@ -1,0 +1,45 @@
+# 定期同步上游图库索引
+# 每天 03:17 (UTC) 拉一次最新清单；有变化才提交，避免仓库噪音。
+# 也可在 Actions 页面手动 Run workflow（支持离线样例模式）。
+name: sync-catalogs
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      offline:
+        description: '使用内置样例（不访问上游）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 同步索引
+        run: node scripts/sync-catalogs.mjs ${{ inputs.offline && '--offline' || '' }}
+
+      - name: 自检
+        run: node scripts/dry-run.mjs
+
+      - name: 提交变更
+        run: |
+          git config user.name  "catalog-bot"
+          git config user.email "catalog-bot@users.noreply.github.com"
+          git add web/public/data
+          if git diff --staged --quiet; then
+            echo "索引无变化，跳过提交"
+          else
+            git commit -m "chore(catalog): sync upstream index $(date -u +%Y-%m-%d)"
+            git push
+          fi
