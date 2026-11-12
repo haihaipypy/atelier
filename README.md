@@ -81,91 +81,102 @@ prompt 里用 `Reference image 1/2/3` 显式引用。模板在 [`shared/generate
 
 两条路，选一条：
 
-| 方式 | 适合 | 特点 |
+| 方式 | 适合 | 需要准备 |
 |---|---|---|
-| **控制台连接 Git 仓库** | 长期维护 | 一次配置，之后 `git push` 自动构建部署 |
-| **本地 wrangler CLI** | 先跑起来看看 | 一条命令上线，不需要仓库授权 |
+| **控制台连仓库** | 不想碰代码，想长期自动部署 | GitHub 账号 + Cloudflare 账号，全程浏览器 |
+| **本地 wrangler CLI** | 本地改代码、快速试一遍 | Node.js 18+，一条命令上线 |
 
-两边的产物完全一样。下面先走控制台方式，因为不用装任何东西。
+两种方式部署出来的东西完全一样。下面先讲控制台方式——**不用写一行代码**。
 
-### 需要准备
+> 本项目**没有构建步骤**：`wrangler.jsonc` 里 `assets.directory` 直接指向 `web/public`，
+> Cloudflare 拿到仓库就能跑，不需要 `npm run build` 之类的前置动作。
 
-- 一个 [Cloudflare](https://dash.cloudflare.com/sign-up) 账号（免费版即可）
-- 代码在 GitHub 仓库里（控制台方式）／ 本地已克隆（CLI 方式）
+### 方式一：控制台连仓库（不用写代码）
 
-`wrangler.jsonc` 里 `assets.directory` 指向 `web/public`，**没有构建步骤**，
-克隆下来就是可运行的完整应用。
+**仓库里代码和配置文件都是现成的，你不需要新建文件、不需要装任何环境。** 以下全在浏览器里完成。
 
-### 方式一：控制台连接 Git 仓库
+#### 1. 先把仓库放到自己账号下
 
-一次配置，之后推代码就自动部署。
+打开 [github.com/haihaipypy/atelier](https://github.com/haihaipypy/atelier)，点右上角 **Fork**。
+（仓库已经在你自己的账号下就跳过这步。）
 
-#### 1. 建 KV 命名空间
+Cloudflare 只能连你自己账号里的仓库，所以这一步不能省。
 
-Dashboard → **Storage & databases → Workers KV → Create instance**，名字填 `atelier-config`（叫什么都行，好认即可）。
+#### 2. 连仓库，建 Worker
 
-创建完复制它的 **ID**（一串十六进制字符），第 2 步要用。
+Dashboard → **Workers & Pages → Create application** → 选 **GitHub**（不要选 Hello World 模板）：
 
-这个 KV 用来存**自定义模型配置**（Base URL / API Key / 模型名），存服务端、前端只回显密钥尾号。
-只跑 Cloudflare 原生模型的话可以不建，但建议一起建好——以后想加自定义通道不用再改配置重部署。
+1. 授权 GitHub，从列表里选中 `atelier`
+2. **Project name** 填 `atelier-compose`
+   —— 必须和仓库里 `wrangler.jsonc` 的 `name` 字段一致，**不一致构建会直接失败**
+3. 构建设置（没自动带出来的话手动填）：
 
-#### 2. 把 KV 绑定写进仓库
+   | 字段 | 填什么 |
+   |---|---|
+   | Build command | 留空 |
+   | Deploy command | `npx wrangler deploy` |
+   | Root directory | 留空（仓库根目录） |
 
-编辑 `wrangler.jsonc`，加一段：
+4. 点 **Save and Deploy**，等 1–2 分钟
+
+`wrangler.jsonc` 就在仓库根目录，Cloudflare 会自己读里面的三项配置：`main`（Worker 入口）、
+`assets`（静态资源目录 `web/public`）、`ai`（模型绑定）。**这些都不用你在界面上填。**
+
+部署成功后，Worker 的代码页里能看到 `worker/`、`shared/`、`web/public/` 这些目录——
+它们是构建时从仓库拉下来的，不是你粘贴进去的。以后要改，改仓库、提交，再自动部署一次。
+
+#### 3. 构建失败了怎么查
+
+| 报错 | 原因 |
+|---|---|
+| `Could not find a Wrangler configuration file` | Root directory 填错了，清空即可 |
+| `The name in the Wrangler configuration file does not match` | Project name 与 `name` 不一致，改成 `atelier-compose` |
+| `Missing entry-point` | 没找到 `main` 指向的 `worker/index.js`，一般是 Root directory 填错或分支没同步 |
+
+顺手说明：如果仓库里**没有** `wrangler.jsonc`，Cloudflare 会自动识别框架并给你开一个 PR 补配置。
+本项目已经带好，不会走这条路。
+
+#### 4. 建 KV（可选，但建议）
+
+KV 只服务一个功能：**在页面里保存自定义模型配置**（Base URL / API Key / 模型名）。
+只跑 Cloudflare 原生模型的话，这步跳过完全没问题，站点照样能用。
+
+先建：Dashboard → **Storage & databases → Workers KV → Create instance**，名字填 `atelier-config`，
+建完复制那串 **ID**。
+
+然后**在 GitHub 网页上改一行**，不用装任何东西：打开仓库里的 `wrangler.jsonc`，点右上角铅笔图标，
+找到这行被注掉的配置：
 
 ```jsonc
-"kv_namespaces": [{ "binding": "CONFIG", "id": "<第 1 步复制的 ID>" }]
+// "kv_namespaces": [{ "binding": "CONFIG", "id": "<namespace id>" }],
 ```
 
-绑定名必须叫 `CONFIG`，代码按这个名字取；里面的键名 `profile` 由程序自己写，不用管。
+删掉开头的 `//`，把 `<namespace id>` 换成刚复制的 ID，点 **Commit changes**。
+提交后 Cloudflare 会自动重新构建部署一次，绑定就生效了。
 
-```bash
-git add wrangler.jsonc
-git commit -m "chore: 绑定 KV"
-git push
-```
+> 为什么不能只在控制台点？因为每次构建都以仓库里的 `wrangler.jsonc` 为准，
+> 控制台里加的绑定会在下次部署时被覆盖掉。
+> 绑定名必须是 `CONFIG`，代码按这个名字取；键名 `profile` 由程序自己写。
 
-> **为什么写在文件里，而不是在控制台点？**
-> 控制台给 Git 部署的 Worker 加的绑定，会在下一次构建时被仓库里的 `wrangler.jsonc` 覆盖掉。
-> 写进文件才是持久的。
+#### 5. 确认绑定
 
-#### 3. 连接仓库，建 Worker
+进 Worker → **Settings → Bindings**，应该看到：
 
-Dashboard → **Workers & Pages → Create → Workers → Connect to Git**（部分账号显示为 *Import a repository*）：
-
-1. 授权 GitHub，选中 `atelier` 仓库
-2. **Project name** 填 `atelier-compose` —— 必须和 `wrangler.jsonc` 里的 `name` 一致，
-   否则会多建一个空的 Worker，绑定的资源也对不上
-3. 构建设置：
-   - **Build command**：留空（本项目没有构建步骤）
-   - **Deploy command**：`npx wrangler deploy`
-   - **Root directory**：`/`
-4. 点 **Deploy**，等 1–2 分钟
-
-仓库里有 `wrangler.jsonc`，控制台读到后一般会自动预填这几项，**保持默认即可**。
-
-#### 4. 确认绑定都接上了
-
-部署完成后，进 Worker → **Settings → Bindings**，应该有这三项：
-
-| 绑定名 | 类型 | 作用 | 来源 |
+| 绑定名 | 类型 | 作用 | 什么时候有 |
 |---|---|---|---|
-| `ASSETS` | Static Assets | 托管 `web/public` 静态页 | `wrangler.jsonc` |
-| `AI` | Workers AI | 原生出图，无需 API Key | `wrangler.jsonc` |
-| `CONFIG` | KV Namespace | 自定义模型配置 | `wrangler.jsonc` |
+| `ASSETS` | Static Assets | 托管 `web/public` | 部署后自动 |
+| `AI` | Workers AI | 原生出图，无需 API Key | 部署后自动 |
+| `CONFIG` | KV Namespace | 自定义模型配置 | 做了第 4 步才有 |
 
 `AI` 就是模型接入本身：Workers AI **直连绑定**，不经过第三方网关，密钥就是你的账号，
-不存在 Key 泄露；消耗的是账号自带的 Neurons 免费额度，**不用绑卡**，首次调用即生效。
+不存在 Key 泄露；消耗账号自带的 Neurons 免费额度，**不用绑卡**，首次调用即生效。
 （若首次生成报 *must agree to the Workers AI terms*，去 Dashboard 的 **AI** 页面确认一次条款即可。）
 
-如果 `AI` 这一项缺失（少见，通常是部署时配置没读到）：点 **Add binding → Workers AI**，
-绑定名填 `AI`，保存后重新部署一次即可。`CONFIG` 缺失同理，检查第 2 步的 ID 是否填对。
-
-#### 5. 访问
+#### 6. 访问
 
 域名形如 `https://atelier-compose.<你的子域>.workers.dev`，直接可用。
 
-- 之后每次 push 到默认分支都会自动构建部署，日志在 Worker 的 **Deployments** 里
+- 之后仓库有提交就自动构建部署，日志在 Worker 的 **Deployments → View build history**
 - 当天用量在 Dashboard → **AI → Workers AI** 看，10,000 Neurons 用完为止
 - 想绑自有域名：Worker → **Settings → Domains & Routes → Add custom domain**
 
@@ -176,15 +187,16 @@ git clone https://github.com/haihaipypy/atelier.git
 cd atelier
 npm install
 npx wrangler login                        # 浏览器授权
-npx wrangler kv namespace create CONFIG   # 输出的 id 填进 wrangler.jsonc
-npx wrangler deploy                       # 静态资源 + API 一起上线
+npx wrangler kv namespace create CONFIG   # 输出里有 id
+npx wrangler deploy                       # 静态资源 + API + 模型绑定一起上线
 ```
 
-`wrangler deploy` 会按 `wrangler.jsonc` 把 `ASSETS` / `AI` / `CONFIG` 三个绑定一次性建好，
-不需要再去控制台点。输出里给的就是可访问地址。
+`ASSETS`（静态资源）和 `AI`（模型）写在配置里，`deploy` 时自动建好。
+`CONFIG`（KV）要把上一条命令输出的 `id` 填进 `wrangler.jsonc` 里注释掉的那行、取消注释，
+再执行 `deploy`；不需要页面内保存自定义模型的话，这两步都可以跳过。
 
-> 两种方式**别混用**：如果 Worker 已经连了 Git，再用 CLI 部署会顶掉控制台里那套构建设置。
-> 想反过来挂到仓库上，进 Worker → **Settings → Build → Connect to Git**，构建设置同第 3 步。
+> 两种方式**别混用**：Worker 已经连了 Git 再用 CLI 部署，会顶掉控制台那套构建设置。
+> 想反过来挂仓库，进 Worker → **Settings → Builds → Connect**，构建设置同方式一第 2 步。
 
 ### 可选：不建 KV，用环境变量配自定义模型
 
