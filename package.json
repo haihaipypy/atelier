@@ -1,6 +1,8 @@
 {
   "name": "atelier-compose",
   "private": true,
+  "author": "无辣 (https://www.1day.vip)",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "sync": "node scripts/sync-catalogs.mjs",

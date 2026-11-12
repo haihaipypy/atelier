@@ -400,4 +400,6 @@ atelier/
 
 ## 许可
 
-代码 [MIT](LICENSE)。素材与生成内容的授权见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+代码 [MIT](LICENSE) © 2026 无辣 · [www.1day.vip](https://www.1day.vip)
+
+素材与生成内容的授权见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
