@@ -23,8 +23,156 @@ const state = {
   config: { ready: false, demo: true, engine: null, engines: [], model: null },
   custom: { configured: false },
   engine: 'cloudflare',
+  relay: 'browser',   // 自定义模型由谁发请求：browser 直连 / server 中转
   busy: false,
 };
+
+/* ─── 自定义模型的本机配置 ───
+ * 直连模式下请求由浏览器发出，密钥必须留在浏览器手里，因此只写 localStorage，
+ * 不上传服务器（服务端 KV 那套只服务「中转模式」）。
+ */
+const LS_RELAY = 'atelier.relay';
+const LS_CUSTOM = 'atelier.custom.v1';
+
+function readLocalCfg() {
+  try {
+    const v = JSON.parse(localStorage.getItem(LS_CUSTOM) || 'null');
+    return v && typeof v === 'object' ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function localCustomReady() {
+  const v = readLocalCfg();
+  return !!(v?.baseUrl && v?.apiKey && v?.model);
+}
+
+/** 自定义通道是否可用：直连看本机配置，中转看服务端状态 */
+function customChannelReady() {
+  return state.relay === 'server' ? !!state.custom.configured : localCustomReady();
+}
+
+const maskLocal = (k) => (!k ? '' : k.length <= 8 ? '••••' : `${k.slice(0, 3)}••••${k.slice(-4)}`);
+
+/** 与 shared/custom-model.js 的 normalizeBaseUrl 保持一致：补协议、去尾斜杠、缺 /v1 时补上 */
+function normBase(raw) {
+  let u = String(raw || '').trim();
+  if (!u) return '';
+  if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
+  u = u.replace(/\/+$/, '');
+  if (/\/images\/generations$/.test(u)) return u.replace(/\/images\/generations$/, '');
+  if (!/\/v\d+$/i.test(u)) u += '/v1';
+  return u;
+}
+
+const endpointOf = (baseUrl) => `${normBase(baseUrl)}/images/generations`;
+
+/** 上游 4xx/5xx 的提示文案（与后端保持一致，前端直连时自己拼） */
+function upstreamMsg(status, json, raw, endpoint) {
+  const upstream = String(json?.error?.message || json?.message || raw || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160);
+  const code = String(json?.error?.code || json?.error?.type || '').trim();
+  const hint =
+    status === 401
+      ? 'API Key 无效或已过期'
+      : status === 402
+        ? '账户余额不足'
+        : status === 403
+          ? '密钥无权访问该模型，或服务商拦截了来源地区/IP'
+          : status === 404
+            ? `接口路径不存在，当前请求 ${endpoint}`
+            : status === 429
+              ? '触发限流或额度用尽'
+              : status === 400 || status === 422
+                ? '上游不接受这组参数（size / model / response_format 可能不支持）'
+                : '';
+  const detail = upstream ? `（上游：${upstream}${code ? ` · ${code}` : ''}）` : '';
+  return `自定义模型返回 ${status}${hint ? `：${hint}` : ''}${detail}`;
+}
+
+/**
+ * 直连模式下提示词要自己拼：/api/prompt 只是读模板，走本站域名不会被任何服务商拦截。
+ * 失败时用一段等价的内置描述兜底，保证「不填提示词也能出图」。
+ */
+async function buildPromptOnServer() {
+  const q = new URLSearchParams({
+    style: $('#style').value || 'photorealistic',
+    extra: $('#extra').value.trim(),
+  });
+  try {
+    const r = await fetch(`/api/prompt?${q}`);
+    if (r.ok) {
+      const j = await r.json();
+      if (j?.prompt) return j.prompt;
+    }
+  } catch {
+    /* 落到下面的兜底 */
+  }
+  return '图1是服装（忽略人台与背景），图2是人物的脸与发型，图3是姿势。'
+    + '把三者合成到同一个人物身上：服装材质与垂感照图1，五官与发色照图2，姿态与镜头角度照图3，'
+    + '输出一张真实感强的全身人物照，光影自然。';
+}
+
+/**
+ * 浏览器直连：请求从用户的网络发出，不经过 Worker。
+ * 之所以需要它：不少模型服务商会整段屏蔽云厂商出口 IP（Cloudflare 首当其冲），
+ * 服务端中转会直接被 403。代价是要求对方允许跨域（CORS），否则浏览器会拦下。
+ */
+async function generateDirect({ images, prompt, size }) {
+  const cfg = readLocalCfg();
+  if (!cfg?.baseUrl || !cfg?.apiKey || !cfg?.model) throw new Error('直连模式还没有在本机保存配置');
+  const endpoint = endpointOf(cfg.baseUrl);
+
+  let extra = {};
+  if (cfg.extraJson) {
+    try {
+      extra = JSON.parse(cfg.extraJson);
+    } catch {
+      throw new Error('额外参数不是合法 JSON');
+    }
+  }
+  const body = { model: cfg.model, prompt, n: 1, size, ...extra };
+  if (images?.length) body.extra_body = { ...(body.extra_body || {}), image: images };
+  body.extra_body = { ...(body.extra_body || {}), response_format: 'b64_json' };
+
+  const started = Date.now();
+  let res;
+  try {
+    res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.apiKey}` },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    // fetch 对 CORS 失败只会抛 TypeError，没有任何细节可读
+    throw new Error(
+      `浏览器直连失败：${e.message}。最常见原因是该服务未开放跨域（CORS），` +
+        `可切到「服务端中转」再试；若服务端被 403，则需服务商放行云厂商出口 IP。`,
+    );
+  }
+
+  const raw = await res.text();
+  let json = null;
+  try {
+    json = JSON.parse(raw);
+  } catch {
+    /* 非 JSON 交给下面报错 */
+  }
+  if (!res.ok) throw new Error(upstreamMsg(res.status, json, raw, endpoint));
+
+  const item = json?.data?.[0] || json?.images?.[0] || json?.output?.[0] || null;
+  const b64 = item?.b64_json || item?.base64 || (typeof item === 'string' ? null : null);
+  const url = item?.url || (typeof item === 'string' ? item : null);
+  let image = '';
+  if (b64) image = `data:image/png;base64,${String(b64).replace(/^data:[^;]+;base64,/, '')}`;
+  else if (url) image = url;
+  if (!image) throw new Error(`自定义模型返回里没找到图片字段（字段：${Object.keys(json || {}).join(', ')}）`);
+
+  return { image, model: cfg.model, ms: Date.now() - started, prompt, engine: 'custom' };
+}
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -70,6 +218,16 @@ async function refreshModelPanel() {
   } catch {
     state.custom = { configured: false };
   }
+  // 没存过偏好时按现状推断：本机有 Key 走直连，否则若服务端有配置则走中转
+  const saved = localStorage.getItem(LS_RELAY);
+  state.relay =
+    saved === 'server' || saved === 'browser'
+      ? saved
+      : localCustomReady()
+        ? 'browser'
+        : state.custom.configured
+          ? 'server'
+          : 'browser';
   paintModelPanel();
 }
 
@@ -85,7 +243,8 @@ function paintModelQuota() {
 function paintModelPanel() {
   const cfg = state.config;
   const engineSel = $('#engine');
-  const customReady = !!state.custom.configured;
+  const customReady = customChannelReady();
+  const local = readLocalCfg();
 
   const cfReady = cfg.ready && (cfg.engines || []).includes('cloudflare');
 
@@ -98,7 +257,9 @@ function paintModelPanel() {
   }
   opts.push({
     v: 'custom',
-    t: customReady ? `自定义模型 · ${state.custom.model}` : '自定义模型（未配置）',
+    t: customReady
+      ? `自定义模型 · ${state.relay === 'browser' ? local?.model : state.custom.model}`
+      : '自定义模型（未配置）',
   });
   engineSel.innerHTML = '';
   for (const o of opts) {
@@ -135,30 +296,78 @@ function paintModelPanel() {
     el(
       'option',
       { value: 'custom' },
-      customReady ? `${state.custom.model}（${state.custom.baseUrl}）` : '尚未配置',
+      customReady
+        ? `${state.relay === 'browser' ? local?.model : state.custom.model}（${
+            state.relay === 'browser' ? local?.baseUrl : state.custom.baseUrl
+          }）`
+        : '尚未配置',
     ),
   );
 
+  /* ── 抽屉里与「请求发起位置」相关的文案 ── */
+  const relaySel = $('#cfgRelay');
+  if (relaySel) relaySel.value = state.relay;
+
+  const isBrowser = state.relay === 'browser';
+  const desc = $('#cfgDesc');
+  if (desc) {
+    desc.innerHTML = isBrowser
+      ? '填写任何 <b>OpenAI 兼容</b> 的图像接口即可。请求由<b>这台浏览器</b>直接发出，不经过本站服务器，不会被云厂商出口 IP 封禁牵连；前提是对方允许跨域（CORS）。'
+      : '填写任何 <b>OpenAI 兼容</b> 的图像接口即可。请求由<b>本站 Worker</b> 转发，密钥存服务端 KV、前端只见尾号；若服务商封了 Cloudflare 出口 IP，会返回 403。';
+  }
+
+  const relayHint = $('#cfgRelayHint');
+  if (relayHint) {
+    relayHint.textContent = isBrowser
+      ? '密钥只存这台浏览器（localStorage），不上传服务器；换设备或清缓存要重填。服务端被 403 时改用这个。'
+      : '密钥存服务端 KV，前端看不到；不需要对方支持跨域，但要求对方不封 Cloudflare。';
+  }
+
   // 持久化提示
-  $('#cfgPersistNote').textContent = state.custom.canPersist
-    ? '密钥仅存于服务端 KV，前端只能看到尾号。'
-    : '当前部署没有绑定 KV，无法在页面保存。请改用环境变量 CUSTOM_BASE_URL / CUSTOM_API_KEY / CUSTOM_MODEL 配置，或在 wrangler.jsonc 添加 KV 绑定。';
+  const note = $('#cfgPersistNote');
+  if (note) {
+    if (isBrowser) {
+      note.textContent = '直连模式：点「保存」只写入本机浏览器，不产生服务端请求，也不依赖 KV 绑定。';
+    } else {
+      note.textContent = state.custom.canPersist
+        ? '中转模式：密钥仅存于服务端 KV，前端只能看到尾号。'
+        : '中转模式需要 KV 才能保存。当前部署没有绑定 KV，请改用环境变量，或把「请求发起位置」切到浏览器直连（不需要 KV）。';
+    }
+  }
 
   const keyHint = $('#cfgKeyHint');
-  if (state.custom.apiKeyMasked) keyHint.textContent = `已保存：${state.custom.apiKeyMasked}（留空则保持不变）`;
-  else keyHint.textContent = '仅存服务端，不下发浏览器';
-  if (state.custom.baseUrl && !$('#cfgBaseUrl').value) $('#cfgBaseUrl').value = state.custom.baseUrl;
-  if (state.custom.model && !$('#cfgModel').value) $('#cfgModel').value = state.custom.model;
+  if (keyHint) {
+    if (isBrowser) {
+      const mine = local?.apiKey;
+      keyHint.textContent = mine
+        ? `已存本机：${maskLocal(mine)}（留空则保持不变）`
+        : '只存本机浏览器，不上传服务器';
+    } else if (state.custom.apiKeyMasked) {
+      keyHint.textContent = `已保存：${state.custom.apiKeyMasked}（留空则保持不变）`;
+    } else {
+      keyHint.textContent = '仅存服务端，不下发浏览器';
+    }
+  }
+
+  // 表单回填：直连填本机那份，中转填服务端那份
+  const src = isBrowser ? local : state.custom;
+  if (src?.baseUrl && !$('#cfgBaseUrl').value) $('#cfgBaseUrl').value = src.baseUrl;
+  if (src?.model && !$('#cfgModel').value) $('#cfgModel').value = src.model;
+  if (isBrowser && local?.extraJson && !$('#cfgExtra').value) $('#cfgExtra').value = local.extraJson;
 }
 
 function renderEngineBadge() {
   const badge = $('#engineBadge');
   const cfg = state.config;
   if (state.engine === 'custom') {
-    if (state.custom.configured) {
-      badge.textContent = `自定义 · ${state.custom.model}`;
+    if (customChannelReady()) {
+      const mine = readLocalCfg();
+      const direct = state.relay === 'browser';
+      const model = direct ? mine?.model : state.custom.model;
+      const base = direct ? mine?.baseUrl : state.custom.baseUrl;
+      badge.textContent = `自定义 · ${model}${direct ? '（直连）' : ''}`;
       badge.className = 'engine-badge ok';
-      badge.title = `${state.custom.baseUrl}｜请求由服务端转发`;
+      badge.title = `${base}｜${direct ? '请求由浏览器直接发出，不经过本站服务器' : '请求由服务端转发'}`;
       return;
     }
     badge.textContent = '自定义模型未配置';
@@ -181,7 +390,7 @@ function renderEngineBadge() {
  *  演示模式下也放行，让用户能看到完整流程（后端返回拼版预览图，不产生真实图像）。 */
 function canGenerate() {
   const engineReady =
-    state.engine === 'custom' ? !!state.custom.configured : state.config.engines?.includes('cloudflare');
+    state.engine === 'custom' ? customChannelReady() : state.config.engines?.includes('cloudflare');
   const allowed = engineReady || state.config.demo;
   return allowed && SLOTS.every((k) => state.selected[k]) && !state.busy;
 }
@@ -513,32 +722,50 @@ async function generate() {
     );
 
     const engineReady =
-      state.engine === 'custom' ? !!state.custom.configured : !!state.config.engines?.includes('cloudflare');
-    setBusy(true, engineReady ? '模型生成中，通常 10–30 秒…' : '演示模式：正在拼接预览…');
-    const payload = {
-      images,
-      width,
-      height,
-      style: $('#style').value,
-      extra: $('#extra').value.trim(),
-      prompt: $('#promptOverride').value.trim(),
-      model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
-      engine: state.engine,
-    };
+      state.engine === 'custom' ? customChannelReady() : !!state.config.engines?.includes('cloudflare');
+    const direct = state.engine === 'custom' && state.relay === 'browser';
+    setBusy(
+      true,
+      direct
+        ? '正在从这台浏览器直接调用模型，通常 10–60 秒…'
+        : engineReady
+          ? '模型生成中，通常 10–30 秒…'
+          : '演示模式：正在拼接预览…',
+    );
 
-    const r = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const j = await r.json();
-    if (!r.ok || j.error) {
-      // 把 Workers AI 的错误码与 Ray ID 一起显示：3043 这类内部错误只能靠 Ray 让 Cloudflare 定位
-      // 自定义模型的错误已在上游 message 里自带原文，不重复拼
-      const d = j.detail || {};
-      const tag =
-        !d.upstreamStatus && d.code ? `（错误码 ${d.code}${d.ray ? ` · Ray ${d.ray}` : ''}）` : '';
-      throw new Error(`${j.error || `生成失败（HTTP ${r.status}）`}${tag}`);
+    let j;
+    if (direct) {
+      j = await generateDirect({
+        images,
+        prompt: $('#promptOverride').value.trim() || (await buildPromptOnServer()),
+        size: `${width}x${height}`,
+      });
+    } else {
+      const payload = {
+        images,
+        width,
+        height,
+        style: $('#style').value,
+        extra: $('#extra').value.trim(),
+        prompt: $('#promptOverride').value.trim(),
+        model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
+        engine: state.engine,
+      };
+
+      const r = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      j = await r.json();
+      if (!r.ok || j.error) {
+        // 把 Workers AI 的错误码与 Ray ID 一起显示：3043 这类内部错误只能靠 Ray 让 Cloudflare 定位
+        // 自定义模型的错误已在上游 message 里自带原文，不重复拼
+        const d = j.detail || {};
+        const tag =
+          !d.upstreamStatus && d.code ? `（错误码 ${d.code}${d.ray ? ` · Ray ${d.ray}` : ''}）` : '';
+        throw new Error(`${j.error || `生成失败（HTTP ${r.status}）`}${tag}`);
+      }
     }
 
     showResult(j);
@@ -623,7 +850,7 @@ function bindUI() {
     paintModelPanel();
     renderEngineBadge();
     updateSlots();
-    if (state.engine === 'custom' && !state.custom.configured) openModelDrawer();
+    if (state.engine === 'custom' && !customChannelReady()) openModelDrawer();
   });
   $('#openModelCfg').addEventListener('click', openModelDrawer);
   $('#model').addEventListener('change', paintModelQuota);
@@ -800,13 +1027,61 @@ const readCfg = () => ({
   extraJson: $('#cfgExtra').value.trim(),
 });
 
+/* 切换「请求发起位置」：两种模式的密钥存在不同地方，切换后表单要重新回填 */
+$('#cfgRelay')?.addEventListener('change', (e) => {
+  state.relay = e.target.value === 'server' ? 'server' : 'browser';
+  localStorage.setItem(LS_RELAY, state.relay);
+  $('#cfgBaseUrl').value = '';
+  $('#cfgModel').value = '';
+  $('#cfgExtra').value = '';
+  $('#cfgApiKey').value = '';
+  cfgMsg('', true);
+  paintModelPanel();
+  renderEngineBadge();
+  updateSlots();
+});
+
 async function saveCfg() {
+  const cfg = readCfg();
+  // 直连模式：只写本机浏览器，不产生任何服务端请求（也不要求绑定 KV）
+  if (state.relay === 'browser') {
+    const prev = readLocalCfg() || {};
+    const baseUrl = normBase(cfg.baseUrl);
+    const body = {
+      baseUrl,
+      apiKey: cfg.apiKey || prev.apiKey || '',
+      model: cfg.model,
+      extraJson: cfg.extraJson,
+    };
+    if (!baseUrl) return cfgMsg('请填写 Base URL', false);
+    if (!/^https?:\/\//i.test(baseUrl)) return cfgMsg('Base URL 必须是 http/https 地址', false);
+    if (!body.model) return cfgMsg('请填写模型名称', false);
+    if (!body.apiKey) return cfgMsg('请填写 API Key', false);
+    if (cfg.extraJson) {
+      try {
+        JSON.parse(cfg.extraJson);
+      } catch {
+        return cfgMsg('额外参数不是合法 JSON', false);
+      }
+    }
+    localStorage.setItem(LS_CUSTOM, JSON.stringify(body));
+    localStorage.setItem(LS_RELAY, 'browser');
+    $('#cfgApiKey').value = '';
+    cfgMsg(`已保存到本机：${body.model} @ ${body.baseUrl}`, true);
+    state.engine = 'custom';
+    state.engineTouched = true;
+    paintModelPanel();
+    renderEngineBadge();
+    updateSlots();
+    return;
+  }
+
   cfgMsg('保存中…', true);
   try {
     const r = await fetch('/api/model', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(readCfg()),
+      body: JSON.stringify(cfg),
     });
     const j = await r.json();
     if (!r.ok || j.error) throw new Error(j.error || `保存失败（HTTP ${r.status}）`);
@@ -825,8 +1100,79 @@ async function saveCfg() {
 
 async function testCfg() {
   const c = readCfg();
-  cfgMsg('正在请求一次极小的文生图…（最长 2 分钟）', true);
+  const endpoint = endpointOf(c.baseUrl) || '(Base URL 未填)';
+  cfgMsg(
+    state.relay === 'browser'
+      ? '正在从这台浏览器直连模型…（最长 2 分钟）'
+      : '正在请求一次极小的文生图…（最长 2 分钟）',
+    true,
+  );
   $('#cfgSample').hidden = true;
+
+  // 直连：不落库也能测，用当前表单值直接打一次文生图（不带参考图）
+  if (state.relay === 'browser') {
+    const prev = readLocalCfg() || {};
+    const baseUrl = normBase(c.baseUrl);
+    const apiKey = c.apiKey || prev.apiKey || '';
+    if (!baseUrl || !apiKey || !c.model) {
+      return cfgMsg('测试失败：请先填写 Base URL、API Key 与模型名', false);
+    }
+    let extra = {};
+    if (c.extraJson) {
+      try {
+        extra = JSON.parse(c.extraJson);
+      } catch {
+        return cfgMsg('测试失败：额外参数不是合法 JSON', false);
+      }
+    }
+    const started = Date.now();
+    let res;
+    try {
+      res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: c.model,
+          prompt: 'a small red dot on a white background, minimal',
+          n: 1,
+          size: '1024x1024',
+          ...extra,
+          extra_body: { response_format: 'b64_json' },
+        }),
+      });
+    } catch (e) {
+      return cfgMsg(
+        `测试失败：浏览器直连被拦（${e.message}）。两种可能：①对方未开放跨域 CORS，` +
+          `②网络/代理阻断。可切到「服务端中转」验证是否为 CORS 问题｜请求地址：${endpoint}`,
+        false,
+      );
+    }
+    const raw = await res.text();
+    let json = null;
+    try {
+      json = JSON.parse(raw);
+    } catch {
+      /* 非 JSON */
+    }
+    if (!res.ok) {
+      return cfgMsg(`测试失败：${upstreamMsg(res.status, json, raw, endpoint)}｜请求地址：${endpoint}`, false);
+    }
+    const item = json?.data?.[0] || json?.images?.[0] || json?.output?.[0] || null;
+    const b64 = item?.b64_json || item?.base64 || null;
+    const url = item?.url || (typeof item === 'string' ? item : null);
+    const sample = b64 ? `data:image/png;base64,${String(b64).replace(/^data:[^;]+;base64,/, '')}` : url;
+    if (!sample) {
+      return cfgMsg(
+        `测试失败：返回里没找到图片字段（字段：${Object.keys(json || {}).join(', ') || '空'}）｜请求地址：${endpoint}`,
+        false,
+      );
+    }
+    cfgMsg(`直连成功，耗时 ${((Date.now() - started) / 1000).toFixed(1)}s。下方为返回样例。`, true);
+    $('#cfgSample').src = sample;
+    $('#cfgSample').hidden = false;
+    return;
+  }
+
   try {
     const r = await fetch('/api/model/test', {
       method: 'POST',
@@ -849,6 +1195,19 @@ async function testCfg() {
 }
 
 async function clearCfg() {
+  if (state.relay === 'browser') {
+    if (!confirm('确定清除本机保存的自定义模型配置？')) return;
+    localStorage.removeItem(LS_CUSTOM);
+    $('#cfgApiKey').value = '';
+    $('#cfgBaseUrl').value = '';
+    $('#cfgModel').value = '';
+    $('#cfgExtra').value = '';
+    cfgMsg('已清除本机配置。', true);
+    paintModelPanel();
+    renderEngineBadge();
+    updateSlots();
+    return;
+  }
   if (!confirm('确定清除已保存的自定义模型配置？')) return;
   try {
     const r = await fetch('/api/model', { method: 'DELETE' });

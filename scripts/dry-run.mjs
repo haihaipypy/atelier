@@ -319,5 +319,32 @@ console.log('\n[17] 图片代理：白名单与错误处理');
   check('非法 URL 返回 400', invalid.status === 400, `status=${invalid.status}`);
 }
 
+console.log('\n[18] 浏览器直连通道（静态检查）');
+{
+  const app = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+  const html = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
+  check('存在直连生成函数', /async function generateDirect\(/.test(app));
+  check('直连请求带 Bearer 鉴权', /authorization: `Bearer \$\{cfg\.apiKey\}`/.test(app));
+  check('直连配置只写 localStorage', /localStorage\.setItem\(LS_CUSTOM/.test(app));
+  check('localStorage 里没有明文变量名误用', !/sessionStorage\.setItem\(.apiKey/.test(app));
+  check('有请求发起位置选择器', /id="cfgRelay"/.test(html) && /value="browser"/.test(html));
+  check('直连模式不走 /api/generate', /if \(direct\) \{\s*j = await generateDirect/.test(app));
+  check('右上角有作者主页链接', /id="authorLink" href="https:\/\/www\.1day\.vip"/.test(html));
+  // 前端拼的端点规则要与后端一致
+  const norm = (raw) => {
+    let u = String(raw || '').trim();
+    if (!u) return '';
+    if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
+    u = u.replace(/\/+$/, '');
+    if (/\/images\/generations$/.test(u)) return u.replace(/\/images\/generations$/, '');
+    if (!/\/v\d+$/i.test(u)) u += '/v1';
+    return u;
+  };
+  check('端点拼接：缺 /v1 会补', norm('https://a.com') === 'https://a.com/v1', norm('https://a.com'));
+  check('端点拼接：保留已有 /v1', norm('https://a.com/v1/') === 'https://a.com/v1');
+  check('端点拼接：完整端点不重复拼', norm('https://a.com/v1/images/generations') === 'https://a.com/v1');
+  check('端点拼接：补协议', norm('a.com/v1') === 'https://a.com/v1');
+}
+
 console.log(`\n结果：${pass} 通过，${fail} 失败\n`);
 if (fail) process.exit(1);
