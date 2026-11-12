@@ -136,27 +136,42 @@ Dashboard → **Workers & Pages → Create application** → 选 **GitHub**（�
 顺手说明：如果仓库里**没有** `wrangler.jsonc`，Cloudflare 会自动识别框架并给你开一个 PR 补配置。
 本项目已经带好，不会走这条路。
 
-#### 4. 建 KV（可选，但建议）
+#### 4. KV：不用管，部署时自动建
 
 KV 只服务一个功能：**在页面里保存自定义模型配置**（Base URL / API Key / 模型名）。
-只跑 Cloudflare 原生模型的话，这步跳过完全没问题，站点照样能用。
-
-先建：Dashboard → **Storage & databases → Workers KV → Create instance**，名字填 `atelier-config`，
-建完复制那串 **ID**。
-
-然后**在 GitHub 网页上改一行**，不用装任何东西：打开仓库里的 `wrangler.jsonc`，点右上角铅笔图标，
-找到这行被注掉的配置：
+它已经写在 `wrangler.jsonc` 里，但**故意只写了绑定名、没写资源 ID**：
 
 ```jsonc
-// "kv_namespaces": [{ "binding": "CONFIG", "id": "<namespace id>" }],
+"kv_namespaces": [{ "binding": "CONFIG" }]
 ```
 
-删掉开头的 `//`，把 `<namespace id>` 换成刚复制的 ID，点 **Commit changes**。
-提交后 Cloudflare 会自动重新构建部署一次，绑定就生效了。
+这是 Cloudflare 的**自动资源供给**（automatic provisioning）：部署时发现这个绑定没有指向
+任何已存在的 namespace，就自动建一个并绑上去，名字形如 `atelier-compose-CONFIG`。
+建好后在 Dashboard → **Storage & databases → Workers KV** 里能看到，**你不用手动创建、也不用复制 ID**。
 
-> 为什么不能只在控制台点？因为每次构建都以仓库里的 `wrangler.jsonc` 为准，
-> 控制台里加的绑定会在下次部署时被覆盖掉。
-> 绑定名必须是 `CONFIG`，代码按这个名字取；键名 `profile` 由程序自己写。
+验证：Worker → **Settings → Bindings**，看到 `CONFIG` + `KV Namespace` 就说明成了。
+
+> **为什么绑定必须写进配置，不能只在控制台点？**
+> Cloudflare 把 `wrangler.jsonc` 当作唯一事实来源。每次构建都按它重建绑定，
+> 控制台里手动加的绑定会在下次部署时被覆盖（`keep_vars` 只保护变量和密钥，不保护绑定）。
+> 好在有了自动资源供给，配置里只写绑定名、不写 ID，所以"不改文件"也能用上 KV。
+
+### 顺便说清：变量和绑定不是一回事
+
+这是最容易混的一点——**KV 是绑定，不是变量，没法用「添加变量」代替**：
+
+| | 写在哪 | 用来干什么 |
+|---|---|---|
+| **变量 / 密钥**（`vars` / `secret`） | `wrangler.jsonc` 的 `vars`、控制台 Settings → Variables and Secrets、或 `wrangler secret put` | 存字符串配置，如 `FLUX_MODEL`、`CUSTOM_API_KEY` |
+| **绑定**（`AI` / `KV` / `R2` / `D1`…） | 只能在 `wrangler.jsonc` 里声明 | 连接到一个 Cloudflare 资源对象本身 |
+
+变量里装不下一个 namespace，所以这两者不能互换。不过你**不需要为此改文件**：
+
+- 想页面里能保存自定义模型配置 → 什么都不用做，KV 自动建好
+- 想连 KV 都不用 → 自定义模型改用 Secret 配置（见文末），模型本身照常出图
+
+> 唯一需要动配置的情况：想让它指向你**自己已有的** namespace，那才要在 `wrangler.jsonc` 里补
+> `"id": "<你的 namespace id>"`。用自动建的就没这个必要。
 
 #### 5. 确认绑定
 
@@ -166,7 +181,7 @@ KV 只服务一个功能：**在页面里保存自定义模型配置**（Base UR
 |---|---|---|---|
 | `ASSETS` | Static Assets | 托管 `web/public` | 部署后自动 |
 | `AI` | Workers AI | 原生出图，无需 API Key | 部署后自动 |
-| `CONFIG` | KV Namespace | 自定义模型配置 | 做了第 4 步才有 |
+| `CONFIG` | KV Namespace | 自定义模型配置 | 部署后自动（自动建档） |
 
 `AI` 就是模型接入本身：Workers AI **直连绑定**，不经过第三方网关，密钥就是你的账号，
 不存在 Key 泄露；消耗账号自带的 Neurons 免费额度，**不用绑卡**，首次调用即生效。
@@ -186,14 +201,13 @@ KV 只服务一个功能：**在页面里保存自定义模型配置**（Base UR
 git clone https://github.com/haihaipypy/atelier.git
 cd atelier
 npm install
-npx wrangler login                        # 浏览器授权
-npx wrangler kv namespace create CONFIG   # 输出里有 id
-npx wrangler deploy                       # 静态资源 + API + 模型绑定一起上线
+npx wrangler login     # 浏览器授权
+npx wrangler deploy    # 静态资源 + 模型绑定 + KV 一起上线
 ```
 
-`ASSETS`（静态资源）和 `AI`（模型）写在配置里，`deploy` 时自动建好。
-`CONFIG`（KV）要把上一条命令输出的 `id` 填进 `wrangler.jsonc` 里注释掉的那行、取消注释，
-再执行 `deploy`；不需要页面内保存自定义模型的话，这两步都可以跳过。
+`ASSETS`（静态资源）、`AI`（模型）、`CONFIG`（KV）都会在 `deploy` 时按 `wrangler.jsonc` 建好。
+KV 那项同样不写 ID，由 Cloudflare 自动建 namespace；CLI 部署会把生成的 ID 写回本地 `wrangler.jsonc`，
+提交与否都行（提交了只是把 ID 固化下来）。
 
 > 两种方式**别混用**：Worker 已经连了 Git 再用 CLI 部署，会顶掉控制台那套构建设置。
 > 想反过来挂仓库，进 Worker → **Settings → Builds → Connect**，构建设置同方式一第 2 步。

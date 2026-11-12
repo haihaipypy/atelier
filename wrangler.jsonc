@@ -11,9 +11,12 @@
   "ai": {
     "binding": "AI"
   },
-  // 可选：KV 用于「页面内保存自定义模型配置」（Base URL / API Key / 模型名）。
-  // 控制台 Storage & databases → Workers KV 建好 namespace，把 id 填进下面一行并取消注释。
-  // "kv_namespaces": [{ "binding": "CONFIG", "id": "<namespace id>" }],
+  // KV：存「页面内保存的自定义模型配置」（Base URL / API Key / 模型名）。
+  // 故意不写 id —— 部署时 Cloudflare 会自动建一个 KV 命名空间并绑到 CONFIG 上，
+  // 名字形如 atelier-compose-CONFIG。建好后在 Dashboard 的 Workers KV 里能看到。
+  // 想改用自己已有的 namespace，再补 "id": "<namespace id>" 即可。
+  // 完全不用自定义模型通道的话，把下面这段删掉也行。
+  "kv_namespaces": [{ "binding": "CONFIG" }],
   "observability": {
     "enabled": true
   },
