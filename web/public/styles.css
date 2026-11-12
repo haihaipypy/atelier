@@ -233,12 +233,16 @@ a { color: inherit; }
 .advanced summary::-webkit-details-marker { display: none; }
 .advanced summary::before { content: "▸ "; color: var(--ink-3); }
 .advanced[open] summary::before { content: "▾ "; }
-.adv-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 0 12px; }
+.adv-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; padding: 0 0 12px; }
 .adv-body label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--ink-2); }
+/* label 的 display:flex 会盖掉 [hidden] 的 UA 默认值，导致两个模型行同时显示 */
+.adv-body label[hidden] { display: none; }
 .adv-body label.wide { grid-column: 1 / -1; }
 .adv-body select, .adv-body input, .adv-body textarea {
   padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg);
   font-size: 12.5px; outline: none; resize: vertical;
+  /* 下拉里塞着长 Base URL 时，select 的固有宽度会撑破栅格（窄屏横向溢出） */
+  width: 100%; min-width: 0; box-sizing: border-box;
 }
 .adv-body textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.5; }
 /* 字段下方的补充说明（如模型免费额度） */
@@ -340,11 +344,24 @@ a { color: inherit; }
 }
 .drawer[hidden] { display: none; }
 .drawer-card {
-  width: min(560px, 100%); max-height: 88vh; overflow-y: auto;
+  width: min(560px, 100%); max-height: min(88vh, 860px); overflow: hidden;
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: 16px; padding: 20px; box-shadow: var(--shadow-md);
-  display: flex; flex-direction: column; gap: 12px;
+  border-radius: 16px; box-shadow: var(--shadow-md);
+  display: flex; flex-direction: column;
   animation: drawerIn .18s ease-out;
+}
+
+/* 三段式：标题固定、中间表单滚动、底部操作固定。
+   之前是单列滚动，测试成功插入的样例图会把底部说明顶出可视区，看着像被裁掉。 */
+.drawer-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--line); flex: none; }
+.drawer-body {
+  padding: 16px 20px; overflow-y: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.drawer-foot {
+  padding: 12px 20px 15px; border-top: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 8px; flex: none;
+  background: var(--surface); border-radius: 0 0 16px 16px;
 }
 @keyframes drawerIn { from { opacity: 0; transform: translateY(8px); } }
 .drawer-head { display: flex; align-items: center; justify-content: space-between; }
@@ -373,7 +390,13 @@ a { color: inherit; }
 .cfg-msg { font-size: 12px; line-height: 1.5; min-height: 0; }
 .cfg-msg.ok { color: var(--sel); }
 .cfg-msg.err { color: var(--accent); white-space: pre-wrap; }
-#cfgSample { width: 120px; border-radius: 8px; border: 1px solid var(--line); }
+.cfg-sample-wrap { margin: 0; display: flex; flex-direction: column; gap: 5px; }
+.cfg-sample-wrap[hidden] { display: none; }
+#cfgSample {
+  max-width: 160px; max-height: 160px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg); object-fit: contain;
+}
+.cfg-sample-wrap figcaption { font-size: 10.5px; color: var(--ink-3); }
 .cfg-note { margin: 0; font-size: 10.5px; color: var(--ink-3); line-height: 1.6; }
 
 /* 卡片标题：编号 + 中文名，避免长串日文挤爆 */

@@ -228,7 +228,7 @@ npx wrangler secret put CUSTOM_MODEL      # 例：gpt-image-1
 
 ```bash
 npm run sync              # 同步最新图库索引
-npm run dryrun            # 72 项自检，不需要任何密钥
+npm run dryrun            # 77 项自检，不需要任何密钥
 npm run dev               # wrangler dev，本地 Cloudflare 环境
 ```
 
@@ -495,7 +495,7 @@ atelier/
 ├── scripts/
 │   ├── sync-catalogs.mjs   #   图库同步（支持 --offline / --only）
 │   ├── preview-server.mjs  #   本地预览（静态 + API 单端口）
-│   └── dry-run.mjs         #   端到端自检（72 项断言，无需密钥）
+│   └── dry-run.mjs         #   端到端自检（77 项断言，无需密钥）
 ├── .github/workflows/
 │   └── sync-catalogs.yml   #   每日自动同步
 ├── wrangler.jsonc          # 部署配置
@@ -529,7 +529,7 @@ atelier/
 
 ## 验证状态
 
-- `dry-run.mjs`：**72 项断言全绿**，覆盖能力探测、演示生成、素材校验、multipart 字段名、3043 重试、
+- `dry-run.mjs`：**77 项断言全绿**，覆盖能力探测、演示生成、素材校验、multipart 字段名、3043 重试、
   未绑定快速失败、假 binding 走通真实调用链、非法模型回落、配额耗尽转 429、
   自定义接口端到端、403/429/422 错误分类、浏览器直连通道、代理白名单
 - 浏览器端完整交互（1080×675 / 1280×800 / 1440×900）：预览 → 确认 → 三板块选齐 → 生成 → 渲染，

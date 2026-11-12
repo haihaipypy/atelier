@@ -346,5 +346,18 @@ console.log('\n[18] 浏览器直连通道（静态检查）');
   check('端点拼接：补协议', norm('a.com/v1') === 'https://a.com/v1');
 }
 
+console.log('\n[19] 设置面板与抽屉排版（回归）');
+{
+  const css = await readFile(path.join(ROOT, 'web/public/styles.css'), 'utf8');
+  const html = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
+  const app = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+  // .adv-body label 的 display:flex 会压过 [hidden] 的 UA 样式，两个模型行会同时露出来
+  check('模型行能真正被 hidden 隐藏', /\.adv-body label\[hidden\]\s*\{\s*display:\s*none/.test(css));
+  check('抽屉为三段式（body/foot 存在）', /class="drawer-body"/.test(html) && /class="drawer-foot"/.test(html));
+  check('抽屉卡片不整体滚动（靠 body 滚）', /\.drawer-body\s*\{[^}]*overflow-y:\s*auto/.test(css));
+  check('样例图有尺寸上限', /#cfgSample\s*\{[^}]*max-height/.test(css));
+  check('保存成功后自动关闭抽屉', /function afterSaved[\s\S]{0,400}closeModelDrawer\(\)/.test(app));
+}
+
 console.log(`\n结果：${pass} 通过，${fail} 失败\n`);
 if (fail) process.exit(1);

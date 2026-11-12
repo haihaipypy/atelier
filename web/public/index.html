@@ -161,6 +161,8 @@
       <h3 id="cfgTitle">自定义模型</h3>
       <button class="text-btn" id="cfgClose" aria-label="关闭">✕</button>
     </div>
+
+    <div class="drawer-body">
     <p class="drawer-desc" id="cfgDesc">
       填写任何 <b>OpenAI 兼容</b> 的图像接口即可。
     </p>
@@ -195,14 +197,21 @@
       <textarea id="cfgExtra" rows="3" spellcheck="false" placeholder='{"quality":"high"}'></textarea>
     </details>
 
-    <div class="drawer-actions">
-      <button class="primary" id="cfgSave">保存</button>
-      <button class="ghost-btn" id="cfgTest">测试连通</button>
-      <button class="text-btn" id="cfgClear">清除</button>
+    <figure class="cfg-sample-wrap" id="cfgSampleWrap" hidden>
+      <img id="cfgSample" alt="测试生成的样例图" />
+      <figcaption>样例图（确认这是真实出图接口）</figcaption>
+    </figure>
     </div>
-    <div class="cfg-msg" id="cfgMsg"></div>
-    <img id="cfgSample" hidden alt="测试生成的样例图" />
-    <p class="cfg-note" id="cfgPersistNote"></p>
+
+    <div class="drawer-foot">
+      <div class="cfg-msg" id="cfgMsg"></div>
+      <div class="drawer-actions">
+        <button class="primary" id="cfgSave">保存</button>
+        <button class="ghost-btn" id="cfgTest">测试连通</button>
+        <button class="text-btn" id="cfgClear">清除</button>
+      </div>
+      <p class="cfg-note" id="cfgPersistNote"></p>
+    </div>
   </div>
 </div>
 

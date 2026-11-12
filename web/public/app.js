@@ -291,16 +291,19 @@ function paintModelPanel() {
   paintModelQuota();
 
   const cm = $('#customModel');
+  // 原生 select 的 option title 提示不稳定，地址同时挂在 select 上
+  const customBase = customReady ? (state.relay === 'browser' ? local?.baseUrl : state.custom.baseUrl) : '';
+  cm.title = customBase || '';
   cm.innerHTML = '';
+  // 只放模型名：把 Base URL 拼进选项会把窄屏下拉撑破，地址改挂 title 悬停可见
   cm.append(
     el(
       'option',
-      { value: 'custom' },
-      customReady
-        ? `${state.relay === 'browser' ? local?.model : state.custom.model}（${
-            state.relay === 'browser' ? local?.baseUrl : state.custom.baseUrl
-          }）`
-        : '尚未配置',
+      {
+        value: 'custom',
+        title: customBase || '',
+      },
+      customReady ? (state.relay === 'browser' ? local?.model : state.custom.model) : '尚未配置',
     ),
   );
 
@@ -854,9 +857,9 @@ function bindUI() {
   });
   $('#openModelCfg').addEventListener('click', openModelDrawer);
   $('#model').addEventListener('change', paintModelQuota);
-  $('#cfgClose').addEventListener('click', () => ($('#modelDrawer').hidden = true));
+  $('#cfgClose').addEventListener('click', closeModelDrawer);
   $('#modelDrawer').addEventListener('click', (e) => {
-    if (e.target.id === 'modelDrawer') $('#modelDrawer').hidden = true;
+    if (e.target.id === 'modelDrawer') closeModelDrawer();
   });
 
   $$('.slot-upload').forEach((b) => {
@@ -1007,10 +1010,32 @@ boot().catch((e) => {
 function openModelDrawer() {
   $('#cfgMsg').textContent = '';
   $('#cfgMsg').className = 'cfg-msg';
-  $('#cfgSample').hidden = true;
+  hideSample();
   $('#modelDrawer').hidden = false;
   paintModelPanel();
   $('#cfgBaseUrl').focus();
+}
+
+function closeModelDrawer() {
+  $('#modelDrawer').hidden = true;
+  hideSample();
+}
+
+function hideSample() {
+  const wrap = $('#cfgSampleWrap');
+  if (wrap) wrap.hidden = true;
+  const img = $('#cfgSample');
+  if (img) img.removeAttribute('src');
+}
+
+function showSample(src) {
+  const img = $('#cfgSample');
+  const wrap = $('#cfgSampleWrap');
+  if (!img || !wrap) return;
+  img.src = src;
+  wrap.hidden = false;
+  // 样例在滚动区末尾，不滚过去会被固定底栏压住一半
+  requestAnimationFrame(() => wrap.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
 }
 
 function cfgMsg(text, ok) {
@@ -1067,12 +1092,12 @@ async function saveCfg() {
     localStorage.setItem(LS_CUSTOM, JSON.stringify(body));
     localStorage.setItem(LS_RELAY, 'browser');
     $('#cfgApiKey').value = '';
-    cfgMsg(`已保存到本机：${body.model} @ ${body.baseUrl}`, true);
     state.engine = 'custom';
     state.engineTouched = true;
     paintModelPanel();
     renderEngineBadge();
     updateSlots();
+    afterSaved(body.model, body.baseUrl);
     return;
   }
 
@@ -1085,7 +1110,6 @@ async function saveCfg() {
     });
     const j = await r.json();
     if (!r.ok || j.error) throw new Error(j.error || `保存失败（HTTP ${r.status}）`);
-    cfgMsg(`已保存：${j.model} @ ${j.baseUrl}`, true);
     $('#cfgApiKey').value = '';
     await refreshModelPanel();
     state.engine = 'custom';
@@ -1093,9 +1117,21 @@ async function saveCfg() {
     paintModelPanel();
     renderEngineBadge();
     updateSlots();
+    afterSaved(j.model, j.baseUrl);
   } catch (e) {
     cfgMsg(e.message, false);
   }
+}
+
+/**
+ * 保存成功的收尾：直接关掉抽屉（保存是终点，不必让用户再点一次关闭），
+ * 反馈改由主界面的提示条承接，否则关窗后没有任何「已保存」的痕迹。
+ */
+function afterSaved(model, baseUrl) {
+  const where = state.relay === 'browser' ? '浏览器直连' : '服务端中转';
+  $('#hint').classList.remove('error');
+  $('#hint').textContent = `已保存自定义模型：${model}（${where}）｜${baseUrl}`;
+  closeModelDrawer();
 }
 
 async function testCfg() {
@@ -1107,7 +1143,7 @@ async function testCfg() {
       : '正在请求一次极小的文生图…（最长 2 分钟）',
     true,
   );
-  $('#cfgSample').hidden = true;
+  hideSample();
 
   // 直连：不落库也能测，用当前表单值直接打一次文生图（不带参考图）
   if (state.relay === 'browser') {
@@ -1168,8 +1204,7 @@ async function testCfg() {
       );
     }
     cfgMsg(`直连成功，耗时 ${((Date.now() - started) / 1000).toFixed(1)}s。下方为返回样例。`, true);
-    $('#cfgSample').src = sample;
-    $('#cfgSample').hidden = false;
+    showSample(sample);
     return;
   }
 
@@ -1187,8 +1222,7 @@ async function testCfg() {
       throw new Error(`${j.error || '测试失败'}${where}`);
     }
     cfgMsg(`连通成功，耗时 ${(j.ms / 1000).toFixed(1)}s。下方为返回样例（用于确认是真实出图接口）。`, true);
-    $('#cfgSample').src = j.sample;
-    $('#cfgSample').hidden = false;
+    showSample(j.sample);
   } catch (e) {
     cfgMsg(`测试失败：${e.message}`, false);
   }
