@@ -11,6 +11,9 @@
   "ai": {
     "binding": "AI"
   },
+  // 可选：KV 用于「页面内保存自定义模型配置」（Base URL / API Key / 模型名）。
+  // 控制台 Storage & databases → Workers KV 建好 namespace，把 id 填进下面一行并取消注释。
+  // "kv_namespaces": [{ "binding": "CONFIG", "id": "<namespace id>" }],
   "observability": {
     "enabled": true
   },

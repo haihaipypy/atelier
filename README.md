@@ -7,7 +7,7 @@
 
 选三张、点一次生成，10–30 秒拿到结果。不用开 PS，不用手动换脸、重绘、调姿势。
 
-**原生 HTML + CSS + ES Module，零前端框架，无构建步骤。** 克隆 → `wrangler deploy` → 上线。
+**原生 HTML + CSS + ES Module，零前端框架，无构建步骤。** 仓库挂到 Cloudflare 上就是完整应用，或者本地 `wrangler deploy` 一条命令上线。
 
 ---
 
@@ -79,61 +79,124 @@ prompt 里用 `Reference image 1/2/3` 显式引用。模板在 [`shared/generate
 
 ## 部署
 
-### 前置条件
+两条路，选一条：
 
-- [Node.js](https://nodejs.org/) 18+
+| 方式 | 适合 | 特点 |
+|---|---|---|
+| **控制台连接 Git 仓库** | 长期维护 | 一次配置，之后 `git push` 自动构建部署 |
+| **本地 wrangler CLI** | 先跑起来看看 | 一条命令上线，不需要仓库授权 |
+
+两边的产物完全一样。下面先走控制台方式，因为不用装任何东西。
+
+### 需要准备
+
 - 一个 [Cloudflare](https://dash.cloudflare.com/sign-up) 账号（免费版即可）
+- 代码在 GitHub 仓库里（控制台方式）／ 本地已克隆（CLI 方式）
 
-### 三步上线
+`wrangler.jsonc` 里 `assets.directory` 指向 `web/public`，**没有构建步骤**，
+克隆下来就是可运行的完整应用。
+
+### 方式一：控制台连接 Git 仓库
+
+一次配置，之后推代码就自动部署。
+
+#### 1. 建 KV 命名空间
+
+Dashboard → **Storage & databases → Workers KV → Create instance**，名字填 `atelier-config`（叫什么都行，好认即可）。
+
+创建完复制它的 **ID**（一串十六进制字符），第 2 步要用。
+
+这个 KV 用来存**自定义模型配置**（Base URL / API Key / 模型名），存服务端、前端只回显密钥尾号。
+只跑 Cloudflare 原生模型的话可以不建，但建议一起建好——以后想加自定义通道不用再改配置重部署。
+
+#### 2. 把 KV 绑定写进仓库
+
+编辑 `wrangler.jsonc`，加一段：
+
+```jsonc
+"kv_namespaces": [{ "binding": "CONFIG", "id": "<第 1 步复制的 ID>" }]
+```
+
+绑定名必须叫 `CONFIG`，代码按这个名字取；里面的键名 `profile` 由程序自己写，不用管。
+
+```bash
+git add wrangler.jsonc
+git commit -m "chore: 绑定 KV"
+git push
+```
+
+> **为什么写在文件里，而不是在控制台点？**
+> 控制台给 Git 部署的 Worker 加的绑定，会在下一次构建时被仓库里的 `wrangler.jsonc` 覆盖掉。
+> 写进文件才是持久的。
+
+#### 3. 连接仓库，建 Worker
+
+Dashboard → **Workers & Pages → Create → Workers → Connect to Git**（部分账号显示为 *Import a repository*）：
+
+1. 授权 GitHub，选中 `atelier` 仓库
+2. **Project name** 填 `atelier-compose` —— 必须和 `wrangler.jsonc` 里的 `name` 一致，
+   否则会多建一个空的 Worker，绑定的资源也对不上
+3. 构建设置：
+   - **Build command**：留空（本项目没有构建步骤）
+   - **Deploy command**：`npx wrangler deploy`
+   - **Root directory**：`/`
+4. 点 **Deploy**，等 1–2 分钟
+
+仓库里有 `wrangler.jsonc`，控制台读到后一般会自动预填这几项，**保持默认即可**。
+
+#### 4. 确认绑定都接上了
+
+部署完成后，进 Worker → **Settings → Bindings**，应该有这三项：
+
+| 绑定名 | 类型 | 作用 | 来源 |
+|---|---|---|---|
+| `ASSETS` | Static Assets | 托管 `web/public` 静态页 | `wrangler.jsonc` |
+| `AI` | Workers AI | 原生出图，无需 API Key | `wrangler.jsonc` |
+| `CONFIG` | KV Namespace | 自定义模型配置 | `wrangler.jsonc` |
+
+`AI` 就是模型接入本身：Workers AI **直连绑定**，不经过第三方网关，密钥就是你的账号，
+不存在 Key 泄露；消耗的是账号自带的 Neurons 免费额度，**不用绑卡**，首次调用即生效。
+（若首次生成报 *must agree to the Workers AI terms*，去 Dashboard 的 **AI** 页面确认一次条款即可。）
+
+如果 `AI` 这一项缺失（少见，通常是部署时配置没读到）：点 **Add binding → Workers AI**，
+绑定名填 `AI`，保存后重新部署一次即可。`CONFIG` 缺失同理，检查第 2 步的 ID 是否填对。
+
+#### 5. 访问
+
+域名形如 `https://atelier-compose.<你的子域>.workers.dev`，直接可用。
+
+- 之后每次 push 到默认分支都会自动构建部署，日志在 Worker 的 **Deployments** 里
+- 当天用量在 Dashboard → **AI → Workers AI** 看，10,000 Neurons 用完为止
+- 想绑自有域名：Worker → **Settings → Domains & Routes → Add custom domain**
+
+### 方式二：本地 wrangler CLI
 
 ```bash
 git clone https://github.com/haihaipypy/atelier.git
 cd atelier
 npm install
-npx wrangler login      # 浏览器授权
-npx wrangler deploy     # 静态资源 + API 一起上线
+npx wrangler login                        # 浏览器授权
+npx wrangler kv namespace create CONFIG   # 输出的 id 填进 wrangler.jsonc
+npx wrangler deploy                       # 静态资源 + API 一起上线
 ```
 
-输出会给出 `https://atelier-compose.<你的子域>.workers.dev`，直接可访问。
+`wrangler deploy` 会按 `wrangler.jsonc` 把 `ASSETS` / `AI` / `CONFIG` 三个绑定一次性建好，
+不需要再去控制台点。输出里给的就是可访问地址。
 
-`wrangler.jsonc` 里 `assets.directory` 指向 `web/public`，**没有构建步骤**，
-克隆下来就是可运行的完整应用。
+> 两种方式**别混用**：如果 Worker 已经连了 Git，再用 CLI 部署会顶掉控制台里那套构建设置。
+> 想反过来挂到仓库上，进 Worker → **Settings → Build → Connect to Git**，构建设置同第 3 步。
 
-### 绑定模型额度
+### 可选：不建 KV，用环境变量配自定义模型
 
-`wrangler.jsonc` 已包含 AI 绑定，不需要额外配置：
-
-```jsonc
-"ai": { "binding": "AI" }
-```
-
-这是 Workers AI **直连绑定**，不经过任何第三方网关，消耗你自己账号的 Neurons 额度，
-不存在 API Key 泄露问题。
-
-### 可选：开启页面内保存自定义模型
-
-想把自定义模型的 Base URL / Key 存在服务端（而不是用环境变量），需要绑定一个 KV：
-
-```bash
-npx wrangler kv namespace create CONFIG
-```
-
-把返回的 `id` 填进 `wrangler.jsonc`：
-
-```jsonc
-"kv_namespaces": [{ "binding": "CONFIG", "id": "<你的 namespace id>" }]
-```
-
-没有绑 KV 也能用自定义模型，只是配置得走环境变量（见下一节），
-页面弹窗底部会直接说明这一点，不会让你白填。
-
-### 改用环境变量配置自定义模型
+不想建 KV 也能用自定义模型通道，配置改走 Secret：
 
 ```bash
 npx wrangler secret put CUSTOM_BASE_URL   # 例：https://your-gateway.com/v1
 npx wrangler secret put CUSTOM_API_KEY
 npx wrangler secret put CUSTOM_MODEL      # 例：gpt-image-1
 ```
+
+页面弹窗底部会直接说明当前是哪种模式，不会让你白填。
 
 ### 本地开发
 
@@ -213,20 +276,13 @@ node scripts/preview-server.mjs   # 默认 http://localhost:8099
 
 ## 免费额度与模型设置
 
-### 为什么只做 Cloudflare
+### 模型从哪来
 
-先把话说清楚：**EdgeOne 有免费额度，但免费的是「运行环境」，不是模型。**
+出图走 **Workers AI 直连绑定**（`@cf/black-forest-labs/flux-2-*`），不经过任何第三方网关：
 
-| 项目 | Cloudflare Workers AI | 腾讯云 EdgeOne |
-|---|---|---|
-| 函数运行 | Workers 免费版 | Cloud Functions 免费版，100 万次调用、120s 超时 |
-| **模型推理** | **含在每天 10,000 Neurons 内** | 内置 `@makers/*` **只有文本模型**，出图必须绑自己的混元 API Key |
-| 出图成本 | 免费额度内 **¥0** | 混元按 token 计费，无免费出图层 |
-| 超额行为 | 免费版直接报错，**不会偷偷扣费** | 按量扣费 |
-
-结论：想「不花钱把站跑起来」，只有 Cloudflare 这一条路。
-要接 EdgeOne，改动点很小：`shared/generate.js` 的 `generate()` 加一个分支，
-`/api/config` 多返回一个能力项，前端无需改动。
+- 不需要 API Key，凭证就是账号本身，不存在泄露问题
+- 消耗账号自带的 Neurons 免费额度，不需要额外开通或绑卡
+- 额度用完直接报错，**不会产生账单**
 
 ### 免费额度
 
