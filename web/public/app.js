@@ -73,6 +73,15 @@ async function refreshModelPanel() {
   paintModelPanel();
 }
 
+/** Cloudflare 模型下方的额度提示：数字随所选模型变（klein-9b 7 张、4b 9 张、dev 2–3 张） */
+function paintModelQuota() {
+  const el = $('#modelQuota');
+  if (!el) return;
+  const cur = (state.config.models || []).find((m) => m.modelId === $('#model').value);
+  const q = cur?.quota || '7 张';
+  el.textContent = `免费额度每天约 ${q}（10,000 Neurons，UTC 0 点重置）。产出不够就用下面「配置自定义模型」接自己的 API。`;
+}
+
 function paintModelPanel() {
   const cfg = state.config;
   const engineSel = $('#engine');
@@ -118,6 +127,7 @@ function paintModelPanel() {
     for (const m of cfg.models) ms.append(el('option', { value: m.modelId, title: m.note }, m.label));
   }
   if (cfg.model) ms.value = cfg.model;
+  paintModelQuota();
 
   const cm = $('#customModel');
   cm.innerHTML = '';
@@ -519,7 +529,12 @@ async function generate() {
       body: JSON.stringify(payload),
     });
     const j = await r.json();
-    if (!r.ok || j.error) throw new Error(j.error || `生成失败（HTTP ${r.status}）`);
+    if (!r.ok || j.error) {
+      // 把 Workers AI 的错误码与 Ray ID 一起显示：3043 这类内部错误只能靠 Ray 让 Cloudflare 定位
+      const d = j.detail || {};
+      const tag = d.code ? `（错误码 ${d.code}${d.ray ? ` · Ray ${d.ray}` : ''}）` : '';
+      throw new Error(`${j.error || `生成失败（HTTP ${r.status}）`}${tag}`);
+    }
 
     showResult(j);
     // 成功后给明确的状态文案，避免停留在「正在生成…」
@@ -606,6 +621,7 @@ function bindUI() {
     if (state.engine === 'custom' && !state.custom.configured) openModelDrawer();
   });
   $('#openModelCfg').addEventListener('click', openModelDrawer);
+  $('#model').addEventListener('change', paintModelQuota);
   $('#cfgClose').addEventListener('click', () => ($('#modelDrawer').hidden = true));
   $('#modelDrawer').addEventListener('click', (e) => {
     if (e.target.id === 'modelDrawer') $('#modelDrawer').hidden = true;

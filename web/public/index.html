@@ -6,6 +6,7 @@
 <title>Atelier · 角色服装合成工坊</title>
 <meta name="description" content="从服装库、脸型库、姿势库各选一张，交给 AI 合成一张完整人物图。基于 Cloudflare Workers AI，克隆即可部署。" />
 <meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231b1b1b'/%3E%3Cpath d='M8 24 16 8l8 16M11 19h10' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://ai-costume-gallery.pages.dev" />
 <link rel="preconnect" href="https://ai-portrait-gallery.pages.dev" />
 <link rel="preconnect" href="https://ai-pose-gallery.pages.dev" />
@@ -26,13 +27,18 @@
   </nav>
   <div class="top-actions">
     <span class="engine-badge" id="engineBadge" title="当前生成通道">通道检测中…</span>
-    <a class="ghost" id="repoLink" href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+    <a class="ghost" href="https://github.com/haihaipypy/atelier" target="_blank" rel="noopener" title="项目源码">项目地址</a>
+    <a class="ghost" href="https://www.1day.vip" target="_blank" rel="noopener" title="无辣的个人站">www.1day.vip</a>
   </div>
 </header>
 
 <main class="layout">
   <!-- 左侧：图库 -->
   <section class="panel library" aria-labelledby="libTitle">
+    <p class="usage-tip">
+      <b>怎么用</b>：在 ① 服装、② 脸、③ 姿势 三个库里各选一张，点「生成合成图」，就会合成为一张完整人物图。
+      默认使用 Cloudflare Workers AI 模型，无需任何密钥。
+    </p>
     <div class="lib-head">
       <h2 id="libTitle">服装库</h2>
       <p class="lib-meta" id="libMeta">加载中…</p>
@@ -98,6 +104,7 @@
         </label>
         <label id="modelRow" class="wide" hidden>Cloudflare 模型
           <select id="model"></select>
+          <span class="field-note" id="modelQuota"></span>
         </label>
         <label id="customModelRow" class="wide" hidden>自定义模型
           <select id="customModel"></select>

@@ -72,6 +72,8 @@ a { color: inherit; }
 .tabs button:not([aria-selected="true"]):hover { color: var(--ink); }
 
 .top-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+/* 外链不换行：窄屏时宁可整体换到下一行，也不要一个字一行地竖排 */
+.top-actions .ghost { white-space: nowrap; flex: none; }
 .engine-badge {
   font-size: 11.5px; padding: 5px 10px; border-radius: 999px;
   border: 1px solid var(--line); color: var(--ink-2); background: var(--surface-2);
@@ -102,7 +104,20 @@ a { color: inherit; }
 /* 图库不锁高度：锁高会让 grid 行被压扁（历史 bug：卡片被压成 7px 横条）。
    改为整页滚动，卡片按宽高比撑开，滚动交给 body。 */
 .library { display: flex; flex-direction: column; }
-.lib-head { padding: 18px 20px 0; }
+.lib-head { padding: 14px 20px 0; }
+/* 使用说明：进入页面第一眼要看到「三个库各选一张 → 生成」 */
+.usage-tip {
+  margin: 14px 20px 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sel);
+  background: var(--surface-2);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+.usage-tip b { color: var(--ink); font-weight: 650; }
 /* 搜索与筛选吸顶，长列表滚动时仍可操作 */
 .lib-tools {
   position: sticky; top: 59px; z-index: 10;
@@ -220,6 +235,8 @@ a { color: inherit; }
   font-size: 12.5px; outline: none; resize: vertical;
 }
 .adv-body textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.5; }
+/* 字段下方的补充说明（如模型免费额度） */
+.field-note { font-size: 10.5px; line-height: 1.55; color: var(--ink-3); }
 
 .actions { display: flex; flex-direction: column; gap: 8px; }
 .primary {
@@ -295,6 +312,10 @@ a { color: inherit; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 9px; padding: 0 14px 8px; }
   .lib-head, .lib-tools, .lib-foot { padding-left: 14px; padding-right: 14px; }
   .adv-body { grid-template-columns: 1fr; }
+  /* 手机宽度：顶栏放不下三组内容，让链接整体掉到第二行右对齐 */
+  .topbar { flex-wrap: wrap; row-gap: 8px; }
+  .top-actions { flex: 1 1 100%; justify-content: flex-end; gap: 8px; }
+  .top-actions .ghost { font-size: 12px; padding: 4px 8px; }
 }
 
 /* ── 模型配置抽屉 ─────────────────────── */

@@ -23,16 +23,19 @@ export const MODELS = {
     label: 'FLUX.2 klein 9B',
     modelId: '@cf/black-forest-labs/flux-2-klein-9b',
     note: '默认。质量与成本平衡，输入图需 <512',
+    quota: '7 张',
   },
   'flux-2-klein-4b': {
     label: 'FLUX.2 klein 4B',
     modelId: '@cf/black-forest-labs/flux-2-klein-4b',
     note: '最省额度，适合调试',
+    quota: '9 张',
   },
   'flux-2-dev': {
     label: 'FLUX.2 dev',
     modelId: '@cf/black-forest-labs/flux-2-dev',
     note: '保真最好，输入图无 512 限制，费用最高',
+    quota: '2–3 张',
   },
 };
 export const DEFAULT_MODEL = '@cf/black-forest-labs/flux-2-klein-9b';
@@ -69,6 +72,15 @@ export function buildPrompt({ style = 'photorealistic', extra = '' } = {}) {
     extra,
   ];
   return parts.filter(Boolean).join(' ');
+}
+
+/** 把 Workers AI 抛出的错误整理成可读、可定位的结构 */
+export function describeAiError(e) {
+  const msg = String(e?.message || e);
+  const code = e?.internalCode ?? e?.code ?? null;
+  // 报错文本里常带一长串十六进制 Ray ID，是找 Cloudflare 排查的唯一凭据，务必带出来
+  const ray = e?.rayId || e?.ray || (msg.match(/\(([0-9a-f]{16,})\)/i)?.[1] ?? null);
+  return { msg, code, ray, name: e?.name || 'Error' };
 }
 
 /** 把 dataURL 解析成 { mime, bytes } */
@@ -159,17 +171,16 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
       multipart: { body: serialized.body, contentType: serialized.headers.get('content-type') },
     });
   } catch (e) {
+    const { msg, code, ray } = describeAiError(e);
+    const info = { raw: msg, code, ray, model: modelId, size: `${width}×${height}`, images: images.length };
     // 最常见的两类：配额用完 / 输入图超 512
-    const msg = String(e?.message || e);
     if (/neuron|quota|limit|exceed/i.test(msg)) {
-      throw new HttpError(429, '今日 Workers AI 免费额度可能已用完（每日 10,000 Neurons，UTC 0 点重置）', {
-        raw: msg,
-      });
+      throw new HttpError(429, '今日 Workers AI 免费额度可能已用完（每日 10,000 Neurons，UTC 0 点重置）', info);
     }
     if (/512|image size|dimension/i.test(msg)) {
-      throw new HttpError(400, '参考图尺寸超限：FLUX.2 klein 要求每张输入图小于 512×512', { raw: msg });
+      throw new HttpError(400, '参考图尺寸超限：FLUX.2 klein 要求每张输入图小于 512×512', info);
     }
-    throw new HttpError(502, `Workers AI 调用失败：${msg}`);
+    throw new HttpError(502, `Workers AI 调用失败：${msg}`, info);
   }
 
   // 官方返回 { image: base64 }；不同封装可能给 Uint8Array 或 data: URI，统一收口
