@@ -281,7 +281,7 @@ klein 系列要求每张输入图 **< 512×512**，超限直接报错。
 
 ```bash
 npm run sync              # 全量同步
-npm run sync:offline      # 离线校验（不发请求）
+npm run sync:offline      # 离线：写入内置样例，不发网络请求
 node scripts/sync-catalogs.mjs --only pose   # 只同步一个板块
 ```
 
