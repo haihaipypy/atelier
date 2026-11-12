@@ -188,13 +188,63 @@ try {
   check('识别为 429 配额问题', e.status === 429, `${e.status} ${e.message}`);
 }
 
-console.log('\n[10] 自定义模型：URL 规范化');
+console.log('\n[10] 3043 瞬时错误自动重试一次');
+let calls = 0;
+const flaky = async () => {
+  calls += 1;
+  if (calls === 1) {
+    const e = new Error('AiError: Internal server error (a4a1cdedab1da502-GRU)');
+    e.internalCode = 3043;
+    throw e;
+  }
+  return { image: 'aGVsbG8=' };
+};
+const retried = await generate({ images: imgs, env: {}, aiRun: flaky });
+check('首次 3043 后重试成功', calls === 2 && retried.b64 === 'aGVsbG8=', `calls=${calls}`);
+
+let calls2 = 0;
+try {
+  await generate({
+    images: imgs,
+    env: {},
+    aiRun: async () => {
+      calls2 += 1;
+      const e = new Error('AiError: Internal server error');
+      e.internalCode = 3043;
+      throw e;
+    },
+  });
+  check('两次都失败应抛错', false);
+} catch (e) {
+  check('两次失败后不再重试', calls2 === 2, `calls=${calls2}`);
+  check('错误码与 Ray 一并透出', e.status === 502 && e.detail?.code === 3043, JSON.stringify(e.detail));
+  check('提示可换模型/画幅', /3043/.test(e.message));
+}
+
+console.log('\n[11] 4xx 类错误不重试');
+let calls3 = 0;
+try {
+  await generate({
+    images: imgs,
+    env: {},
+    aiRun: async () => {
+      calls3 += 1;
+      throw new Error('3005: prompt is too long');
+    },
+  });
+  check('应抛错', false);
+} catch (e) {
+  check('非瞬时错误只调用一次', calls3 === 1, `calls=${calls3}`);
+  check('状态码 502', e.status === 502, String(e.status));
+}
+
+console.log('\n[12] 自定义模型：URL 规范化');
 check('补 /v1', normalizeBaseUrl('https://api.foo.com') === 'https://api.foo.com/v1');
 check('去尾斜杠', normalizeBaseUrl('https://api.foo.com/v1/') === 'https://api.foo.com/v1');
 check('缺协议自动补 https', normalizeBaseUrl('api.foo.com/v1') === 'https://api.foo.com/v1');
 check('完整端点不改写', normalizeBaseUrl('https://a.com/v1/images/generations') === 'https://a.com/v1/images/generations');
 
-console.log('\n[11] 自定义模型：保存校验');
+console.log('\n[13] 自定义模型：保存校验');
 for (const [name, body, code] of [
   ['缺 Base URL', { apiKey: 'k', model: 'm' }, 400],
   ['缺模型名', { baseUrl: 'https://a.com', apiKey: 'k' }, 400],
@@ -208,7 +258,7 @@ for (const [name, body, code] of [
   }
 }
 
-console.log('\n[12] 自定义模型：KV 读写与脱敏');
+console.log('\n[14] 自定义模型：KV 读写与脱敏');
 const kv = fakeKV();
 await saveProfile({ CONFIG: kv }, { baseUrl: 'api.demo.com', apiKey: 'sk-abcdefgh1234', model: 'my-model' });
 const pub = await publicProfile({ CONFIG: kv });
@@ -219,7 +269,7 @@ check('前端拿不到明文密钥', !JSON.stringify(pub).includes('sk-abcdefgh'
 const cfgWithCustom = await (await handleRequest(new Request('https://x/api/config'), { CONFIG: kv })).json();
 check('/api/config 反映自定义通道', cfgWithCustom.engine === 'custom' && cfgWithCustom.ready === true);
 
-console.log('\n[13] 自定义模型：真实调用（本地假服务器）');
+console.log('\n[15] 自定义模型：真实调用（本地假服务器）');
 const srv = await startFakeImageServer();
 try {
   const profile = { baseUrl: `http://127.0.0.1:${srv.port}/v1`, apiKey: 'sk-test', model: 'fake-img', ready: true, sendMode: 'auto', extraJson: '' };
@@ -232,7 +282,7 @@ try {
   await srv.close();
 }
 
-console.log('\n[14] 自定义模型：错误分类');
+console.log('\n[16] 自定义模型：错误分类');
 const srv2 = await startFakeImageServer({ fail: 401 });
 try {
   await generateCustom({ images: [], prompt: 'x', size: '1024x1024', profile: { baseUrl: `http://127.0.0.1:${srv2.port}/v1`, apiKey: 'k', model: 'm', ready: true } });
@@ -243,7 +293,7 @@ try {
   await srv2.close();
 }
 
-console.log('\n[15] 图片代理：白名单与错误处理');
+console.log('\n[17] 图片代理：白名单与错误处理');
 {
   const bad = await handleRequest(new Request('https://x/api/proxy?url=' + encodeURIComponent('https://evil.example/a.png')), {});
   check('非白名单域名被拒绝', bad.status === 403, `status=${bad.status}`);

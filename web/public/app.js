@@ -13,7 +13,7 @@ const SLOTS = ['outfit', 'face', 'pose'];
 const SLOT_NAME = { outfit: '服装', face: '脸', pose: '姿势' };
 const PAGE = 60;
 const MAX_SIDE = 480;      // 输入参考图最长边（< 512 满足 FLUX.2 约束）
-const REF_QUALITY = 0.86;
+const REF_QUALITY = 0.9;   // JPEG 质量：480px 下约 50KB/张，肉眼无损
 
 const state = {
   tab: 'outfit',
@@ -79,7 +79,7 @@ function paintModelQuota() {
   if (!el) return;
   const cur = (state.config.models || []).find((m) => m.modelId === $('#model').value);
   const q = cur?.quota || '7 张';
-  el.textContent = `免费额度每天约 ${q}（10,000 Neurons，UTC 0 点重置）。产出不够就用下面「配置自定义模型」接自己的 API。`;
+  el.textContent = `每天免费额度约 ${q}（10,000 Neurons，UTC 0 点重置）；产出不够建议点下方按钮，接自己的 API。`;
 }
 
 function paintModelPanel() {
@@ -436,8 +436,10 @@ async function toReference(src) {
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(img, 0, 0, w, h);
 
-  const png = canvas.toDataURL('image/png');
-  if (png.length < 1_500_000) return { dataUrl: png, w, h };
+  // 统一输出 JPEG，而不是 PNG：
+  //   1. canvas 的 PNG 是 RGBA（带 alpha 通道），部分推理后端遇到会直接抛 3043；
+  //   2. 480px 照片 PNG 约 400–700KB，JPEG 只要 40–70KB，三张一起能让请求体小一个量级，
+  //      而请求体过大同样是 3043 的常见诱因。
   return { dataUrl: canvas.toDataURL('image/jpeg', REF_QUALITY), w, h };
 }
 
@@ -483,7 +485,8 @@ function loadImage(src) {
 
 /* ─────────────────────────── 生成 ─────────────────────────── */
 
-const RATIO_MAP = { '3:4': [864, 1152], '1:1': [1024, 1024], '9:16': [736, 1312], '4:3': [1152, 864] };
+/* 尺寸统一为 16/64 的倍数（FLUX 系列对非对齐尺寸容易内部报错），且都在 256–1920 内 */
+const RATIO_MAP = { '3:4': [960, 1280], '1:1': [1024, 1024], '9:16': [720, 1280], '4:3': [1280, 960] };
 
 async function generate() {
   if (state.busy) return;

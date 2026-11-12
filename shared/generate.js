@@ -130,7 +130,10 @@ export function buildCloudflareForm({ images, prompt, modelId, width = 1024, hei
   if (seed != null) out.append('seed', String(seed));
   images.forEach((dataUrl, i) => {
     const { mime, bytes } = parseDataUrl(dataUrl);
-    out.append(`input_image_${i}`, new Blob([bytes], { type: mime }), `ref-${i}.png`);
+    // 文件名扩展名必须与实际 MIME 一致：曾经统一叫 ref-N.png 却塞 JPEG 数据，
+    // 后端按扩展名解析时容易判成坏图（表现为 3043）。
+    const ext = mime.includes('jpeg') ? 'jpg' : mime.includes('webp') ? 'webp' : 'png';
+    out.append(`input_image_${i}`, new Blob([bytes], { type: mime }), `ref-${i}.${ext}`);
   });
   return { modelId, form: out };
 }
@@ -159,19 +162,33 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
   const allowed = new Set(Object.values(MODELS).map((m) => m.modelId));
   const wanted = model || env.FLUX_MODEL || DEFAULT_MODEL;
   const modelId = allowed.has(wanted) ? wanted : DEFAULT_MODEL;
-  const { form } = buildCloudflareForm({ images, prompt: finalPrompt, modelId, width, height, seed });
 
-  // Workers AI 的 multipart 入参需要先把 FormData 序列化成流再传入
-  const serialized = new Response(form);
   const started = Date.now();
 
+  // body 是流，只能消费一次，重试必须重新构造 FormData
   let res;
-  try {
-    res = await aiRun(modelId, {
-      multipart: { body: serialized.body, contentType: serialized.headers.get('content-type') },
-    });
-  } catch (e) {
-    const { msg, code, ray } = describeAiError(e);
+
+  let lastErr = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const { form } = buildCloudflareForm({ images, prompt: finalPrompt, modelId, width, height, seed });
+    const serialized = new Response(form);
+    try {
+      res = await aiRun(modelId, {
+        multipart: { body: serialized.body, contentType: serialized.headers.get('content-type') },
+      });
+      break;
+    } catch (e) {
+      lastErr = describeAiError(e);
+      // 3043 / 5xx / 超时基本是上游瞬时故障，同一请求重发通常就成了；4xx 类不重试
+      const transient =
+        lastErr.code === 3043 || /internal server error|internal error|timed? ?out|50[023]|overloaded/i.test(lastErr.msg);
+      if (!transient || attempt === 1) break;
+      await new Promise((r) => setTimeout(r, 700));
+    }
+  }
+
+  if (!res) {
+    const { msg, code, ray } = lastErr || { msg: '未知错误' };
     const info = { raw: msg, code, ray, model: modelId, size: `${width}×${height}`, images: images.length };
     // 最常见的两类：配额用完 / 输入图超 512
     if (/neuron|quota|limit|exceed/i.test(msg)) {
@@ -180,7 +197,13 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
     if (/512|image size|dimension/i.test(msg)) {
       throw new HttpError(400, '参考图尺寸超限：FLUX.2 klein 要求每张输入图小于 512×512', info);
     }
-    throw new HttpError(502, `Workers AI 调用失败：${msg}`, info);
+    throw new HttpError(
+      502,
+      code === 3043
+        ? 'Workers AI 内部错误（3043）已自动重试一次仍失败，通常是上游瞬时故障。可换个模型或画幅再试。'
+        : `Workers AI 调用失败：${msg}`,
+      info,
+    );
   }
 
   // 官方返回 { image: base64 }；不同封装可能给 Uint8Array 或 data: URI，统一收口

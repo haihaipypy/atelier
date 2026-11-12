@@ -228,7 +228,7 @@ npx wrangler secret put CUSTOM_MODEL      # 例：gpt-image-1
 
 ```bash
 npm run sync              # 同步最新图库索引
-npm run dryrun            # 46 项自检，不需要任何密钥
+npm run dryrun            # 52 项自检，不需要任何密钥
 npm run dev               # wrangler dev，本地 Cloudflare 环境
 ```
 
@@ -348,11 +348,20 @@ node scripts/preview-server.mjs   # 默认 http://localhost:8099
 
 服务端对模型名做白名单校验，乱传会回落到默认模型，不会报错到用户面前。
 
-### 输入图为什么被压到 480px
+### 输入图为什么被压到 480px，还统一转成 JPEG
 
 klein 系列要求每张输入图 **< 512×512**，超限直接报错。
 前端用 Canvas 把参考图等比缩放到最长边 480px 再上传，既满足限制，请求体也小、传得快。
 `flux-2-dev` 虽然没这个限制，但仍走同一条路径，保证行为一致。
+
+统一输出 JPEG 而不是 PNG，是因为踩过坑：
+
+- Canvas 导出的 PNG 是 **RGBA**（带 alpha 通道），部分推理后端拿到会报 `3043`
+- 480px 照片的 PNG 约 400–700KB，**三张加起来 1–2MB**，请求体过大同样会触发 `3043`
+- 换成 JPEG（质量 0.9）后，三张合计只有 **60–90KB**，肉眼几乎无损
+
+遇到 `3043` 不用慌：服务端会**自动重试一次**（这类错误多为上游瞬时故障），
+仍失败时会提示换模型或画幅，并把错误码与 Ray ID 一并显示出来，方便排查。
 
 ---
 
@@ -434,12 +443,14 @@ atelier/
 │   ├── styles.css
 │   ├── app.js              #   交互逻辑
 │   ├── i18n.js             #   日文元数据 → 中文
+│   ├── favicon.svg         #   站点图标（人形：头/躯干/双臂三色 = 三个素材库）
+│   ├── apple-touch-icon.png
 │   ├── data/*.json         #   图库索引（同步产出）
 │   └── samples/            #   演示占位图
 ├── scripts/
 │   ├── sync-catalogs.mjs   #   图库同步（支持 --offline / --only）
 │   ├── preview-server.mjs  #   本地预览（静态 + API 单端口）
-│   └── dry-run.mjs         #   端到端自检（46 项断言，无需密钥）
+│   └── dry-run.mjs         #   端到端自检（52 项断言，无需密钥）
 ├── .github/workflows/
 │   └── sync-catalogs.yml   #   每日自动同步
 ├── wrangler.jsonc          # 部署配置
@@ -473,7 +484,7 @@ atelier/
 
 ## 验证状态
 
-- `dry-run.mjs`：**46 项断言全绿**，覆盖能力探测、演示生成、素材校验、multipart 字段名、
+- `dry-run.mjs`：**52 项断言全绿**，覆盖能力探测、演示生成、素材校验、multipart 字段名、3043 重试、
   未绑定快速失败、假 binding 走通真实调用链、非法模型回落、配额耗尽转 429、
   自定义接口端到端、代理白名单
 - 浏览器端完整交互（1080×675 / 1280×800 / 1440×900）：预览 → 确认 → 三板块选齐 → 生成 → 渲染，
