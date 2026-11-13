@@ -12,24 +12,24 @@
 export const SLOTS = ['outfit', 'face', 'pose'];
 
 /**
- * 默认模型。可换的候选（都在 Workers AI 目录内，均支持多参考图）：
- *   @cf/black-forest-labs/flux-2-klein-9b   4 步蒸馏，输入图须 < 512，约 1,363 Neurons/张
- *   @cf/black-forest-labs/flux-2-klein-4b   更便宜更快，约 1,024 Neurons/张
- *   @cf/black-forest-labs/flux-2-dev        质量最好、输入图无 512 限制，但步数多、最贵
- * 改环境变量 FLUX_MODEL 即可切换，无需改代码。
+ * 默认模型。可换的候选（都在 Workers AI 目录内，均支持多参考图）。
+ * 张数按官方价目表实算：klein-9b 首张 1024² 为 1,363.64 Neurons，
+ * 每张输入图另按 181.82 Neurons/MP 计——三张 480px 参考图只占约 0.7MP，
+ * 即每出图约 1,490 Neurons，10,000 额度≈6 张，别写成 7 张。klein-4b 按
+ * 5.37/26.05 Neurons 每个 512² 分块计，一进一出约 850 Neurons，≈11 张。
  */
 export const MODELS = {
   'flux-2-klein-9b': {
     label: 'FLUX.2 klein 9B',
     modelId: '@cf/black-forest-labs/flux-2-klein-9b',
     note: '默认。质量与成本平衡，输入图需 <512',
-    quota: '7 张',
+    quota: '6 张',
   },
   'flux-2-klein-4b': {
     label: 'FLUX.2 klein 4B',
     modelId: '@cf/black-forest-labs/flux-2-klein-4b',
     note: '最省额度，适合调试',
-    quota: '9 张',
+    quota: '10 张左右',
   },
   'flux-2-dev': {
     label: 'FLUX.2 dev',
@@ -113,15 +113,19 @@ export function classifyAiFailure({ msg = '', code = null } = {}) {
     };
   }
 
-  // ② 配额：必须点到 neuron / quota / allocation 这类明确词
-  const quotaish = /neuron|quota|allocation|daily (?:free|limit)|insufficient (?:credit|balance)|out of credit/i.test(text);
-  // ③ 容量/限流：不是配额，等几秒重试就好，别让用户以为额度没了
+  // ③ 配额：按「上游原文」判定，不看错误码。
+  // 官方错误码表把额度耗尽记作 3036 "Account limited"，但自由额度耗尽实际上抛的是
+  // 4006，两条文案完全一样；用文案判定才不会因为码对不上而漏判。
+  const quotaish =
+    /used up your daily free allocation|daily free allocation|out of neurons|daily neuron limit/i.test(text)
+    || /neuron|quota|allocation|insufficient (?:credit|balance)|out of credit/i.test(text);
+  // ④ 容量/限流：不是配额，等几秒重试就好，别让用户以为额度没了
   const capacityish = /rate.?limit|too many requests|capacity|overload|concurren|temporar|busy/i.test(text);
 
   if (quotaish && !capacityish) {
     return {
       status: 429,
-      message: `今日 Workers AI 免费额度可能已用完（10,000 Neurons/日，UTC 0 点重置）。上游原文：${clip(text, 120)}`,
+      message: buildQuotaMessage(text),
       info,
     };
   }
@@ -140,6 +144,21 @@ export function classifyAiFailure({ msg = '', code = null } = {}) {
       : `Workers AI 调用失败：${clip(text)}`,
     info,
   };
+}
+
+/**
+ * 额度耗尽的提示。
+ *
+ * 控制台显示「今日 0/10k」却照样报 4006 是社区里反复出现的既定行为：
+ * 超额之后，封锁要到**当天首次使用满 24 小时**才解除，而不是 UTC 0 点；
+ * 而用量面板在新的一天从 0 开始记，于是面板与拦截计数对不上。
+ * 所以文案不要写死「UTC 0 点重置」——那句话会让人以为等到点就好了。
+ */
+function buildQuotaMessage(text) {
+  return 'Workers AI 免费额度已用尽（10,000 Neurons/日，账号级共享）。'
+    + '注意：超额后的封锁通常要到「当日首次使用起满 24 小时」才解除，'
+    + '而控制台的「今日用量」在新的一天会从 0 开始记，所以显示 0/10k 也可能仍在封锁中。'
+    + `上游原文：${clip(text, 120)}`;
 }
 
 /** 错误原文可能很长且带换行，截断后再拼进提示 */

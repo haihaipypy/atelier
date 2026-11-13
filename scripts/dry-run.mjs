@@ -207,6 +207,22 @@ const quotaOk = classifyAiFailure({ msg: '4007: you have used up your daily free
 check('真实配额错误仍判 429', quotaOk.status === 429, `${quotaOk.status}`);
 check('容量类错误不出现「额度用完」字样', !/额度可能已用完/.test(classifyAiFailure({ msg: 'Memory limit exceeded' }).message));
 
+console.log('\n[9c] 额度耗尽：官方文档与实测的错误码并不一致');
+// 官方错误码表写的是 3036 "Account limited"，但自由额度耗尽实际抛 4006，两条文案一致。
+// 只按码判定会漏掉 4006（用户的真实报错就是这么来的）。
+const codes = [null, 3036, 4006, '4006'];
+for (const c of codes) {
+  const got = classifyAiFailure({
+    msg: "4006: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage.",
+    code: c,
+  });
+  check(`错误码 ${c ?? '缺失'} 也能判成 429`, got.status === 429, `得到 ${got.status}`);
+}
+const quotaMsg = classifyAiFailure({ msg: 'you have used up your daily free allocation of 10,000 neurons' }).message;
+check('不再写死「UTC 0 点重置」误导用户', !/UTC 0 点重置/.test(quotaMsg), quotaMsg);
+check('解释「面板 0/10k 仍被拦」的原因', /0\/10k|24 小时/.test(quotaMsg), quotaMsg);
+check('提示额度是账号级共享', /账号级/.test(quotaMsg), quotaMsg);
+
 console.log('\n[10] 3043 瞬时错误自动重试一次');
 let calls = 0;
 const flaky = async () => {

@@ -237,13 +237,13 @@ async function refreshModelPanel() {
   paintModelPanel();
 }
 
-/** Cloudflare 模型下方的额度提示：数字随所选模型变（klein-9b 7 张、4b 9 张、dev 2–3 张） */
+/** Cloudflare 模型下方的额度提示：张数按官方价目实算（9b 约 6 张、4b 约 10 张、dev 2–3 张） */
 function paintModelQuota() {
   const el = $('#modelQuota');
   if (!el) return;
   const cur = (state.config.models || []).find((m) => m.modelId === $('#model').value);
-  const q = cur?.quota || '7 张';
-  el.textContent = `每天免费额度约 ${q}（10,000 Neurons，UTC 0 点重置）；产出不够建议点下方按钮，接自己的 API。`;
+  const q = cur?.quota || '6 张';
+  el.textContent = `每天免费额度约 ${q}（10,000 Neurons/日，账号级共享）；用完要到次日才恢复，产出不够建议点下方按钮，接自己的 API。`;
 }
 
 function paintModelPanel() {
