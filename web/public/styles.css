@@ -309,8 +309,9 @@ a { color: inherit; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 /* 图库说明：例如男性版姿势库借用女性素体骨架这件事，必须在选之前讲清楚 */
+/* 左右留白必须与上方 .usage-tip 一致（20px），否则两条说明框的边框对不齐 */
 .lib-note {
-  margin: 0 0 8px; padding: 7px 10px; font-size: 11.5px; line-height: 1.55;
+  margin: 10px 20px 2px; padding: 7px 12px; font-size: 11.5px; line-height: 1.55;
   color: var(--ink-2); background: var(--surface-2);
   border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px;
 }
@@ -374,6 +375,8 @@ a { color: inherit; }
   .gender-switch button { padding: 5px 9px; font-size: 12px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 9px; padding: 0 14px 8px; }
   .lib-head, .lib-tools, .lib-foot { padding-left: 14px; padding-right: 14px; }
+  /* 窄屏上两条提示框跟着收窄，保持与卡片网格同一条左边界 */
+  .usage-tip, .lib-note { margin-left: 14px; margin-right: 14px; }
   .adv-body { grid-template-columns: 1fr; }
   /* 手机宽度：顶栏放不下三组内容，让链接整体掉到第二行右对齐 */
   .topbar { flex-wrap: wrap; row-gap: 8px; }

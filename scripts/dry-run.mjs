@@ -390,6 +390,7 @@ console.log('\n[18] 浏览器直连通道（静态检查）');
   check('有请求发起位置选择器', /id="cfgRelay"/.test(html) && /value="browser"/.test(html));
   check('直连模式不走 /api/generate', /if \(direct\) \{\s*j = await generateDirect/.test(app));
   check('右上角有作者主页链接', /id="authorLink" href="https:\/\/www\.1day\.vip"/.test(html));
+  check('项目地址旁有项目文档链接', /项目地址<\/a>\s*<a class="ghost" href="https:\/\/blog\.1day\.vip\/post\/ai-character-atelier"/.test(html));
   // 前端拼的端点规则要与后端一致
   const norm = (raw) => {
     let u = String(raw || '').trim();
@@ -462,6 +463,20 @@ console.log('\n[20] 女性 / 男性双版本');
   check('提示词区分性别', /adult man/.test(pM) && /adult woman/.test(pF) && pM !== pF);
   check('代理放行 jsDelivr', /cdn\.jsdelivr\.net/.test(router));
   check('未引入 generated.photos', !/generated\.photos/.test(app + router + css));
+}
+
+console.log('\n[21] 文档拆分');
+{
+  const readme = await readFile(path.join(ROOT, 'README.md'), 'utf8');
+  const manual = await readFile(path.join(ROOT, 'docs/manual.md'), 'utf8');
+  // README 只留介绍/演示/部署/使用，细节搬去 docs/manual.md
+  check('README 变短', readme.split('\n').length < 200, `${readme.split('\n').length} 行`);
+  check('README 不再堆错误码表', !/unsupported_country_region_territory/.test(readme));
+  check('README 指向详细说明', /docs\/manual\.md/.test(readme));
+  check('README 指向图文教程', /blog\.1day\.vip\/post\/ai-character-atelier/.test(readme));
+  check('详细说明接手了错误码表', /unsupported_country_region_territory/.test(manual));
+  check('详细说明含部署细节', /automatic provisioning|自动资源供给/.test(manual));
+  check('详细说明不再重复断言数量', !/项断言/.test(readme));
 }
 
 console.log(`\n结果：${pass} 通过，${fail} 失败\n`);
