@@ -1,0 +1,3271 @@
+{
+  "generatedAt": "2026-11-13T02:37:12.855Z",
+  "mode": "live",
+  "source": {
+    "label": "男性姿势",
+    "homepage": "https://github.com/wquguru/shisei",
+    "license": "CC0-1.0"
+  },
+  "count": 181,
+  "items": [
+    {
+      "id": "SP-P001-front",
+      "code": "P001",
+      "title": "后仰坐・单膝竖起",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P001-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P001_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting leaning back, one knee raised"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P001-diag",
+      "code": "P001",
+      "title": "后仰坐・单膝竖起",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P001-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P001_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting leaning back, one knee raised"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P002-front",
+      "code": "P002",
+      "title": "单手支撑・双腿前伸",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P002-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P002_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, one-hand support, legs swept forward"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P002-diag",
+      "code": "P002",
+      "title": "单手支撑・双腿前伸",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P002-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P002_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, one-hand support, legs swept forward"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P003-front",
+      "code": "P003",
+      "title": "双手后撑・挺胸坐",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P003-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P003_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, hands behind, chest out"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P003-diag",
+      "code": "P003",
+      "title": "双手后撑・挺胸坐",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P003-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P003_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, hands behind, chest out"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P004-front",
+      "code": "P004",
+      "title": "三角坐・双膝左倾",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P004-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P004_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Triangle sit, knees tilted left"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P004-diag",
+      "code": "P004",
+      "title": "三角坐・双膝左倾",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P004-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P004_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Triangle sit, knees tilted left"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P005-front",
+      "code": "P005",
+      "title": "单膝竖起・手触发",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P005-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P005_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, one knee raised, hand in hair"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P005-diag",
+      "code": "P005",
+      "title": "单膝竖起・手触发",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P005-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P005_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, one knee raised, hand in hair"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P006-front",
+      "code": "P006",
+      "title": "双腿斜伸・手扶腰",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P006-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P006_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, legs extended diagonally, hand on hip"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P006-diag",
+      "code": "P006",
+      "title": "双腿斜伸・手扶腰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P006-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P006_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, legs extended diagonally, hand on hip"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P007-front",
+      "code": "P007",
+      "title": "双肘撑地俯卧",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P007-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P007_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Lying prone propped on both elbows"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P007-diag",
+      "code": "P007",
+      "title": "双肘撑地俯卧",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P007-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P007_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Lying prone propped on both elbows"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P008-front",
+      "code": "P008",
+      "title": "双膝竖起・双手抱头",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P008-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P008_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, knees up, hands behind head"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P008-diag",
+      "code": "P008",
+      "title": "双膝竖起・双手抱头",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P008-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P008_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, knees up, hands behind head"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P009-front",
+      "code": "P009",
+      "title": "右倾・肘撑坐",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P009-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P009_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting leaning right on elbow"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P010-front",
+      "code": "P010",
+      "title": "手扶脚踝坐",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P010-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P010_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, hand resting on ankle"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P010-diag",
+      "code": "P010",
+      "title": "手扶脚踝坐",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P010-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P010_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, hand resting on ankle"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P011-front",
+      "code": "P011",
+      "title": "双手抱头・挺胸",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P011-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P011_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, hands behind head, chest arched"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P011-diag",
+      "code": "P011",
+      "title": "双手抱头・挺胸",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P011-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P011_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, hands behind head, chest arched"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P012-front",
+      "code": "P012",
+      "title": "单膝竖起・托腮",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P012-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P012_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, one knee up, cheek on hand"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P012-diag",
+      "code": "P012",
+      "title": "单膝竖起・托腮",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P012-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P012_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, one knee up, cheek on hand"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P013-front",
+      "code": "P013",
+      "title": "后撑・双腿离地",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P013-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P013_front.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Leaning back on hands, both legs lifted"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P013-diag",
+      "code": "P013",
+      "title": "后撑・双腿离地",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P013-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P013_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Leaning back on hands, both legs lifted"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P014-diag",
+      "code": "P014",
+      "title": "单膝竖起・握脚踝",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P014-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P014_diag.webp",
+      "cats": [
+        "坐姿"
+      ],
+      "tags": [
+        "坐姿",
+        "Sitting, one knee up, holding ankle"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P015-front",
+      "code": "P015",
+      "title": "站立・单手叉腰",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P015-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P015_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing contrapposto, hand on hip"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P015-diag",
+      "code": "P015",
+      "title": "站立・单手叉腰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P015-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P015_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing contrapposto, hand on hip"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P016-front",
+      "code": "P016",
+      "title": "站立・双手撩发",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P016-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P016_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, both hands lifting hair"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P016-diag",
+      "code": "P016",
+      "title": "站立・双手撩发",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P016-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P016_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, both hands lifting hair"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P017-front",
+      "code": "P017",
+      "title": "站立・回眸",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P017-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P017_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, looking back over shoulder"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P017-diag",
+      "code": "P017",
+      "title": "站立・回眸",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P017-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P017_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, looking back over shoulder"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P018-front",
+      "code": "P018",
+      "title": "站立・双手叉腰",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P018-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P018_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, both hands on hips"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P018-diag",
+      "code": "P018",
+      "title": "站立・双手叉腰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P018-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P018_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, both hands on hips"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P019-front",
+      "code": "P019",
+      "title": "站立・双臂上伸",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P019-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P019_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, arms stretched overhead"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P019-diag",
+      "code": "P019",
+      "title": "站立・双臂上伸",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P019-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P019_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, arms stretched overhead"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P020-front",
+      "code": "P020",
+      "title": "站立・单手扶后脑",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P020-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P020_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, one hand behind head"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P020-diag",
+      "code": "P020",
+      "title": "站立・单手扶后脑",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P020-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P020_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, one hand behind head"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P021-front",
+      "code": "P021",
+      "title": "站立・手扶颈侧与大腿",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P021-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P021_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, hands at neck and thigh"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P021-diag",
+      "code": "P021",
+      "title": "站立・手扶颈侧与大腿",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P021-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P021_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, hands at neck and thigh"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P022-front",
+      "code": "P022",
+      "title": "站立・双臂后展挺胸",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P022-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P022_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, arms behind, chest out"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P022-diag",
+      "code": "P022",
+      "title": "站立・双臂后展挺胸",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P022-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P022_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, arms behind, chest out"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P024-front",
+      "code": "P024",
+      "title": "站立・单腿后抬",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P024-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P024_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, one leg lifted behind"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P024-diag",
+      "code": "P024",
+      "title": "站立・单腿后抬",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P024-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P024_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, one leg lifted behind"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P025-front",
+      "code": "P025",
+      "title": "站立・双腿分开叉腰",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P025-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P025_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing wide stance, hands on hips"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P025-diag",
+      "code": "P025",
+      "title": "站立・双腿分开叉腰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P025-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P025_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing wide stance, hands on hips"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P026-front",
+      "code": "P026",
+      "title": "站立・单臂上举扭腰",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P026-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P026_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, one arm up, hip pushed out"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P026-diag",
+      "code": "P026",
+      "title": "站立・单臂上举扭腰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P026-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P026_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, one arm up, hip pushed out"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P027-front",
+      "code": "P027",
+      "title": "站立・双手扶颈后",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P027-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P027_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, both hands at nape"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P027-diag",
+      "code": "P027",
+      "title": "站立・双手扶颈后",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P027-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P027_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, both hands at nape"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P029-front",
+      "code": "P029",
+      "title": "站立・长发飘扬",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P029-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P029_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing, hair flowing in the wind"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P030-front",
+      "code": "P030",
+      "title": "踮脚站立・双臂V字",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P030-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P030_front.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing on tiptoe, arms in V"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P030-diag",
+      "code": "P030",
+      "title": "踮脚站立・双臂V字",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P030-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P030_diag.webp",
+      "cats": [
+        "站立"
+      ],
+      "tags": [
+        "站立",
+        "Standing on tiptoe, arms in V"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P031-diag",
+      "code": "P031",
+      "title": "跪立・双手放大腿",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P031-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P031_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling upright, hands on thighs"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P032-front",
+      "code": "P032",
+      "title": "跪立・双手抱头",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P032-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P032_front.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, hands behind head"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P032-diag",
+      "code": "P032",
+      "title": "跪立・双手抱头",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P032-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P032_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, hands behind head"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P033-front",
+      "code": "P033",
+      "title": "单膝跪・手放膝上",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P033-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P033_front.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Half-kneeling, hand on knee"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P033-diag",
+      "code": "P033",
+      "title": "单膝跪・手放膝上",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P033-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P033_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Half-kneeling, hand on knee"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P034-diag",
+      "code": "P034",
+      "title": "跪立・上身后仰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P034-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P034_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, upper body arched back"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P035-front",
+      "code": "P035",
+      "title": "跪立・双臂上伸",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P035-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P035_front.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, arms stretched up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P035-diag",
+      "code": "P035",
+      "title": "跪立・双臂上伸",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P035-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P035_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, arms stretched up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P036-front",
+      "code": "P036",
+      "title": "跪立・一手触发一手叉腰",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P036-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P036_front.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, one hand in hair, one on hip"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P036-diag",
+      "code": "P036",
+      "title": "跪立・一手触发一手叉腰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P036-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P036_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, one hand in hair, one on hip"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P037-front",
+      "code": "P037",
+      "title": "单膝跪・仰望",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P037-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P037_front.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Half-kneeling, looking up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P037-diag",
+      "code": "P037",
+      "title": "单膝跪・仰望",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P037-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P037_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Half-kneeling, looking up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P039-front",
+      "code": "P039",
+      "title": "跪立・叉腰后仰",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P039-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P039_front.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, hands on hips, back arched"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P039-diag",
+      "code": "P039",
+      "title": "跪立・叉腰后仰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P039-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P039_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, hands on hips, back arched"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P040-front",
+      "code": "P040",
+      "title": "跪立・扭腰单臂上举",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P040-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P040_front.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, hips swayed, one arm raised"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P040-diag",
+      "code": "P040",
+      "title": "跪立・扭腰单臂上举",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P040-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P040_diag.webp",
+      "cats": [
+        "跪姿"
+      ],
+      "tags": [
+        "跪姿",
+        "Kneeling, hips swayed, one arm raised"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P041-front",
+      "code": "P041",
+      "title": "少女坐・双手放大腿",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P041-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P041_front.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hands on thighs"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P041-diag",
+      "code": "P041",
+      "title": "少女坐・双手放大腿",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P041-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P041_diag.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hands on thighs"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P042-front",
+      "code": "P042",
+      "title": "少女坐・双手前撑",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P042-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P042_front.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hands on floor in front"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P042-diag",
+      "code": "P042",
+      "title": "少女坐・双手前撑",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P042-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P042_diag.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hands on floor in front"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P043-front",
+      "code": "P043",
+      "title": "少女坐・双手抱头",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P043-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P043_front.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hands behind head"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P044-front",
+      "code": "P044",
+      "title": "少女坐・双手后撑",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P044-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P044_front.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hands on floor behind"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P044-diag",
+      "code": "P044",
+      "title": "少女坐・双手后撑",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P044-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P044_diag.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hands on floor behind"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P045-front",
+      "code": "P045",
+      "title": "侧坐・双腿右流",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P045-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P045_front.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "Side sit, legs swept right"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P045-diag",
+      "code": "P045",
+      "title": "侧坐・双腿右流",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P045-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P045_diag.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "Side sit, legs swept right"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P046-front",
+      "code": "P046",
+      "title": "侧坐・手贴脸颊",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P046-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P046_front.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "Side sit, hand on cheek"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P046-diag",
+      "code": "P046",
+      "title": "侧坐・手贴脸颊",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P046-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P046_diag.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "Side sit, hand on cheek"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P047-front",
+      "code": "P047",
+      "title": "侧坐・单臂上伸",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P047-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P047_front.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "Side sit, one arm stretched up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P047-diag",
+      "code": "P047",
+      "title": "侧坐・单臂上伸",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P047-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P047_diag.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "Side sit, one arm stretched up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P048-front",
+      "code": "P048",
+      "title": "少女坐・手扶颈侧",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P048-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P048_front.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hand at neck"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P048-diag",
+      "code": "P048",
+      "title": "少女坐・手扶颈侧",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P048-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P048_diag.webp",
+      "cats": [
+        "侧坐・少女坐"
+      ],
+      "tags": [
+        "侧坐・少女坐",
+        "W-sit, hand at neck"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P049-front",
+      "code": "P049",
+      "title": "仰卧・双臂过头",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P049-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P049_front.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on back, arms overhead"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P049-diag",
+      "code": "P049",
+      "title": "仰卧・双臂过头",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P049-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P049_diag.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on back, arms overhead"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P050-front",
+      "code": "P050",
+      "title": "侧卧・托腮",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P050-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P050_front.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on side, cheek on hand"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P050-diag",
+      "code": "P050",
+      "title": "侧卧・托腮",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P050-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P050_diag.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on side, cheek on hand"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P051-diag",
+      "code": "P051",
+      "title": "俯卧・双腿上踢",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P051-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P051_diag.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying face down, legs kicked up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P053-front",
+      "code": "P053",
+      "title": "侧卧・腰部曲线",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P053-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P053_front.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on side, waist curved"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P053-diag",
+      "code": "P053",
+      "title": "侧卧・腰部曲线",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P053-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P053_diag.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on side, waist curved"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P054-front",
+      "code": "P054",
+      "title": "仰卧・双腿竖直上举",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P054-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P054_front.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on back, both legs straight up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P054-diag",
+      "code": "P054",
+      "title": "仰卧・双腿竖直上举",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P054-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P054_diag.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on back, both legs straight up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P055-front",
+      "code": "P055",
+      "title": "侧卧・单臂过头",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P055-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P055_front.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on side, one arm overhead"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P055-diag",
+      "code": "P055",
+      "title": "侧卧・单臂过头",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P055-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P055_diag.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying on side, one arm overhead"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P056-front",
+      "code": "P056",
+      "title": "俯卧・臂枕",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P056-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P056_front.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying face down, head on folded arms"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P056-diag",
+      "code": "P056",
+      "title": "俯卧・臂枕",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P056-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P056_diag.webp",
+      "cats": [
+        "躺姿"
+      ],
+      "tags": [
+        "躺姿",
+        "Lying face down, head on folded arms"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P058-front",
+      "code": "P058",
+      "title": "深蹲・手放膝上",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P058-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P058_front.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, hands on knees"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P058-diag",
+      "code": "P058",
+      "title": "深蹲・手放膝上",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P058-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P058_diag.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, hands on knees"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P059-front",
+      "code": "P059",
+      "title": "深蹲・单手撑地",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P059-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P059_front.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, one hand on floor"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P059-diag",
+      "code": "P059",
+      "title": "深蹲・单手撑地",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P059-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P059_diag.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, one hand on floor"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P060-front",
+      "code": "P060",
+      "title": "深蹲・托腮",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P060-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P060_front.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, cheek on hand"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P060-diag",
+      "code": "P060",
+      "title": "深蹲・托腮",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P060-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P060_diag.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, cheek on hand"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P061-front",
+      "code": "P061",
+      "title": "深蹲・手触发",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P061-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P061_front.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, hand in hair"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P061-diag",
+      "code": "P061",
+      "title": "深蹲・手触发",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P061-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P061_diag.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, hand in hair"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P062-front",
+      "code": "P062",
+      "title": "深蹲踮脚・双手撑地",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P062-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P062_front.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Deep squat on tiptoe, both hands on floor"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P062-diag",
+      "code": "P062",
+      "title": "深蹲踮脚・双手撑地",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P062-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P062_diag.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Deep squat on tiptoe, both hands on floor"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P063-front",
+      "code": "P063",
+      "title": "深蹲・回头",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P063-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P063_front.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, looking back"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P063-diag",
+      "code": "P063",
+      "title": "深蹲・回头",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P063-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P063_diag.webp",
+      "cats": [
+        "蹲姿"
+      ],
+      "tags": [
+        "蹲姿",
+        "Squatting, looking back"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P064-front",
+      "code": "P064",
+      "title": "前倾・手放膝上",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P064-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P064_front.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, hands on knees"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P064-diag",
+      "code": "P064",
+      "title": "前倾・手放膝上",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P064-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P064_diag.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, hands on knees"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P065-front",
+      "code": "P065",
+      "title": "前倾・手摸小腿",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P065-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P065_front.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward deeply, hands touching shins"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P065-diag",
+      "code": "P065",
+      "title": "前倾・手摸小腿",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P065-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P065_diag.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward deeply, hands touching shins"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P066-front",
+      "code": "P066",
+      "title": "前倾・单手叉腰仰望",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P066-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P066_front.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, one hand on hip, looking up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P066-diag",
+      "code": "P066",
+      "title": "前倾・单手叉腰仰望",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P066-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P066_diag.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, one hand on hip, looking up"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P067-front",
+      "code": "P067",
+      "title": "前倾・手放大腿挺臀",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P067-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P067_front.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, hands on thighs, hips back"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P067-diag",
+      "code": "P067",
+      "title": "前倾・手放大腿挺臀",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P067-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P067_diag.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, hands on thighs, hips back"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P068-front",
+      "code": "P068",
+      "title": "前倾・双臂垂落",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P068-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P068_front.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, arms hanging limp"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P068-diag",
+      "code": "P068",
+      "title": "前倾・双臂垂落",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P068-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P068_diag.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, arms hanging limp"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P069-front",
+      "code": "P069",
+      "title": "前倾・单腿后抬",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P069-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P069_front.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, one leg lifted behind"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P069-diag",
+      "code": "P069",
+      "title": "前倾・单腿后抬",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P069-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P069_diag.webp",
+      "cats": [
+        "前倾"
+      ],
+      "tags": [
+        "前倾",
+        "Bent forward, one leg lifted behind"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P073-front",
+      "code": "P073",
+      "title": "站立扭转・双臂展开",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P073-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P073_front.webp",
+      "cats": [
+        "扭转"
+      ],
+      "tags": [
+        "扭转",
+        "Standing twist, arms spread wide"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P073-diag",
+      "code": "P073",
+      "title": "站立扭转・双臂展开",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P073-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P073_diag.webp",
+      "cats": [
+        "扭转"
+      ],
+      "tags": [
+        "扭转",
+        "Standing twist, arms spread wide"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P074-front",
+      "code": "P074",
+      "title": "跪立扭转・回头",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P074-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P074_front.webp",
+      "cats": [
+        "扭转"
+      ],
+      "tags": [
+        "扭转",
+        "Kneeling twist, looking back"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P074-diag",
+      "code": "P074",
+      "title": "跪立扭转・回头",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P074-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P074_diag.webp",
+      "cats": [
+        "扭转"
+      ],
+      "tags": [
+        "扭转",
+        "Kneeling twist, looking back"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P075-front",
+      "code": "P075",
+      "title": "坐姿・上身扭转",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-P075-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P075_front.webp",
+      "cats": [
+        "扭转"
+      ],
+      "tags": [
+        "扭转",
+        "Sitting, upper body twisted"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-P075-diag",
+      "code": "P075",
+      "title": "坐姿・上身扭转",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-P075-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P075_diag.webp",
+      "cats": [
+        "扭转"
+      ],
+      "tags": [
+        "扭转",
+        "Sitting, upper body twisted"
+      ],
+      "series": "std",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U001-front",
+      "code": "U001",
+      "title": "胸前双手比心",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U001-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U001_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Both hands heart at chest"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U001-diag",
+      "code": "U001",
+      "title": "胸前双手比心",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U001-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U001_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Both hands heart at chest"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U002-front",
+      "code": "U002",
+      "title": "头顶双臂大爱心",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U002-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U002_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Overhead arms heart"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U002-diag",
+      "code": "U002",
+      "title": "头顶双臂大爱心",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U002-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U002_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Overhead arms heart"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U003-front",
+      "code": "U003",
+      "title": "脸颊旁手指比心",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U003-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U003_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Finger heart by cheek"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U003-diag",
+      "code": "U003",
+      "title": "脸颊旁手指比心",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U003-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U003_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Finger heart by cheek"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U004-front",
+      "code": "U004",
+      "title": "下巴下双剪刀手",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U004-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U004_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Double peace under chin"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U004-diag",
+      "code": "U004",
+      "title": "下巴下双剪刀手",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U004-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U004_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Double peace under chin"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U005-front",
+      "code": "U005",
+      "title": "手背剪刀手",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U005-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U005_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Peace sign, back of hand"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U005-diag",
+      "code": "U005",
+      "title": "手背剪刀手",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U005-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U005_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Peace sign, back of hand"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U006-front",
+      "code": "U006",
+      "title": "拳头贴脸颊卖萌",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U006-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U006_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Fist against cheek"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U006-diag",
+      "code": "U006",
+      "title": "拳头贴脸颊卖萌",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U006-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U006_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Fist against cheek"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U007-front",
+      "code": "U007",
+      "title": "兔耳朵手势",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U007-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U007_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Rabbit ears pose"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U007-diag",
+      "code": "U007",
+      "title": "兔耳朵手势",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U007-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U007_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Rabbit ears pose"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U008-front",
+      "code": "U008",
+      "title": "招财猫猫爪",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U008-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U008_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Cat paw hands"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U008-diag",
+      "code": "U008",
+      "title": "招财猫猫爪",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U008-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U008_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Cat paw hands"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U009-front",
+      "code": "U009",
+      "title": "双手张爪吓人",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U009-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U009_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Claw hands pose"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U009-diag",
+      "code": "U009",
+      "title": "双手张爪吓人",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U009-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U009_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Claw hands pose"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U010-front",
+      "code": "U010",
+      "title": "食指竖在唇前（嘘）",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U010-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U010_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Finger to lips (shh)"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U010-diag",
+      "code": "U010",
+      "title": "食指竖在唇前（嘘）",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U010-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U010_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Finger to lips (shh)"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U011-front",
+      "code": "U011",
+      "title": "歪头手扶头侧",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U011-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U011_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Head tilt, hand at head"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U011-diag",
+      "code": "U011",
+      "title": "歪头手扶头侧",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U011-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U011_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Head tilt, hand at head"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U012-front",
+      "code": "U012",
+      "title": "伸手飞吻",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U012-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U012_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Blowing a kiss"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U012-diag",
+      "code": "U012",
+      "title": "伸手飞吻",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U012-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U012_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Blowing a kiss"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U013-front",
+      "code": "U013",
+      "title": "双手托下巴花朵手",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U013-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U013_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Chin on palms (flower)"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U013-diag",
+      "code": "U013",
+      "title": "双手托下巴花朵手",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U013-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U013_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Chin on palms (flower)"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U014-front",
+      "code": "U014",
+      "title": "食指戳脸颊",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U014-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U014_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Finger poking cheek"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U014-diag",
+      "code": "U014",
+      "title": "食指戳脸颊",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U014-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U014_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Finger poking cheek"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U015-front",
+      "code": "U015",
+      "title": "双手捂嘴",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U015-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U015_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Hands over mouth"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U015-diag",
+      "code": "U015",
+      "title": "双手捂嘴",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U015-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U015_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Hands over mouth"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U016-front",
+      "code": "U016",
+      "title": "双手合十拜托",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U016-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U016_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Palms together pleading"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U016-diag",
+      "code": "U016",
+      "title": "双手合十拜托",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U016-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U016_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Palms together pleading"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U017-front",
+      "code": "U017",
+      "title": "抱自己害羞",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U017-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U017_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Self-hug, shy"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U017-diag",
+      "code": "U017",
+      "title": "抱自己害羞",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U017-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U017_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Self-hug, shy"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U018-front",
+      "code": "U018",
+      "title": "手指取景框",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U018-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U018_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Finger frame"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U018-diag",
+      "code": "U018",
+      "title": "手指取景框",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U018-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U018_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Finger frame"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U019-front",
+      "code": "U019",
+      "title": "手撩耳边发",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U019-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U019_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Hand at ear (hair tuck)"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U019-diag",
+      "code": "U019",
+      "title": "手撩耳边发",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U019-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U019_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Hand at ear (hair tuck)"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U020-front",
+      "code": "U020",
+      "title": "双手捧脸颊",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U020-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U020_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Hands cupping cheeks"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U020-diag",
+      "code": "U020",
+      "title": "双手捧脸颊",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U020-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U020_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Hands cupping cheeks"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U021-front",
+      "code": "U021",
+      "title": "敬礼",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U021-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U021_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Salute"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U021-diag",
+      "code": "U021",
+      "title": "敬礼",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U021-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U021_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Salute"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U022-front",
+      "code": "U022",
+      "title": "手指镜头",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U022-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U022_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Pointing at camera"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U022-diag",
+      "code": "U022",
+      "title": "手指镜头",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U022-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U022_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Pointing at camera"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U023-front",
+      "code": "U023",
+      "title": "单手遮脸伸懒腰",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U023-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U023_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Hand at face, arm out"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U023-diag",
+      "code": "U023",
+      "title": "单手遮脸伸懒腰",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U023-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U023_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Hand at face, arm out"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U024-front",
+      "code": "U024",
+      "title": "半心贴脸・单手抚胸",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U024-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U024_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Half-heart + hand on chest"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U024-diag",
+      "code": "U024",
+      "title": "半心贴脸・单手抚胸",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U024-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U024_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Half-heart + hand on chest"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U025-front",
+      "code": "U025",
+      "title": "指缝偷看",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U025-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U025_front.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Peeking through fingers"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U025-diag",
+      "code": "U025",
+      "title": "指缝偷看",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U025-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U025_diag.webp",
+      "cats": [
+        "可爱系"
+      ],
+      "tags": [
+        "可爱系",
+        "Peeking through fingers"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U035-front",
+      "code": "U035",
+      "title": "双手平放锁骨",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U035-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U035_front.webp",
+      "cats": [
+        "胸线强调系"
+      ],
+      "tags": [
+        "胸线强调系",
+        "Hands flat on collarbones"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U035-diag",
+      "code": "U035",
+      "title": "双手平放锁骨",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U035-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U035_diag.webp",
+      "cats": [
+        "胸线强调系"
+      ],
+      "tags": [
+        "胸线强调系",
+        "Hands flat on collarbones"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U040-front",
+      "code": "U040",
+      "title": "单肘支膝托腮",
+      "angle": "正面",
+      "thumb": "/library/pose/SP-U040-front.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U040_front.webp",
+      "cats": [
+        "胸线强调系"
+      ],
+      "tags": [
+        "胸线强调系",
+        "Elbow on knee, chin on hand"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SP-U040-diag",
+      "code": "U040",
+      "title": "单肘支膝托腮",
+      "angle": "斜侧",
+      "thumb": "/library/pose/SP-U040-diag.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U040_diag.webp",
+      "cats": [
+        "胸线强调系"
+      ],
+      "tags": [
+        "胸线强调系",
+        "Elbow on knee, chin on hand"
+      ],
+      "series": "upper",
+      "src": "shisei",
+      "license": "CC0-1.0"
+    }
+  ],
+  "origin": "bundled"
+}

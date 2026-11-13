@@ -1,5 +1,5 @@
 /**
- * Atelier 前端：图库浏览 → 三选一 → 合成
+ * AI角色合成工坊 前端：图库浏览（女性/男性） → 三选一 → 合成
  *
  * 关键取舍：三张参考图在上传前由浏览器 Canvas 统一缩放/转码。
  *   - Cloudflare FLUX.2 要求输入图 < 512×512，超限直接报错
@@ -17,6 +17,7 @@ const REF_QUALITY = 0.9;   // JPEG 质量：480px 下约 50KB/张，肉眼无损
 
 const state = {
   tab: 'outfit',
+  gender: 'female',          // female | male：决定素材库与整套配色
   data: { outfit: null, face: null, pose: null },
   selected: { outfit: null, face: null, pose: null },
   q: '', cat: '', page: 1, lbItem: null, lbBig: null,
@@ -101,6 +102,7 @@ async function buildPromptOnServer() {
   const q = new URLSearchParams({
     style: $('#style').value || 'photorealistic',
     extra: $('#extra').value.trim(),
+    gender: state.gender,
   });
   try {
     const r = await fetch(`/api/prompt?${q}`);
@@ -111,8 +113,9 @@ async function buildPromptOnServer() {
   } catch {
     /* 落到下面的兜底 */
   }
-  return '图1是服装（忽略人台与背景），图2是人物的脸与发型，图3是姿势。'
-    + '把三者合成到同一个人物身上：服装材质与垂感照图1，五官与发色照图2，姿态与镜头角度照图3，'
+  const who = state.gender === 'male' ? '成年男性' : '成年女性';
+  return `图1是服装（忽略人台与背景），图2是${who}的脸与发型，图3是姿势。`
+    + `把三者合成到同一个${who}身上：服装材质与垂感照图1，五官与发色照图2，姿态与镜头角度照图3，`
     + '输出一张真实感强的全身人物照，光影自然。';
 }
 
@@ -190,6 +193,9 @@ const el = (tag, attrs = {}, ...kids) => {
 /* ─────────────────────────── 启动 ─────────────────────────── */
 
 async function boot() {
+  const savedGender = localStorage.getItem('atelier.gender');
+  state.gender = savedGender === 'male' ? 'male' : 'female';
+  applyGenderTheme();
   await loadConfig();
   await Promise.all(SLOTS.map(loadCatalog));
   renderTabs();
@@ -399,14 +405,56 @@ function canGenerate() {
 }
 
 async function loadCatalog(kind) {
+  // 女性版沿用原文件名，男性版加 -male 后缀，两套互不影响
+  const file = state.gender === 'male' ? `${kind}-male` : kind;
   try {
-    const r = await fetch(`/data/${kind}.json`);
+    const r = await fetch(`/data/${file}.json`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     state.data[kind] = await r.json();
   } catch {
     state.data[kind] = { items: [], count: 0, mode: 'missing', source: {} };
   }
   updateSlotThumb(kind);
+}
+
+/* ─────────────────────────── 性别切换 ─────────────────────────── */
+
+/** 只改 html[data-gender]，配色全部由 CSS 变量接管 */
+function applyGenderTheme() {
+  document.documentElement.dataset.gender = state.gender;
+  $$('.gender-switch button').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.gender === state.gender));
+  });
+}
+
+async function setGender(gender) {
+  const next = gender === 'male' ? 'male' : 'female';
+  if (next === state.gender) return;
+  state.gender = next;
+  localStorage.setItem('atelier.gender', next);
+  applyGenderTheme();
+
+  // 素材库整套换掉，已选的三张（哪怕是同编号）语义也可能不同，直接清空更稳妥
+  SLOTS.forEach((k) => {
+    state.selected[k] = null;
+  });
+  state.data = { outfit: null, face: null, pose: null };
+  state.page = 1;
+  state.q = '';
+  state.cat = '';
+  $('#search').value = '';
+  $('#catFilter').dataset.sig = '';
+
+  renderGrid();
+  await Promise.all(SLOTS.map(loadCatalog));
+  renderGrid();          // 数据到位后重画：上面那次只是先把旧列表清掉
+  updateSlots();
+  setDefaultPrompt();
+  $('#hint').classList.remove('error');
+  $('#hint').textContent =
+    next === 'male'
+      ? '已切到男性版：服装、姿势取自 Shisei（CC0），脸型为本站自建素材。'
+      : '已切到女性版：服装、脸型、姿势取自上游图库，另补充 Shisei 的中性与女装。';
 }
 
 /* ─────────────────────────── 图库渲染 ─────────────────────────── */
@@ -429,7 +477,16 @@ function renderTabsState() {
   $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.slot === state.tab)));
   $('#libTitle').textContent = `${SLOT_NAME[state.tab]}库`;
   const d = state.data[state.tab];
-  const mode = d?.mode === 'live' ? '上游同步' : d?.mode === 'fixture' ? '本地样例' : '样例';
+  const mode =
+    d?.origin === 'local'
+      ? '本站自建'
+      : d?.origin === 'bundled'
+        ? 'Shisei · CC0'
+        : d?.mode === 'live'
+          ? '上游同步'
+          : d?.mode === 'fixture'
+            ? '本地样例'
+            : '样例';
   $('#libMeta').textContent = d ? `${d.count ?? d.items?.length ?? 0} 条 · ${mode}${d.generatedAt ? ' · ' + new Date(d.generatedAt).toLocaleDateString('zh-CN') : ''}` : '';
 }
 
@@ -762,11 +819,14 @@ async function generate() {
       });
       j = await r.json();
       if (!r.ok || j.error) {
-        // 把 Workers AI 的错误码与 Ray ID 一起显示：3043 这类内部错误只能靠 Ray 让 Cloudflare 定位
+        // 把错误码与 Ray ID 一起显示：3043 这类内部错误只能靠 Ray 让 Cloudflare 定位
         // 自定义模型的错误已在上游 message 里自带原文，不重复拼
         const d = j.detail || {};
-        const tag =
-          !d.upstreamStatus && d.code ? `（错误码 ${d.code}${d.ray ? ` · Ray ${d.ray}` : ''}）` : '';
+        const bits = [];
+        if (d.code) bits.push(`错误码 ${d.code}`);
+        // Ray ID 是提工单的唯一凭据，哪怕没有错误码也要露出来
+        if (d.ray) bits.push(`Ray ${d.ray}`);
+        const tag = !d.upstreamStatus && bits.length ? `（${bits.join(' · ')}）` : '';
         throw new Error(`${j.error || `生成失败（HTTP ${r.status}）`}${tag}`);
       }
     }
@@ -854,6 +914,9 @@ function bindUI() {
     renderEngineBadge();
     updateSlots();
     if (state.engine === 'custom' && !customChannelReady()) openModelDrawer();
+  });
+  $$('.gender-switch button').forEach((b) => {
+    b.addEventListener('click', () => setGender(b.dataset.gender));
   });
   $('#openModelCfg').addEventListener('click', openModelDrawer);
   $('#model').addEventListener('change', paintModelQuota);

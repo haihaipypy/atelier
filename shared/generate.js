@@ -46,7 +46,7 @@ export const DEFAULT_MODEL = '@cf/black-forest-labs/flux-2-klein-9b';
  * - 明确「必须保留什么」「必须替换什么」，避免模型照抄服装图的空白人体
  * - 姿势线稿要显式说明「只取骨架与角度，不要线稿风格」
  */
-export function buildPrompt({ style = 'photorealistic', extra = '' } = {}) {
+export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'female' } = {}) {
   const styleLine = {
     photorealistic:
       'Photorealistic editorial fashion photography, realistic skin texture, natural light, ' +
@@ -56,8 +56,15 @@ export function buildPrompt({ style = 'photorealistic', extra = '' } = {}) {
       'full-body character illustration, simple gradient background.',
   }[style] || 'Photorealistic editorial photography.';
 
+  // 男性版的参考图（中性人台、中性人偶）不带性别信息，必须显式说明，否则模型会按默认女性渲染
+  const subject =
+    gender === 'male'
+      ? 'The person is an adult man: male facial structure, male body proportions, flat chest, no makeup.'
+      : 'The person is an adult woman: female facial structure, female body proportions.';
+
   const parts = [
     'Compose ONE single new image of one person, using the three reference images below.',
+    subject,
     'Reference image 1 defines the OUTFIT ONLY: copy its garments, colors, fabric, patterns, ' +
       'accessories and footwear exactly as shown. Ignore the empty body inside it — do not render ' +
       'a mannequin, do not leave the torso hollow, and do not copy its standing front view.',
@@ -72,6 +79,73 @@ export function buildPrompt({ style = 'photorealistic', extra = '' } = {}) {
     extra,
   ];
   return parts.filter(Boolean).join(' ');
+}
+
+/**
+ * 把 Workers AI 的失败原因归类成「HTTP 状态 + 人话文案」。
+ *
+ * 抽成纯函数是因为这里踩过坑：早先只用 /neuron|quota|limit|exceed/ 一条正则判断配额，
+ * 结果上游的「Memory limit exceeded」「image size limit exceeded」全被吞成
+ * 「今日免费额度可能已用完」——用户第二天配额明明已重置，看到的还是同一句话。
+ *
+ * 判定顺序很关键：先排除尺寸/内存/容量类，再判配额。
+ */
+export function classifyAiFailure({ msg = '', code = null } = {}) {
+  const text = String(msg || '');
+  const info = { raw: text, code };
+
+  // ① 输入侧问题：这类报错里同样常带 limit / exceed，必须先拦
+  if (/512|image size|dimension|too large|payload|context length|batch size|invalid image/i.test(text)) {
+    return {
+      status: 400,
+      message: /512|image size|dimension|too large/i.test(text)
+        ? '参考图尺寸超限：FLUX.2 klein 要求每张输入图小于 512×512（前端已自动缩放，可换一张图再试）'
+        : `Workers AI 拒绝了输入内容：${clip(text)}`,
+      info,
+    };
+  }
+  // ② 上游内存不足：是服务端资源问题，不是配额，也不是输入格式错
+  if (/memory|out of memory|oom/i.test(text)) {
+    return {
+      status: 502,
+      message: `Workers AI 上游资源不足（${clip(text, 100)}），换个模型或稍后重试；这不是额度用完`,
+      info,
+    };
+  }
+
+  // ② 配额：必须点到 neuron / quota / allocation 这类明确词
+  const quotaish = /neuron|quota|allocation|daily (?:free|limit)|insufficient (?:credit|balance)|out of credit/i.test(text);
+  // ③ 容量/限流：不是配额，等几秒重试就好，别让用户以为额度没了
+  const capacityish = /rate.?limit|too many requests|capacity|overload|concurren|temporar|busy/i.test(text);
+
+  if (quotaish && !capacityish) {
+    return {
+      status: 429,
+      message: `今日 Workers AI 免费额度可能已用完（10,000 Neurons/日，UTC 0 点重置）。上游原文：${clip(text, 120)}`,
+      info,
+    };
+  }
+  if (capacityish) {
+    return {
+      status: 503,
+      message: `Workers AI 当前繁忙或触发限流，稍等几秒再点一次（并非额度用完）。上游原文：${clip(text, 120)}`,
+      info,
+    };
+  }
+
+  return {
+    status: 502,
+    message: code === 3043
+      ? 'Workers AI 内部错误（3043）已自动重试一次仍失败，通常是上游瞬时故障。可换个模型或画幅再试。'
+      : `Workers AI 调用失败：${clip(text)}`,
+    info,
+  };
+}
+
+/** 错误原文可能很长且带换行，截断后再拼进提示 */
+function clip(s, n = 160) {
+  const t = String(s || '').replace(/\s+/g, ' ').trim();
+  return t.length > n ? `${t.slice(0, n)}…` : t;
 }
 
 /** 把 Workers AI 抛出的错误整理成可读、可定位的结构 */
@@ -189,21 +263,14 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
 
   if (!res) {
     const { msg, code, ray } = lastErr || { msg: '未知错误' };
-    const info = { raw: msg, code, ray, model: modelId, size: `${width}×${height}`, images: images.length };
-    // 最常见的两类：配额用完 / 输入图超 512
-    if (/neuron|quota|limit|exceed/i.test(msg)) {
-      throw new HttpError(429, '今日 Workers AI 免费额度可能已用完（每日 10,000 Neurons，UTC 0 点重置）', info);
-    }
-    if (/512|image size|dimension/i.test(msg)) {
-      throw new HttpError(400, '参考图尺寸超限：FLUX.2 klein 要求每张输入图小于 512×512', info);
-    }
-    throw new HttpError(
-      502,
-      code === 3043
-        ? 'Workers AI 内部错误（3043）已自动重试一次仍失败，通常是上游瞬时故障。可换个模型或画幅再试。'
-        : `Workers AI 调用失败：${msg}`,
-      info,
-    );
+    const { status, message, info } = classifyAiFailure({ msg, code });
+    throw new HttpError(status, message, {
+      ...info,
+      ray,
+      model: modelId,
+      size: `${width}×${height}`,
+      images: images.length,
+    });
   }
 
   // 官方返回 { image: base64 }；不同封装可能给 Uint8Array 或 data: URI，统一收口

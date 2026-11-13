@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Atelier · 角色服装合成工坊</title>
-<meta name="description" content="从服装库、脸型库、姿势库各选一张，交给 AI 合成一张完整人物图。基于 Cloudflare Workers AI，克隆即可部署。" />
+<title>AI角色合成工坊 · 服装、脸型、姿势合成完整 AI 角色</title>
+<meta name="description" content="服装、脸型、姿势合成完整 AI 角色：在三个素材库里各选一张，AI 合成一张完整人物图。分女性版与男性版，基于 Cloudflare Workers AI，克隆即可部署。" />
 <meta name="color-scheme" content="light dark" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -20,20 +20,24 @@
       <!-- 三个素材库拼成一个人：头（脸）、躯干（服装）、双臂（姿势）各取一色 -->
       <svg viewBox="0 0 32 32" width="24" height="24">
         <circle cx="16" cy="8.2" r="4.5" fill="#f6f3ee" />
-        <path d="M12.2 13.9h7.6c1.6 0 2.8 1.3 2.6 2.9l-.9 9.6c-.1 1.2-1.1 2.1-2.3 2.1h-6.4c-1.2 0-2.2-.9-2.3-2.1l-.9-9.6c-.2-1.6 1-2.9 2.6-2.9z" fill="#d97757" />
-        <g fill="none" stroke="#74b79f" stroke-width="2.3" stroke-linecap="round">
+        <path d="M12.2 13.9h7.6c1.6 0 2.8 1.3 2.6 2.9l-.9 9.6c-.1 1.2-1.1 2.1-2.3 2.1h-6.4c-1.2 0-2.2-.9-2.3-2.1l-.9-9.6c-.2-1.6 1-2.9 2.6-2.9z" fill="var(--accent)" />
+        <g fill="none" stroke="var(--sel)" stroke-width="2.3" stroke-linecap="round">
           <path d="M11.3 16.2 8.9 22.6" />
           <path d="M20.7 16.2 23.1 22.6" />
         </g>
       </svg>
     </span>
-    <span class="brand-text">Atelier<small>角色服装合成工坊</small></span>
+    <span class="brand-text">AI角色合成工坊<small>服装 · 脸型 · 姿势 → 完整角色</small></span>
   </a>
   <nav class="tabs" role="tablist" aria-label="素材板块">
     <button role="tab" data-slot="outfit" aria-selected="true">① 服装</button>
     <button role="tab" data-slot="face" aria-selected="false">② 脸</button>
     <button role="tab" data-slot="pose" aria-selected="false">③ 姿势</button>
   </nav>
+  <div class="gender-switch" role="group" aria-label="角色性别">
+    <button type="button" data-gender="female" aria-pressed="true">女性版</button>
+    <button type="button" data-gender="male" aria-pressed="false">男性版</button>
+  </div>
   <div class="top-actions">
     <span class="engine-badge" id="engineBadge" title="当前生成通道">通道检测中…</span>
     <a class="ghost" href="https://github.com/haihaipypy/atelier" target="_blank" rel="noopener" title="项目源码">项目地址</a>
@@ -45,8 +49,8 @@
   <!-- 左侧：图库 -->
   <section class="panel library" aria-labelledby="libTitle">
     <p class="usage-tip">
-      <b>怎么用</b>：在 ① 服装、② 脸、③ 姿势 三个库里各选一张，点「生成合成图」，就会合成为一张完整人物图。
-      默认使用 Cloudflare Workers AI 模型，无需任何密钥。
+      <b>怎么用</b>：先选<b>女性版 / 男性版</b>，再在 ① 服装、② 脸、③ 姿势 三个库里各选一张，
+      点「生成合成图」，就会合成为一张完整角色图。默认使用 Cloudflare Workers AI 模型，无需任何密钥。
     </p>
     <div class="lib-head">
       <h2 id="libTitle">服装库</h2>

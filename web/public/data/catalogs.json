@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-12T01:05:24.304Z",
+  "generatedAt": "2026-11-13T02:37:12.871Z",
   "outfit": {
-    "count": 1267,
+    "count": 1542,
     "label": "服装"
   },
   "face": {
@@ -11,5 +11,17 @@
   "pose": {
     "count": 440,
     "label": "姿势"
+  },
+  "outfit-male": {
+    "count": 254,
+    "label": "男装"
+  },
+  "pose-male": {
+    "count": 181,
+    "label": "男性姿势"
+  },
+  "face-male": {
+    "count": 48,
+    "label": "男性脸型"
   }
 }

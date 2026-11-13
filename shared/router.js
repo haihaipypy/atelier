@@ -27,6 +27,7 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   'ai-costume-gallery.pages.dev',
   'ai-portrait-gallery.pages.dev',
   'ai-pose-gallery.pages.dev',
+  'cdn.jsdelivr.net',        // Shisei 素材（CC0）的大图走 jsDelivr
 ]);
 
 /**
@@ -122,7 +123,8 @@ export async function handleRequest(request, env = {}, aiRun = null) {
   if (url.pathname === '/api/prompt' && request.method === 'GET') {
     const style = url.searchParams.get('style') || 'photorealistic';
     const extra = url.searchParams.get('extra') || '';
-    return json({ prompt: buildPrompt({ style, extra }) });
+    const gender = url.searchParams.get('gender') === 'male' ? 'male' : 'female';
+    return json({ prompt: buildPrompt({ style, extra, gender }) });
   }
 
   /**
@@ -198,7 +200,7 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         assertThreeImages(body.images);
         const out = await generateCustom({
           images: body.images,
-          prompt: body.prompt || buildPrompt({ style: body.style, extra: body.extra }),
+          prompt: body.prompt || buildPrompt({ style: body.style, extra: body.extra, gender: body.gender }),
           size: `${body.width || 1024}x${body.height || 1024}`,
           profile,
           signal: AbortSignal.timeout(Number(env.CUSTOM_TIMEOUT_MS || 120000)),
@@ -218,6 +220,7 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         prompt: body.prompt || undefined,
         style: body.style,
         extra: body.extra,
+        gender: body.gender,
         width: body.width || 1024,
         height: body.height || 1024,
         seed: body.seed,

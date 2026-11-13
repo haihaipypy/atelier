@@ -1,0 +1,4077 @@
+{
+  "generatedAt": "2026-11-13T02:37:12.853Z",
+  "mode": "live",
+  "source": {
+    "label": "男装",
+    "homepage": "https://github.com/wquguru/shisei",
+    "license": "CC0-1.0"
+  },
+  "count": 254,
+  "items": [
+    {
+      "id": "SC-C001",
+      "code": "C001",
+      "title": "上衣下裳·蔽膝（黄褐）",
+      "thumb": "/library/costume/sc-C001.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C001_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "商",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C002",
+      "code": "C002",
+      "title": "上衣下裳·蔽膝（赭红）",
+      "thumb": "/library/costume/sc-C002.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C002_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "商",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C005",
+      "code": "C005",
+      "title": "直裾深衣（玄色）",
+      "thumb": "/library/costume/sc-C005.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C005_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "汉",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C006",
+      "code": "C006",
+      "title": "直裾深衣（褐色）",
+      "thumb": "/library/costume/sc-C006.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C006_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "汉",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C010",
+      "code": "C010",
+      "title": "褒衣博带（月白）",
+      "thumb": "/library/costume/sc-C010.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C010_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "魏晋",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C011",
+      "code": "C011",
+      "title": "褒衣博带（苍灰）",
+      "thumb": "/library/costume/sc-C011.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C011_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "魏晋",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C016",
+      "code": "C016",
+      "title": "圆领袍（赭黄）",
+      "thumb": "/library/costume/sc-C016.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C016_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "唐",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C017",
+      "code": "C017",
+      "title": "圆领袍（绯红）",
+      "thumb": "/library/costume/sc-C017.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C017_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "唐",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C024",
+      "code": "C024",
+      "title": "直裰（茶褐）",
+      "thumb": "/library/costume/sc-C024.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C024_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "宋",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C025",
+      "code": "C025",
+      "title": "直裰（鸦青）",
+      "thumb": "/library/costume/sc-C025.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C025_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "宋",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C026",
+      "code": "C026",
+      "title": "襕衫（白·皂缘）",
+      "thumb": "/library/costume/sc-C026.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C026_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "宋",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C027",
+      "code": "C027",
+      "title": "襕衫（蓝·皂缘）",
+      "thumb": "/library/costume/sc-C027.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C027_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "宋",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C028",
+      "code": "C028",
+      "title": "质孙服（宝蓝）",
+      "thumb": "/library/costume/sc-C028.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C028_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "元",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C029",
+      "code": "C029",
+      "title": "质孙服（驼褐）",
+      "thumb": "/library/costume/sc-C029.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C029_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "元",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C036",
+      "code": "C036",
+      "title": "道袍（宝蓝）",
+      "thumb": "/library/costume/sc-C036.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C036_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "明",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C037",
+      "code": "C037",
+      "title": "道袍（驼色）",
+      "thumb": "/library/costume/sc-C037.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C037_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "明",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C038",
+      "code": "C038",
+      "title": "曳撒（大红）",
+      "thumb": "/library/costume/sc-C038.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C038_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "明",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C039",
+      "code": "C039",
+      "title": "曳撒（墨绿）",
+      "thumb": "/library/costume/sc-C039.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C039_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "明",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C040",
+      "code": "C040",
+      "title": "圆领补服（绯色）",
+      "thumb": "/library/costume/sc-C040.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C040_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "明",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C041",
+      "code": "C041",
+      "title": "圆领补服（青色）",
+      "thumb": "/library/costume/sc-C041.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C041_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "明",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C042",
+      "code": "C042",
+      "title": "披风（玉色）",
+      "thumb": "/library/costume/sc-C042.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C042_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "明",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C043",
+      "code": "C043",
+      "title": "披风（绛紫）",
+      "thumb": "/library/costume/sc-C043.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C043_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "明",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C046",
+      "code": "C046",
+      "title": "长袍马褂（宝蓝·玄）",
+      "thumb": "/library/costume/sc-C046.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C046_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "清",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C047",
+      "code": "C047",
+      "title": "长袍马褂（灰·藏青）",
+      "thumb": "/library/costume/sc-C047.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C047_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "清",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C054",
+      "code": "C054",
+      "title": "长衫（灰布）",
+      "thumb": "/library/costume/sc-C054.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C054_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "民国",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C055",
+      "code": "C055",
+      "title": "长衫（藏青）",
+      "thumb": "/library/costume/sc-C055.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C055_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "民国",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C056",
+      "code": "C056",
+      "title": "中山装（灰）",
+      "thumb": "/library/costume/sc-C056.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C056_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "民国",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C057",
+      "code": "C057",
+      "title": "中山装（藏青）",
+      "thumb": "/library/costume/sc-C057.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C057_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "民国",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C060",
+      "code": "C060",
+      "title": "明制男婚服（大红）",
+      "thumb": "/library/costume/sc-C060.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C060_front.webp",
+      "cats": [
+        "中华传统"
+      ],
+      "tags": [
+        "婚服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C065",
+      "code": "C065",
+      "title": "浴衣（男）（灰·细格）",
+      "thumb": "/library/costume/sc-C065.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C065_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "东亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C066",
+      "code": "C066",
+      "title": "浴衣（男）（蓝染·竖纹）",
+      "thumb": "/library/costume/sc-C066.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C066_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "东亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C067",
+      "code": "C067",
+      "title": "羽织袴（黑·仙台平）",
+      "thumb": "/library/costume/sc-C067.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C067_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "东亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C068",
+      "code": "C068",
+      "title": "羽织袴（藏青）",
+      "thumb": "/library/costume/sc-C068.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C068_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "东亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C071",
+      "code": "C071",
+      "title": "韩服（男）（玉色·藏青）",
+      "thumb": "/library/costume/sc-C071.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C071_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "东亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C072",
+      "code": "C072",
+      "title": "韩服（男）（灰·墨）",
+      "thumb": "/library/costume/sc-C072.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C072_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "东亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C077",
+      "code": "C077",
+      "title": "马来装（翠绿·金）",
+      "thumb": "/library/costume/sc-C077.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C077_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "东南亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C078",
+      "code": "C078",
+      "title": "马来装（米白·红）",
+      "thumb": "/library/costume/sc-C078.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C078_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "东南亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C083",
+      "code": "C083",
+      "title": "舍尔瓦尼（象牙·金）",
+      "thumb": "/library/costume/sc-C083.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C083_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "南亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C084",
+      "code": "C084",
+      "title": "舍尔瓦尼（酒红·金）",
+      "thumb": "/library/costume/sc-C084.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C084_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "南亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C087",
+      "code": "C087",
+      "title": "藏袍（绛红·豹纹边）",
+      "thumb": "/library/costume/sc-C087.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C087_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "中国少数民族",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C088",
+      "code": "C088",
+      "title": "藏袍（黑·织锦边）",
+      "thumb": "/library/costume/sc-C088.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C088_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "中国少数民族",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C089",
+      "code": "C089",
+      "title": "蒙古袍（天蓝·金）",
+      "thumb": "/library/costume/sc-C089.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C089_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "中国少数民族",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C090",
+      "code": "C090",
+      "title": "蒙古袍（绛红·黑）",
+      "thumb": "/library/costume/sc-C090.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C090_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "中国少数民族",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C094",
+      "code": "C094",
+      "title": "苏格兰裙（红格）",
+      "thumb": "/library/costume/sc-C094.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C094_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "欧洲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C095",
+      "code": "C095",
+      "title": "苏格兰裙（蓝格）",
+      "thumb": "/library/costume/sc-C095.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C095_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "欧洲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C098",
+      "code": "C098",
+      "title": "皮短裤套装（深棕·红格）",
+      "thumb": "/library/costume/sc-C098.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C098_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "欧洲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C099",
+      "code": "C099",
+      "title": "皮短裤套装（浅棕·蓝格）",
+      "thumb": "/library/costume/sc-C099.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C099_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "欧洲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C102",
+      "code": "C102",
+      "title": "格鲁吉亚长外套（酒红）",
+      "thumb": "/library/costume/sc-C102.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C102_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "欧洲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C103",
+      "code": "C103",
+      "title": "格鲁吉亚长外套（黑）",
+      "thumb": "/library/costume/sc-C103.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C103_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "欧洲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C105",
+      "code": "C105",
+      "title": "乌克兰刺绣衬衫（红黑绣）",
+      "thumb": "/library/costume/sc-C105.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C105_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "欧洲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C108",
+      "code": "C108",
+      "title": "阿格巴达袍（米白·金）",
+      "thumb": "/library/costume/sc-C108.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C108_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "非洲与中东",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C109",
+      "code": "C109",
+      "title": "阿格巴达袍（宝蓝·银）",
+      "thumb": "/library/costume/sc-C109.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C109_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "非洲与中东",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C110",
+      "code": "C110",
+      "title": "肯特布（金绿红）",
+      "thumb": "/library/costume/sc-C110.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C110_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "非洲与中东",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C113",
+      "code": "C113",
+      "title": "吉拉巴长袍（驼褐）",
+      "thumb": "/library/costume/sc-C113.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C113_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "非洲与中东",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C114",
+      "code": "C114",
+      "title": "吉拉巴长袍（白）",
+      "thumb": "/library/costume/sc-C114.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C114_front.webp",
+      "cats": [
+        "东亚传统"
+      ],
+      "tags": [
+        "非洲与中东",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C117",
+      "code": "C117",
+      "title": "卫衣叠穿·卡其裤（麻灰·卡其）",
+      "thumb": "/library/costume/sc-C117.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C117_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "休闲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C118",
+      "code": "C118",
+      "title": "青果领粗针开衫·牛仔裤（燕麦·靛蓝）",
+      "thumb": "/library/costume/sc-C118.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C118_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "休闲",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C119",
+      "code": "C119",
+      "title": "宽松T恤·抽绳短裤（本白·橄榄绿）",
+      "thumb": "/library/costume/sc-C119.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C119_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "休闲",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C122",
+      "code": "C122",
+      "title": "宽松连帽卫衣·工装裤（炭灰·橄榄绿）",
+      "thumb": "/library/costume/sc-C122.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C122_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "街头",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C123",
+      "code": "C123",
+      "title": "短款面包服·阔腿牛仔裤（黑·浅蓝）",
+      "thumb": "/library/costume/sc-C123.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C123_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "街头",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C124",
+      "code": "C124",
+      "title": "教练夹克·运动长裤（藏青·米白）",
+      "thumb": "/library/costume/sc-C124.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C124_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "街头",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C127",
+      "code": "C127",
+      "title": "无衬西装·针织Polo·西裤（棕·奶油）",
+      "thumb": "/library/costume/sc-C127.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C127_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "通勤",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C128",
+      "code": "C128",
+      "title": "单排扣大衣·高领毛衣·西裤（驼色·黑）",
+      "thumb": "/library/costume/sc-C128.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C128_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "通勤",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C129",
+      "code": "C129",
+      "title": "宽松西装·T恤·阔腿裤（中灰·白）",
+      "thumb": "/library/costume/sc-C129.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C129_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "通勤",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C132",
+      "code": "C132",
+      "title": "美利奴圆领毛衣·褶裥西裤（藏青·灰褐）",
+      "thumb": "/library/costume/sc-C132.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C132_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "极简",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C133",
+      "code": "C133",
+      "title": "暗门襟短大衣·高领（炭灰·灰白）",
+      "thumb": "/library/costume/sc-C133.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C133_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "极简",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C134",
+      "code": "C134",
+      "title": "方廓衬衫·阔腿裤（白·黑）",
+      "thumb": "/library/costume/sc-C134.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C134_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "极简",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C137",
+      "code": "C137",
+      "title": "中式棉服·直筒裤（墨黑·灰）",
+      "thumb": "/library/costume/sc-C137.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C137_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "新中式",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C138",
+      "code": "C138",
+      "title": "大襟立领衬衫·阔腿裤（沙色·褐）",
+      "thumb": "/library/costume/sc-C138.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C138_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "新中式",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C139",
+      "code": "C139",
+      "title": "对襟罩衫·宽裤（米麻·黑）",
+      "thumb": "/library/costume/sc-C139.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C139_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "新中式",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C142",
+      "code": "C142",
+      "title": "工装夹克·宽锥形裤（焦茶·靛蓝）",
+      "thumb": "/library/costume/sc-C142.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C142_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "日系",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C143",
+      "code": "C143",
+      "title": "牛角扣大衣·渔夫毛衣（藏青·米白）",
+      "thumb": "/library/costume/sc-C143.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C143_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "日系",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C144",
+      "code": "C144",
+      "title": "开领衬衫·宽松九分裤（蓝白细条·米）",
+      "thumb": "/library/costume/sc-C144.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C144_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "日系",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C147",
+      "code": "C147",
+      "title": "短袖针织Polo·褶裥阔腿裤（薄荷·浅灰）",
+      "thumb": "/library/costume/sc-C147.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C147_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "韩系",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C148",
+      "code": "C148",
+      "title": "落肩西装·针织背心·西裤（灰褐·咖啡）",
+      "thumb": "/library/costume/sc-C148.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C148_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "韩系",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C149",
+      "code": "C149",
+      "title": "格纹衬衫外套·直筒牛仔裤（棕米格·白）",
+      "thumb": "/library/costume/sc-C149.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C149_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "韩系",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C152",
+      "code": "C152",
+      "title": "法式工作夹克·T恤·九分裤（工装蓝·白·米）",
+      "thumb": "/library/costume/sc-C152.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C152_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "法式",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C153",
+      "code": "C153",
+      "title": "双排扣海军短大衣·高领（藏青·奶白）",
+      "thumb": "/library/costume/sc-C153.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C153_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "法式",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C154",
+      "code": "C154",
+      "title": "亚麻衬衫·亚麻长裤（白·沙色）",
+      "thumb": "/library/costume/sc-C154.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C154_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "法式",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C157",
+      "code": "C157",
+      "title": "牛仔夹克·法兰绒衬衫·工装靴（红黑格·原色）",
+      "thumb": "/library/costume/sc-C157.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C157_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "美式复古",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C158",
+      "code": "C158",
+      "title": "翻毛领麂皮夹克·牛仔裤（烟草棕·奶白）",
+      "thumb": "/library/costume/sc-C158.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C158_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "美式复古",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C159",
+      "code": "C159",
+      "title": "复古保龄球衫·卡其裤（奶白·孔雀绿）",
+      "thumb": "/library/costume/sc-C159.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C159_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "美式复古",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C162",
+      "code": "C162",
+      "title": "火焰印花衬衫·宽松牛仔裤（黑底火焰·中蓝）",
+      "thumb": "/library/costume/sc-C162.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C162_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "Y2K",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C163",
+      "code": "C163",
+      "title": "拼色运动夹克·宽松牛仔裤（宝蓝·白）",
+      "thumb": "/library/costume/sc-C163.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C163_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "Y2K",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C164",
+      "code": "C164",
+      "title": "撞色滚边T恤·木工牛仔裤（白·藏青·中蓝）",
+      "thumb": "/library/costume/sc-C164.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C164_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "Y2K",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C167",
+      "code": "C167",
+      "title": "V领开衫·T恤·平前长裤（淡蓝·白·奶白）",
+      "thumb": "/library/costume/sc-C167.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C167_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "甜美",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C168",
+      "code": "C168",
+      "title": "针织短袖衬衫·褶裥短裤（蜜桃·白）",
+      "thumb": "/library/costume/sc-C168.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C168_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "甜美",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C169",
+      "code": "C169",
+      "title": "泰迪绒外套·针织·阔腿裤（奶白·焦糖）",
+      "thumb": "/library/costume/sc-C169.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C169_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "甜美",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C172",
+      "code": "C172",
+      "title": "立领亚麻衬衫·抽绳长裤（陶土·橄榄）",
+      "thumb": "/library/costume/sc-C172.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C172_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "森系",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C173",
+      "code": "C173",
+      "title": "羊毛衬衫外套·渔夫毛衣·灯芯绒裤（森绿·米白·棕）",
+      "thumb": "/library/costume/sc-C173.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C173_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "森系",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C174",
+      "code": "C174",
+      "title": "帆布背带裤·条纹长袖（本白·藏青细条）",
+      "thumb": "/library/costume/sc-C174.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C174_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "森系",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C177",
+      "code": "C177",
+      "title": "软壳夹克·机能裤（石墨灰·黑）",
+      "thumb": "/library/costume/sc-C177.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C177_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "机能",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C178",
+      "code": "C178",
+      "title": "机能长款派克·束脚裤·短靴（全黑）",
+      "thumb": "/library/costume/sc-C178.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C178_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "机能",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C179",
+      "code": "C179",
+      "title": "半拉链冲锋套头衫·机能短裤（石板蓝·黑）",
+      "thumb": "/library/costume/sc-C179.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C179_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "机能",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C182",
+      "code": "C182",
+      "title": "轻薄冲锋衣·速干裤·徒步鞋（芥黄·石灰）",
+      "thumb": "/library/costume/sc-C182.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C182_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "户外 Gorpcore",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C183",
+      "code": "C183",
+      "title": "速干短袖衬衫·徒步短裤·凉鞋（灰绿·卡其）",
+      "thumb": "/library/costume/sc-C183.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C183_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "户外 Gorpcore",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C184",
+      "code": "C184",
+      "title": "保暖马甲·长袖打底·户外裤（孔雀绿·灰·黑）",
+      "thumb": "/library/costume/sc-C184.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C184_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "户外 Gorpcore",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C187",
+      "code": "C187",
+      "title": "珠地Polo·卡其短裤·船鞋（藏青·石色）",
+      "thumb": "/library/costume/sc-C187.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C187_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "学院风",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C188",
+      "code": "C188",
+      "title": "费尔岛毛衣·牛津衬衫·法兰绒裤（燕麦·灰）",
+      "thumb": "/library/costume/sc-C188.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C188_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "学院风",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C189",
+      "code": "C189",
+      "title": "板球毛衣·牛津衬衫·卡其裤（奶白·藏青酒红）",
+      "thumb": "/library/costume/sc-C189.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C189_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "学院风",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C192",
+      "code": "C192",
+      "title": "热带印花开领衬衫·亚麻短裤（奶白底绿叶·沙色）",
+      "thumb": "/library/costume/sc-C192.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C192_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "度假",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C193",
+      "code": "C193",
+      "title": "长袖亚麻衬衫外套·休闲长裤（橄榄·白·米）",
+      "thumb": "/library/costume/sc-C193.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C193_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "度假",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C194",
+      "code": "C194",
+      "title": "雪山度假北欧花纹毛衣·羊毛长裤（红底白纹·炭灰）",
+      "thumb": "/library/costume/sc-C194.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C194_front.webp",
+      "cats": [
+        "现代休闲"
+      ],
+      "tags": [
+        "度假",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C195",
+      "code": "C195",
+      "title": "男士三件套西装（炭灰）",
+      "thumb": "/library/costume/sc-C195.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C195_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "西装套装",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C196",
+      "code": "C196",
+      "title": "男士三件套西装（藏青）",
+      "thumb": "/library/costume/sc-C196.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C196_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "西装套装",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C197",
+      "code": "C197",
+      "title": "男士双排扣西装（藏青白条）",
+      "thumb": "/library/costume/sc-C197.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C197_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "西装套装",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C198",
+      "code": "C198",
+      "title": "男士双排扣西装（中灰白条）",
+      "thumb": "/library/costume/sc-C198.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C198_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "西装套装",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C202",
+      "code": "C202",
+      "title": "燕尾服（黑·白）",
+      "thumb": "/library/costume/sc-C202.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C202_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "男士礼服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C203",
+      "code": "C203",
+      "title": "无尾礼服（黑）",
+      "thumb": "/library/costume/sc-C203.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C203_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "男士礼服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C204",
+      "code": "C204",
+      "title": "无尾礼服（午夜蓝）",
+      "thumb": "/library/costume/sc-C204.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C204_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "男士礼服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C205",
+      "code": "C205",
+      "title": "无尾礼服（象牙白上衣）",
+      "thumb": "/library/costume/sc-C205.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C205_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "男士礼服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C206",
+      "code": "C206",
+      "title": "晨礼服（黑·鸽灰）",
+      "thumb": "/library/costume/sc-C206.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C206_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "男士礼服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C219",
+      "code": "C219",
+      "title": "新中式立领礼服（玄黑）",
+      "thumb": "/library/costume/sc-C219.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C219_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "中式礼服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C220",
+      "code": "C220",
+      "title": "新中式立领礼服（藏蓝·暗纹）",
+      "thumb": "/library/costume/sc-C220.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C220_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "中式礼服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C223",
+      "code": "C223",
+      "title": "学位袍（学士·黑）",
+      "thumb": "/library/costume/sc-C223.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C223_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "学位服",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C224",
+      "code": "C224",
+      "title": "学位袍（博士·黑丝绒）",
+      "thumb": "/library/costume/sc-C224.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C224_front.webp",
+      "cats": [
+        "西装礼服"
+      ],
+      "tags": [
+        "学位服",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C227",
+      "code": "C227",
+      "title": "健身训练服（炭灰·青柠）",
+      "thumb": "/library/costume/sc-C227.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C227_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "室内训练",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C230",
+      "code": "C230",
+      "title": "篮球服（绯红·白）",
+      "thumb": "/library/costume/sc-C230.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C230_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "球类",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C231",
+      "code": "C231",
+      "title": "篮球服（青绿·黑）",
+      "thumb": "/library/costume/sc-C231.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C231_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "球类",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C232",
+      "code": "C232",
+      "title": "足球服（草绿·白）",
+      "thumb": "/library/costume/sc-C232.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C232_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "球类",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C233",
+      "code": "C233",
+      "title": "足球服（橙·藏青）",
+      "thumb": "/library/costume/sc-C233.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C233_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "球类",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C234",
+      "code": "C234",
+      "title": "高尔夫球装（天蓝·石色）",
+      "thumb": "/library/costume/sc-C234.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C234_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "球类",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C238",
+      "code": "C238",
+      "title": "跑步服（男）（黑·荧光黄）",
+      "thumb": "/library/costume/sc-C238.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C238_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "跑步与骑行",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C239",
+      "code": "C239",
+      "title": "公路骑行服（钴蓝·白）",
+      "thumb": "/library/costume/sc-C239.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C239_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "跑步与骑行",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C240",
+      "code": "C240",
+      "title": "公路骑行服（芥黄·炭灰）",
+      "thumb": "/library/costume/sc-C240.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C240_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "跑步与骑行",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C243",
+      "code": "C243",
+      "title": "单板滑雪服（橄榄·沙色）",
+      "thumb": "/library/costume/sc-C243.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C243_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "冰雪",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C244",
+      "code": "C244",
+      "title": "单板滑雪服（丁香紫·黑）",
+      "thumb": "/library/costume/sc-C244.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C244_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "冰雪",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C245",
+      "code": "C245",
+      "title": "登山冲锋衣（橙·石墨灰）",
+      "thumb": "/library/costume/sc-C245.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C245_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "户外徒步",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C246",
+      "code": "C246",
+      "title": "登山冲锋衣（森林绿·卡其）",
+      "thumb": "/library/costume/sc-C246.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C246_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "户外徒步",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C247",
+      "code": "C247",
+      "title": "冲浪防寒服（黑·湖蓝）",
+      "thumb": "/library/costume/sc-C247.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C247_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "水上",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C248",
+      "code": "C248",
+      "title": "冲浪防寒服（黑·灰）",
+      "thumb": "/library/costume/sc-C248.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C248_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "水上",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C249",
+      "code": "C249",
+      "title": "拳击服（宝蓝·金）",
+      "thumb": "/library/costume/sc-C249.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C249_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "格斗与武术",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C250",
+      "code": "C250",
+      "title": "击剑服（白）",
+      "thumb": "/library/costume/sc-C250.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C250_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "格斗与武术",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C252",
+      "code": "C252",
+      "title": "武术练功服（黑·红）",
+      "thumb": "/library/costume/sc-C252.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C252_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "格斗与武术",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C254",
+      "code": "C254",
+      "title": "赛车服（孔雀蓝·白）",
+      "thumb": "/library/costume/sc-C254.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C254_front.webp",
+      "cats": [
+        "运动"
+      ],
+      "tags": [
+        "赛车",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C255",
+      "code": "C255",
+      "title": "医生白大褂（浅蓝衬衫·藏青裤）",
+      "thumb": "/library/costume/sc-C255.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C255_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "医护",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C256",
+      "code": "C256",
+      "title": "医生白大褂（灰衬衫·炭灰裤）",
+      "thumb": "/library/costume/sc-C256.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C256_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "医护",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C257",
+      "code": "C257",
+      "title": "手术服（浅天蓝）",
+      "thumb": "/library/costume/sc-C257.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C257_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "医护",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C258",
+      "code": "C258",
+      "title": "手术服（手术绿）",
+      "thumb": "/library/costume/sc-C258.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C258_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "医护",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C261",
+      "code": "C261",
+      "title": "厨师服（白·千鸟格裤）",
+      "thumb": "/library/costume/sc-C261.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C261_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "餐饮",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C262",
+      "code": "C262",
+      "title": "厨师服（黑）",
+      "thumb": "/library/costume/sc-C262.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C262_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "餐饮",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C263",
+      "code": "C263",
+      "title": "咖啡师围裙装（牛仔蓝·白）",
+      "thumb": "/library/costume/sc-C263.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C263_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "餐饮",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C264",
+      "code": "C264",
+      "title": "咖啡师围裙装（驼色·黑）",
+      "thumb": "/library/costume/sc-C264.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C264_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "餐饮",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C265",
+      "code": "C265",
+      "title": "餐厅侍应（黑）",
+      "thumb": "/library/costume/sc-C265.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C265_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "餐饮",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C266",
+      "code": "C266",
+      "title": "餐厅侍应（酒红·黑）",
+      "thumb": "/library/costume/sc-C266.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C266_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "餐饮",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C269",
+      "code": "C269",
+      "title": "机长制服（藏青·金）",
+      "thumb": "/library/costume/sc-C269.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C269_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "航空",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C270",
+      "code": "C270",
+      "title": "机长制服（黑·银）",
+      "thumb": "/library/costume/sc-C270.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C270_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "航空",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C271",
+      "code": "C271",
+      "title": "消防战斗服（沙褐）",
+      "thumb": "/library/costume/sc-C271.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C271_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "消防",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C272",
+      "code": "C272",
+      "title": "消防战斗服（黑）",
+      "thumb": "/library/costume/sc-C272.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C272_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "消防",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C273",
+      "code": "C273",
+      "title": "工装·反光背心（荧光橙）",
+      "thumb": "/library/costume/sc-C273.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C273_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "工匠与户外作业",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C274",
+      "code": "C274",
+      "title": "工装·反光背心（荧光黄）",
+      "thumb": "/library/costume/sc-C274.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C274_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "工匠与户外作业",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C275",
+      "code": "C275",
+      "title": "园丁工作服（格纹·橄榄）",
+      "thumb": "/library/costume/sc-C275.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C275_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "工匠与户外作业",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C276",
+      "code": "C276",
+      "title": "园丁工作服（青年布·卡其）",
+      "thumb": "/library/costume/sc-C276.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C276_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "工匠与户外作业",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C277",
+      "code": "C277",
+      "title": "画家工作服（米白·彩点）",
+      "thumb": "/library/costume/sc-C277.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C277_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "工匠与户外作业",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C279",
+      "code": "C279",
+      "title": "实验服（白·深灰裤）",
+      "thumb": "/library/costume/sc-C279.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C279_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "科研与航天",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C280",
+      "code": "C280",
+      "title": "舱外宇航服（白·橙条）",
+      "thumb": "/library/costume/sc-C280.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C280_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "科研与航天",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C283",
+      "code": "C283",
+      "title": "管家礼服（黑·灰条纹裤）",
+      "thumb": "/library/costume/sc-C283.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C283_front.webp",
+      "cats": [
+        "职业装"
+      ],
+      "tags": [
+        "家政与侍从",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C286",
+      "code": "C286",
+      "title": "托加袍（本白）",
+      "thumb": "/library/costume/sc-C286.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C286_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "古希腊罗马",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C288",
+      "code": "C288",
+      "title": "胡普兰长袍（酒红）",
+      "thumb": "/library/costume/sc-C288.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C288_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "中世纪",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C290",
+      "code": "C290",
+      "title": "都铎男装（黑·红）",
+      "thumb": "/library/costume/sc-C290.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C290_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "都铎",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C292",
+      "code": "C292",
+      "title": "骑士党装（灰蓝）",
+      "thumb": "/library/costume/sc-C292.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C292_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "巴洛克",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C294",
+      "code": "C294",
+      "title": "法式男礼服（紫红·银）",
+      "thumb": "/library/costume/sc-C294.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C294_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "洛可可",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C296",
+      "code": "C296",
+      "title": "摄政燕尾服（深蓝·浅黄）",
+      "thumb": "/library/costume/sc-C296.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C296_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "摄政时期",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C298",
+      "code": "C298",
+      "title": "维多利亚长礼服（黑·灰）",
+      "thumb": "/library/costume/sc-C298.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C298_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "维多利亚",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C300",
+      "code": "C300",
+      "title": "诺福克套装（棕人字呢）",
+      "thumb": "/library/costume/sc-C300.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C300_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "爱德华",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C302",
+      "code": "C302",
+      "title": "二十年代三件套（燕麦）",
+      "thumb": "/library/costume/sc-C302.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C302_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "1920年代",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C304",
+      "code": "C304",
+      "title": "高尔夫灯笼裤装（燕麦·铁锈）",
+      "thumb": "/library/costume/sc-C304.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C304_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "1930年代",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C306",
+      "code": "C306",
+      "title": "四十年代双排扣西装（炭灰粉笔条）",
+      "thumb": "/library/costume/sc-C306.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C306_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "1940年代",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C310",
+      "code": "C310",
+      "title": "六十年代摩登西装（鲨鱼皮灰）",
+      "thumb": "/library/costume/sc-C310.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C310_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "1960年代",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C312",
+      "code": "C312",
+      "title": "七十年代喇叭裤三件套（巧克力棕）",
+      "thumb": "/library/costume/sc-C312.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C312_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "1970年代",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C314",
+      "code": "C314",
+      "title": "九十年代垃圾摇滚（红黑格）",
+      "thumb": "/library/costume/sc-C314.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C314_front.webp",
+      "cats": [
+        "世界历史"
+      ],
+      "tags": [
+        "1990年代",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C315",
+      "code": "C315",
+      "title": "骑士板甲（亮钢·黄铜）",
+      "thumb": "/library/costume/sc-C315.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C315_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "骑士",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C316",
+      "code": "C316",
+      "title": "骑士板甲（黑钢·金）",
+      "thumb": "/library/costume/sc-C316.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C316_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "骑士",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C321",
+      "code": "C321",
+      "title": "法师长袍（午夜蓝·金）",
+      "thumb": "/library/costume/sc-C321.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C321_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "法师",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C322",
+      "code": "C322",
+      "title": "法师长袍（炭灰·牛血红）",
+      "thumb": "/library/costume/sc-C322.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C322_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "法师",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C325",
+      "code": "C325",
+      "title": "刺客（黑·暗红）",
+      "thumb": "/library/costume/sc-C325.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C325_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "刺客",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C326",
+      "code": "C326",
+      "title": "刺客（青灰·灰）",
+      "thumb": "/library/costume/sc-C326.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C326_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "刺客",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C327",
+      "code": "C327",
+      "title": "吟游诗人（青绿·芥黄）",
+      "thumb": "/library/costume/sc-C327.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C327_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "吟游诗人",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C328",
+      "code": "C328",
+      "title": "吟游诗人（酒红·森绿）",
+      "thumb": "/library/costume/sc-C328.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C328_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "吟游诗人",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C331",
+      "code": "C331",
+      "title": "赛博朋克街头装（黑·荧黄）",
+      "thumb": "/library/costume/sc-C331.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C331_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "赛博朋克",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C332",
+      "code": "C332",
+      "title": "赛博朋克街头装（枪灰·青）",
+      "thumb": "/library/costume/sc-C332.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C332_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "赛博朋克",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C334",
+      "code": "C334",
+      "title": "蒸汽朋克工程师（瓶绿·铜棕）",
+      "thumb": "/library/costume/sc-C334.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C334_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "蒸汽朋克",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C335",
+      "code": "C335",
+      "title": "废土拾荒者（沙土·铁锈）",
+      "thumb": "/library/costume/sc-C335.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C335_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "废土",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C336",
+      "code": "C336",
+      "title": "废土拾荒者（橄榄·赭黄）",
+      "thumb": "/library/costume/sc-C336.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C336_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "废土",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C339",
+      "code": "C339",
+      "title": "机甲驾驶服（藏青·橙）",
+      "thumb": "/library/costume/sc-C339.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C339_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "机甲驾驶员",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C340",
+      "code": "C340",
+      "title": "机甲驾驶服（炭灰·橄榄）",
+      "thumb": "/library/costume/sc-C340.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C340_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "机甲驾驶员",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C343",
+      "code": "C343",
+      "title": "仙侠道袍（月白·墨）",
+      "thumb": "/library/costume/sc-C343.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C343_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "仙侠",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C344",
+      "code": "C344",
+      "title": "仙侠道袍（靛青·银）",
+      "thumb": "/library/costume/sc-C344.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C344_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "仙侠",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C345",
+      "code": "C345",
+      "title": "武侠劲装（玄黑·朱）",
+      "thumb": "/library/costume/sc-C345.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C345_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "武侠",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C346",
+      "code": "C346",
+      "title": "武侠劲装（青蓝·白）",
+      "thumb": "/library/costume/sc-C346.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C346_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "武侠",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C350",
+      "code": "C350",
+      "title": "哥特贵族（黑·深红）",
+      "thumb": "/library/costume/sc-C350.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C350_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "哥特",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C351",
+      "code": "C351",
+      "title": "北地战士（铁锈红·灰毛）",
+      "thumb": "/library/costume/sc-C351.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C351_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "北地",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C352",
+      "code": "C352",
+      "title": "北地战士（石板蓝·棕毛）",
+      "thumb": "/library/costume/sc-C352.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C352_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "北地",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C354",
+      "code": "C354",
+      "title": "恶魔风贵族装（黑·暗铜）",
+      "thumb": "/library/costume/sc-C354.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C354_front.webp",
+      "cats": [
+        "幻想骑士"
+      ],
+      "tags": [
+        "天使与恶魔",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C357",
+      "code": "C357",
+      "title": "春节新装（男）（中国红·黑裤）",
+      "thumb": "/library/costume/sc-C357.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C357_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "春节",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C358",
+      "code": "C358",
+      "title": "春节新装（男）（酒红·藏青）",
+      "thumb": "/library/costume/sc-C358.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C358_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "春节",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C361",
+      "code": "C361",
+      "title": "圣诞毛衣（红·雪花）",
+      "thumb": "/library/costume/sc-C361.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C361_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "圣诞",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C363",
+      "code": "C363",
+      "title": "骷髅印花连体服（黑·白骨）",
+      "thumb": "/library/costume/sc-C363.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C363_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "万圣节",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C366",
+      "code": "C366",
+      "title": "假面舞会燕尾服（黑·金织锦）",
+      "thumb": "/library/costume/sc-C366.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C366_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "假面舞会",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C367",
+      "code": "C367",
+      "title": "狂欢节菱格装（红绿黄菱格）",
+      "thumb": "/library/costume/sc-C367.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C367_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "狂欢节",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C370",
+      "code": "C370",
+      "title": "演唱会舞台装（银亮片）",
+      "thumb": "/library/costume/sc-C370.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C370_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "舞台",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C371",
+      "code": "C371",
+      "title": "魔术师燕尾服（黑·红衬）",
+      "thumb": "/library/costume/sc-C371.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C371_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "表演者",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C372",
+      "code": "C372",
+      "title": "马戏团领班（大红·金）",
+      "thumb": "/library/costume/sc-C372.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C372_front.webp",
+      "cats": [
+        "节庆"
+      ],
+      "tags": [
+        "表演者",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C377",
+      "code": "C377",
+      "title": "男士棉睡衣（蓝白条纹）",
+      "thumb": "/library/costume/sc-C377.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C377_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "睡衣",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C378",
+      "code": "C378",
+      "title": "男士棉睡衣（灰色细格）",
+      "thumb": "/library/costume/sc-C378.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C378_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "睡衣",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C379",
+      "code": "C379",
+      "title": "法兰绒格纹睡衣（红黑格）",
+      "thumb": "/library/costume/sc-C379.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C379_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "睡衣",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C380",
+      "code": "C380",
+      "title": "法兰绒格纹睡衣（绿藏青格）",
+      "thumb": "/library/costume/sc-C380.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C380_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "睡衣",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C381",
+      "code": "C381",
+      "title": "卫衣家居套装（麻灰）",
+      "thumb": "/library/costume/sc-C381.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C381_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "家居服",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C382",
+      "code": "C382",
+      "title": "卫衣家居套装（灰绿）",
+      "thumb": "/library/costume/sc-C382.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C382_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "家居服",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C385",
+      "code": "C385",
+      "title": "男士华夫格家居服（藏青）",
+      "thumb": "/library/costume/sc-C385.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C385_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "家居服",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C386",
+      "code": "C386",
+      "title": "毛巾浴袍（白）",
+      "thumb": "/library/costume/sc-C386.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C386_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "浴袍与晨袍",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C387",
+      "code": "C387",
+      "title": "毛巾浴袍（藏青）",
+      "thumb": "/library/costume/sc-C387.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C387_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "浴袍与晨袍",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C392",
+      "code": "C392",
+      "title": "冲浪连体服（黑·青绿）",
+      "thumb": "/library/costume/sc-C392.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C392_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "泳装",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C393",
+      "code": "C393",
+      "title": "冲浪连体服（藏青·橙）",
+      "thumb": "/library/costume/sc-C393.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C393_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "泳装",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C394",
+      "code": "C394",
+      "title": "男士沙滩泳裤（藏青素色）",
+      "thumb": "/library/costume/sc-C394.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C394_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "泳装",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C395",
+      "code": "C395",
+      "title": "男士沙滩泳裤（珊瑚·棕榈叶）",
+      "thumb": "/library/costume/sc-C395.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C395_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "泳装",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C396",
+      "code": "C396",
+      "title": "男士及膝竞技泳裤（黑·蓝条）",
+      "thumb": "/library/costume/sc-C396.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C396_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "泳装",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C397",
+      "code": "C397",
+      "title": "长袖防晒泳衣（白·藏青）",
+      "thumb": "/library/costume/sc-C397.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C397_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "泳装",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C398",
+      "code": "C398",
+      "title": "长袖防晒泳衣（青绿·灰）",
+      "thumb": "/library/costume/sc-C398.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C398_front.webp",
+      "cats": [
+        "家居服"
+      ],
+      "tags": [
+        "泳装",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C405",
+      "code": "C405",
+      "title": "软呢帽（炭灰）",
+      "thumb": "/library/costume/sc-C405.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C405_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C406",
+      "code": "C406",
+      "title": "软呢帽（驼色）",
+      "thumb": "/library/costume/sc-C406.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C406_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C409",
+      "code": "C409",
+      "title": "硬草帽（本色）",
+      "thumb": "/library/costume/sc-C409.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C409_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C411",
+      "code": "C411",
+      "title": "渔夫帽（卡其）",
+      "thumb": "/library/costume/sc-C411.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C411_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C412",
+      "code": "C412",
+      "title": "棒球帽（藏青）",
+      "thumb": "/library/costume/sc-C412.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C412_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C413",
+      "code": "C413",
+      "title": "毛线帽（芥末黄）",
+      "thumb": "/library/costume/sc-C413.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C413_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C414",
+      "code": "C414",
+      "title": "平顶鸭舌帽（棕色）",
+      "thumb": "/library/costume/sc-C414.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C414_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C415",
+      "code": "C415",
+      "title": "报童帽（灰色）",
+      "thumb": "/library/costume/sc-C415.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C415_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C417",
+      "code": "C417",
+      "title": "高礼帽（黑色）",
+      "thumb": "/library/costume/sc-C417.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C417_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C418",
+      "code": "C418",
+      "title": "牛仔帽（浅棕）",
+      "thumb": "/library/costume/sc-C418.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C418_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C419",
+      "code": "C419",
+      "title": "巴拿马草帽（象牙白）",
+      "thumb": "/library/costume/sc-C419.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C419_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "帽子",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C424",
+      "code": "C424",
+      "title": "唐软脚幞头（黑色）",
+      "thumb": "/library/costume/sc-C424.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C424_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "中国头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C425",
+      "code": "C425",
+      "title": "宋展脚幞头（黑色）",
+      "thumb": "/library/costume/sc-C425.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C425_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "中国头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C426",
+      "code": "C426",
+      "title": "网巾·四方平定巾（黑色）",
+      "thumb": "/library/costume/sc-C426.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C426_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "中国头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C427",
+      "code": "C427",
+      "title": "东坡巾（黑色）",
+      "thumb": "/library/costume/sc-C427.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C427_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "中国头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C433",
+      "code": "C433",
+      "title": "斗笠（本色）",
+      "thumb": "/library/costume/sc-C433.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C433_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "中国头饰",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C436",
+      "code": "C436",
+      "title": "束发冠（鎏金）",
+      "thumb": "/library/costume/sc-C436.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C436_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "中国头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C437",
+      "code": "C437",
+      "title": "苏格兰圆扁帽（藏青·红球）",
+      "thumb": "/library/costume/sc-C437.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C437_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "世界民族头饰",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C438",
+      "code": "C438",
+      "title": "墨西哥宽边帽（黑·银绣）",
+      "thumb": "/library/costume/sc-C438.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C438_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "世界民族头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C439",
+      "code": "C439",
+      "title": "安第斯护耳帽（红底多彩）",
+      "thumb": "/library/costume/sc-C439.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C439_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "世界民族头饰",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C440",
+      "code": "C440",
+      "title": "越南斗笠（本色）",
+      "thumb": "/library/costume/sc-C440.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C440_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "世界民族头饰",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C441",
+      "code": "C441",
+      "title": "朝鲜笠（黑色）",
+      "thumb": "/library/costume/sc-C441.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C441_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "世界民族头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C442",
+      "code": "C442",
+      "title": "巴伐利亚登山帽（墨绿）",
+      "thumb": "/library/costume/sc-C442.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C442_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "世界民族头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C443",
+      "code": "C443",
+      "title": "护耳毛帽（棕皮·灰毛）",
+      "thumb": "/library/costume/sc-C443.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C443_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "世界民族头饰",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C444",
+      "code": "C444",
+      "title": "菲斯帽（红色）",
+      "thumb": "/library/costume/sc-C444.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C444_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "世界民族头饰",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C452",
+      "code": "C452",
+      "title": "双肩包（藏青）",
+      "thumb": "/library/costume/sc-C452.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C452_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C453",
+      "code": "C453",
+      "title": "双肩包（军绿）",
+      "thumb": "/library/costume/sc-C453.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C453_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C454",
+      "code": "C454",
+      "title": "邮差包（灰色）",
+      "thumb": "/library/costume/sc-C454.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C454_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C456",
+      "code": "C456",
+      "title": "帆布袋（米白）",
+      "thumb": "/library/costume/sc-C456.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C456_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C457",
+      "code": "C457",
+      "title": "腰包（黑色）",
+      "thumb": "/library/costume/sc-C457.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C457_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C458",
+      "code": "C458",
+      "title": "公文包（深棕）",
+      "thumb": "/library/costume/sc-C458.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C458_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "男装"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C459",
+      "code": "C459",
+      "title": "旅行袋（藏青·棕皮）",
+      "thumb": "/library/costume/sc-C459.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C459_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C462",
+      "code": "C462",
+      "title": "荷包（绛红）",
+      "thumb": "/library/costume/sc-C462.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C462_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C463",
+      "code": "C463",
+      "title": "包袱（靛蓝）",
+      "thumb": "/library/costume/sc-C463.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C463_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "SC-C464",
+      "code": "C464",
+      "title": "翻盖皮挎包（栗色）",
+      "thumb": "/library/costume/sc-C464.webp",
+      "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/costume/grey/w900/costume_C464_front.webp",
+      "cats": [
+        "配饰"
+      ],
+      "tags": [
+        "包",
+        "中性"
+      ],
+      "src": "shisei",
+      "license": "CC0-1.0"
+    }
+  ],
+  "origin": "bundled"
+}

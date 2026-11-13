@@ -51,7 +51,7 @@ export async function makeDemoImage({ images = [], width = 1024, height = 1024 }
   </defs>
   <rect width="${W}" height="${H}" fill="url(#bg)"/>
   <text x="${pad}" y="${Math.round(W * 0.042)}" font-family="Georgia, Songti SC, serif"
-        font-size="${Math.round(W * 0.03)}" fill="#1d1a17" letter-spacing="1">Atelier · 合成预览</text>
+        font-size="${Math.round(W * 0.03)}" fill="#1d1a17" letter-spacing="1">AI角色合成工坊 · 合成预览</text>
   ${cells}
   <g>
     <rect x="${pad}" y="${panelY}" width="${W - pad * 2}" height="${panelH}" rx="${Math.round(W * 0.03)}"

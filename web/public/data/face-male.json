@@ -1,0 +1,830 @@
+{
+  "generatedAt": "2026-11-13T02:54:05.424792Z",
+  "mode": "live",
+  "source": {
+    "label": "男性脸型",
+    "homepage": "",
+    "license": "CC0-1.0",
+    "note": "本站用图像模型生成并人工挑选，版权归本项目，随仓库分发；不对应任何真实人物。"
+  },
+  "count": 48,
+  "items": [
+    {
+      "id": "M001",
+      "code": "M001",
+      "title": "男性脸型 01 · 东亚 · 30+ · 短发",
+      "thumb": "/library/face/male-01.webp",
+      "full": "/library/face/male-01.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "30+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M002",
+      "code": "M002",
+      "title": "男性脸型 02 · 欧美 · 50+ · 短发",
+      "thumb": "/library/face/male-02.webp",
+      "full": "/library/face/male-02.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "欧美",
+        "50+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M003",
+      "code": "M003",
+      "title": "男性脸型 03 · 欧美 · 30+ · 卷发",
+      "thumb": "/library/face/male-03.webp",
+      "full": "/library/face/male-03.webp",
+      "cats": [
+        "卷发"
+      ],
+      "tags": [
+        "欧美",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M004",
+      "code": "M004",
+      "title": "男性脸型 04 · 欧美 · 20+ · 短发",
+      "thumb": "/library/face/male-04.webp",
+      "full": "/library/face/male-04.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "欧美",
+        "20+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M005",
+      "code": "M005",
+      "title": "男性脸型 05 · 东亚 · 20+ · 短发",
+      "thumb": "/library/face/male-05.webp",
+      "full": "/library/face/male-05.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M006",
+      "code": "M006",
+      "title": "男性脸型 06 · 非裔 · 30+ · 卷发",
+      "thumb": "/library/face/male-06.webp",
+      "full": "/library/face/male-06.webp",
+      "cats": [
+        "卷发"
+      ],
+      "tags": [
+        "非裔",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M007",
+      "code": "M007",
+      "title": "男性脸型 07 · 南亚 · 30+ · 短发",
+      "thumb": "/library/face/male-07.webp",
+      "full": "/library/face/male-07.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "南亚",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M008",
+      "code": "M008",
+      "title": "男性脸型 08 · 中东 · 30+ · 中长发",
+      "thumb": "/library/face/male-08.webp",
+      "full": "/library/face/male-08.webp",
+      "cats": [
+        "中长发"
+      ],
+      "tags": [
+        "中东",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M009",
+      "code": "M009",
+      "title": "男性脸型 09 · 欧美 · 30+ · 长发",
+      "thumb": "/library/face/male-09.webp",
+      "full": "/library/face/male-09.webp",
+      "cats": [
+        "长发"
+      ],
+      "tags": [
+        "欧美",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M010",
+      "code": "M010",
+      "title": "男性脸型 10 · 东亚 · 40+ · 短发",
+      "thumb": "/library/face/male-10.webp",
+      "full": "/library/face/male-10.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "40+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M011",
+      "code": "M011",
+      "title": "男性脸型 11 · 非裔 · 20+ · 中长发",
+      "thumb": "/library/face/male-11.webp",
+      "full": "/library/face/male-11.webp",
+      "cats": [
+        "中长发"
+      ],
+      "tags": [
+        "非裔",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M012",
+      "code": "M012",
+      "title": "男性脸型 12 · 东亚 · 30+ · 短发",
+      "thumb": "/library/face/male-12.webp",
+      "full": "/library/face/male-12.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M013",
+      "code": "M013",
+      "title": "男性脸型 13 · 欧美 · 60+ · 短发",
+      "thumb": "/library/face/male-13.webp",
+      "full": "/library/face/male-13.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "欧美",
+        "60+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M014",
+      "code": "M014",
+      "title": "男性脸型 14 · 东亚 · 20+ · 中长发",
+      "thumb": "/library/face/male-14.webp",
+      "full": "/library/face/male-14.webp",
+      "cats": [
+        "中长发"
+      ],
+      "tags": [
+        "东亚",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M015",
+      "code": "M015",
+      "title": "男性脸型 15 · 拉美 · 30+ · 卷发",
+      "thumb": "/library/face/male-15.webp",
+      "full": "/library/face/male-15.webp",
+      "cats": [
+        "卷发"
+      ],
+      "tags": [
+        "拉美",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M016",
+      "code": "M016",
+      "title": "男性脸型 16 · 非裔 · 50+ · 短发",
+      "thumb": "/library/face/male-16.webp",
+      "full": "/library/face/male-16.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "非裔",
+        "50+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M017",
+      "code": "M017",
+      "title": "男性脸型 17 · 中东 · 30+ · 卷发",
+      "thumb": "/library/face/male-17.webp",
+      "full": "/library/face/male-17.webp",
+      "cats": [
+        "卷发"
+      ],
+      "tags": [
+        "中东",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M018",
+      "code": "M018",
+      "title": "男性脸型 18 · 欧美 · 20+ · 卷发",
+      "thumb": "/library/face/male-18.webp",
+      "full": "/library/face/male-18.webp",
+      "cats": [
+        "卷发"
+      ],
+      "tags": [
+        "欧美",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M019",
+      "code": "M019",
+      "title": "男性脸型 19 · 东亚 · 40+ · 短发",
+      "thumb": "/library/face/male-19.webp",
+      "full": "/library/face/male-19.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "40+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M020",
+      "code": "M020",
+      "title": "男性脸型 20 · 南亚 · 40+ · 短发",
+      "thumb": "/library/face/male-20.webp",
+      "full": "/library/face/male-20.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "南亚",
+        "40+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M021",
+      "code": "M021",
+      "title": "男性脸型 21 · 非裔 · 30+ · 短发",
+      "thumb": "/library/face/male-21.webp",
+      "full": "/library/face/male-21.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "非裔",
+        "30+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M022",
+      "code": "M022",
+      "title": "男性脸型 22 · 欧美 · 30+ · 短发",
+      "thumb": "/library/face/male-22.webp",
+      "full": "/library/face/male-22.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "欧美",
+        "30+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M023",
+      "code": "M023",
+      "title": "男性脸型 23 · 欧美 · 30+ · 中长发",
+      "thumb": "/library/face/male-23.webp",
+      "full": "/library/face/male-23.webp",
+      "cats": [
+        "中长发"
+      ],
+      "tags": [
+        "欧美",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M024",
+      "code": "M024",
+      "title": "男性脸型 24 · 东亚 · 30+ · 短发",
+      "thumb": "/library/face/male-24.webp",
+      "full": "/library/face/male-24.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M025",
+      "code": "M025",
+      "title": "男性脸型 25 · 欧美 · 30+ · 短发",
+      "thumb": "/library/face/male-25.webp",
+      "full": "/library/face/male-25.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "欧美",
+        "30+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M026",
+      "code": "M026",
+      "title": "男性脸型 26 · 东亚 · 20+ · 短发",
+      "thumb": "/library/face/male-26.webp",
+      "full": "/library/face/male-26.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M027",
+      "code": "M027",
+      "title": "男性脸型 27 · 非裔 · 40+ · 短发",
+      "thumb": "/library/face/male-27.webp",
+      "full": "/library/face/male-27.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "非裔",
+        "40+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M028",
+      "code": "M028",
+      "title": "男性脸型 28 · 拉美 · 30+ · 短发",
+      "thumb": "/library/face/male-28.webp",
+      "full": "/library/face/male-28.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "拉美",
+        "30+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M029",
+      "code": "M029",
+      "title": "男性脸型 29 · 欧美 · 40+ · 短发",
+      "thumb": "/library/face/male-29.webp",
+      "full": "/library/face/male-29.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "欧美",
+        "40+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M030",
+      "code": "M030",
+      "title": "男性脸型 30 · 东南亚 · 20+ · 短发",
+      "thumb": "/library/face/male-30.webp",
+      "full": "/library/face/male-30.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东南亚",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M031",
+      "code": "M031",
+      "title": "男性脸型 31 · 中东 · 40+ · 短发",
+      "thumb": "/library/face/male-31.webp",
+      "full": "/library/face/male-31.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "中东",
+        "40+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M032",
+      "code": "M032",
+      "title": "男性脸型 32 · 非裔 · 60+ · 短发",
+      "thumb": "/library/face/male-32.webp",
+      "full": "/library/face/male-32.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "非裔",
+        "60+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M033",
+      "code": "M033",
+      "title": "男性脸型 33 · 东亚 · 30+ · 长发",
+      "thumb": "/library/face/male-33.webp",
+      "full": "/library/face/male-33.webp",
+      "cats": [
+        "长发"
+      ],
+      "tags": [
+        "东亚",
+        "30+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M034",
+      "code": "M034",
+      "title": "男性脸型 34 · 欧美 · 20+ · 卷发",
+      "thumb": "/library/face/male-34.webp",
+      "full": "/library/face/male-34.webp",
+      "cats": [
+        "卷发"
+      ],
+      "tags": [
+        "欧美",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M035",
+      "code": "M035",
+      "title": "男性脸型 35 · 非裔 · 40+ · 短发",
+      "thumb": "/library/face/male-35.webp",
+      "full": "/library/face/male-35.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "非裔",
+        "40+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M036",
+      "code": "M036",
+      "title": "男性脸型 36 · 南亚 · 20+ · 短发",
+      "thumb": "/library/face/male-36.webp",
+      "full": "/library/face/male-36.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "南亚",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M037",
+      "code": "M037",
+      "title": "男性脸型 37 · 拉美 · 50+ · 短发",
+      "thumb": "/library/face/male-37.webp",
+      "full": "/library/face/male-37.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "拉美",
+        "50+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M038",
+      "code": "M038",
+      "title": "男性脸型 38 · 欧美 · 20+ · 短发",
+      "thumb": "/library/face/male-38.webp",
+      "full": "/library/face/male-38.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "欧美",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M039",
+      "code": "M039",
+      "title": "男性脸型 39 · 东亚 · 50+ · 短发",
+      "thumb": "/library/face/male-39.webp",
+      "full": "/library/face/male-39.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "50+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M040",
+      "code": "M040",
+      "title": "男性脸型 40 · 中东 · 20+ · 卷发",
+      "thumb": "/library/face/male-40.webp",
+      "full": "/library/face/male-40.webp",
+      "cats": [
+        "卷发"
+      ],
+      "tags": [
+        "中东",
+        "20+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M041",
+      "code": "M041",
+      "title": "男性脸型 41 · 非裔 · 30+ · 中长发",
+      "thumb": "/library/face/male-41.webp",
+      "full": "/library/face/male-41.webp",
+      "cats": [
+        "中长发"
+      ],
+      "tags": [
+        "非裔",
+        "30+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M042",
+      "code": "M042",
+      "title": "男性脸型 42 · 欧美 · 40+ · 中长发",
+      "thumb": "/library/face/male-42.webp",
+      "full": "/library/face/male-42.webp",
+      "cats": [
+        "中长发"
+      ],
+      "tags": [
+        "欧美",
+        "40+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M043",
+      "code": "M043",
+      "title": "男性脸型 43 · 东亚 · 20+ · 长发",
+      "thumb": "/library/face/male-43.webp",
+      "full": "/library/face/male-43.webp",
+      "cats": [
+        "长发"
+      ],
+      "tags": [
+        "东亚",
+        "20+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M044",
+      "code": "M044",
+      "title": "男性脸型 44 · 南亚 · 50+ · 短发",
+      "thumb": "/library/face/male-44.webp",
+      "full": "/library/face/male-44.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "南亚",
+        "50+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M045",
+      "code": "M045",
+      "title": "男性脸型 45 · 欧美 · 30+ · 短发",
+      "thumb": "/library/face/male-45.webp",
+      "full": "/library/face/male-45.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "欧美",
+        "30+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M046",
+      "code": "M046",
+      "title": "男性脸型 46 · 拉美 · 40+ · 短发",
+      "thumb": "/library/face/male-46.webp",
+      "full": "/library/face/male-46.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "拉美",
+        "40+岁",
+        "有胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M047",
+      "code": "M047",
+      "title": "男性脸型 47 · 东南亚 · 40+ · 短发",
+      "thumb": "/library/face/male-47.webp",
+      "full": "/library/face/male-47.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东南亚",
+        "40+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "M048",
+      "code": "M048",
+      "title": "男性脸型 48 · 东亚 · 30+ · 短发",
+      "thumb": "/library/face/male-48.webp",
+      "full": "/library/face/male-48.webp",
+      "cats": [
+        "短发"
+      ],
+      "tags": [
+        "东亚",
+        "30+岁",
+        "无胡须"
+      ],
+      "src": "atelier-selfmade",
+      "license": "CC0-1.0"
+    }
+  ],
+  "origin": "local"
+}

@@ -12,7 +12,7 @@
  */
 
 import { handleRequest, resolveBackends } from '../shared/router.js';
-import { buildPrompt, buildCloudflareForm, parseDataUrl, generate, DEFAULT_MODEL } from '../shared/generate.js';
+import { buildPrompt, buildCloudflareForm, parseDataUrl, generate, classifyAiFailure, DEFAULT_MODEL } from '../shared/generate.js';
 import {
   normalizeBaseUrl,
   saveProfile,
@@ -186,7 +186,26 @@ try {
   check('应抛错', false);
 } catch (e) {
   check('识别为 429 配额问题', e.status === 429, `${e.status} ${e.message}`);
+  check('提示里带上游原文便于自查', /daily free allocation/.test(e.message), e.message);
+  check('detail.raw 保留完整错误', /neurons/.test(e.detail?.raw || ''), JSON.stringify(e.detail));
 }
+
+console.log('\n[9b] 误判回归：非配额报错不得说成「额度用完」');
+// 曾经的问题：一条 /limit|exceed/ 正则把内存、尺寸、限流全吞成配额提示，
+// 用户第二天额度已重置却仍看到「今日免费额度可能已用完」。
+const misjudge = [
+  ['AiError: Memory limit exceeded', '内存超限不应算配额', 502],
+  ['AiError: image size limit exceeded, max 512x512', '尺寸超限应为 400', 400],
+  ['AiError: Rate limit exceeded, retry later', '限流应为 503', 503],
+  ['AiError: Internal server error', '普通 5xx 应为 502', 502],
+];
+for (const [msg, label, want] of misjudge) {
+  const got = classifyAiFailure({ msg });
+  check(label, got.status === want, `得到 ${got.status}：${got.message}`);
+}
+const quotaOk = classifyAiFailure({ msg: '4007: you have used up your daily free allocation of 10,000 neurons' });
+check('真实配额错误仍判 429', quotaOk.status === 429, `${quotaOk.status}`);
+check('容量类错误不出现「额度用完」字样', !/额度可能已用完/.test(classifyAiFailure({ msg: 'Memory limit exceeded' }).message));
 
 console.log('\n[10] 3043 瞬时错误自动重试一次');
 let calls = 0;
@@ -357,6 +376,51 @@ console.log('\n[19] 设置面板与抽屉排版（回归）');
   check('抽屉卡片不整体滚动（靠 body 滚）', /\.drawer-body\s*\{[^}]*overflow-y:\s*auto/.test(css));
   check('样例图有尺寸上限', /#cfgSample\s*\{[^}]*max-height/.test(css));
   check('保存成功后自动关闭抽屉', /function afterSaved[\s\S]{0,400}closeModelDrawer\(\)/.test(app));
+}
+
+
+console.log('\n[20] 女性 / 男性双版本');
+{
+  const app = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+  const css = await readFile(path.join(ROOT, 'web/public/styles.css'), 'utf8');
+  const html = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
+  const router = await readFile(path.join(ROOT, 'shared/router.js'), 'utf8');
+
+  const read = async (f) => JSON.parse(await readFile(path.join(ROOT, 'web/public/data', f), 'utf8'));
+  const male = { outfit: await read('outfit-male.json'), pose: await read('pose-male.json'), face: await read('face-male.json') };
+  const female = { outfit: await read('outfit.json'), pose: await read('pose.json'), face: await read('face.json') };
+
+  check('男性三库都有条目', Object.values(male).every((d) => d.items.length > 0), Object.entries(male).map(([k, d]) => `${k}:${d.items.length}`).join(' '));
+  check('女性服装含 Shisei 补充', female.outfit.items.some((it) => it.src === 'shisei'), `总 ${female.outfit.items.length}`);
+
+  // 图片必须真实存在，避免出现「索引有、图挂了」
+  let missing = 0;
+  for (const d of Object.values(male)) {
+    for (const it of d.items) {
+      if (!it.thumb.startsWith('/')) continue;
+      try {
+        await readFile(path.join(ROOT, 'web/public', it.thumb.replace(/^\//, '')));
+      } catch {
+        missing++;
+      }
+    }
+  }
+  check('男性素材缩略图全部存在', missing === 0, `缺失 ${missing}`);
+
+  check('默认女性版', /state\.gender = 'female'|gender: 'female'/.test(app));
+  check('切换会重载图库', /async function setGender[\s\S]{0,900}loadCatalog/.test(app));
+  check('男性走 *-male 索引', /state\.gender === 'male' \? `\$\{kind\}-male`/.test(app));
+  check('配色随 data-gender 切换', /:root\[data-gender="male"\]/.test(css));
+  check('女性版为粉色主色', /--accent:\s*#c05579/.test(css));
+  check('男性版为蓝色主色', /:root\[data-gender="male"\][\s\S]{0,400}--accent:\s*#3a6ea5/.test(css));
+  check('顶栏有性别切换按钮', /class="gender-switch"/.test(html) && /data-gender="male"/.test(html));
+  check('站名已改', /<title>AI角色合成工坊/.test(html));
+
+  const pM = buildPrompt({ gender: 'male' });
+  const pF = buildPrompt({ gender: 'female' });
+  check('提示词区分性别', /adult man/.test(pM) && /adult woman/.test(pF) && pM !== pF);
+  check('代理放行 jsDelivr', /cdn\.jsdelivr\.net/.test(router));
+  check('未引入 generated.photos', !/generated\.photos/.test(app + router + css));
 }
 
 console.log(`\n结果：${pass} 通过，${fail} 失败\n`);

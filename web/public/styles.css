@@ -1,35 +1,64 @@
 :root {
-  --bg: #f6f3ee;
-  --surface: #fffdfa;
-  --surface-2: #f0ebe3;
-  --line: #e2dad0;
-  --ink: #1d1a17;
-  --ink-2: #5d564e;
-  --ink-3: #938a80;
-  --accent: #b4553a;          /* 陶土红，来自服装图的粉色系但更沉稳 */
+  /* 女性版（默认）：玫瑰粉 + 米白纸感 */
+  --bg: #fbf4f6;
+  --surface: #fffbfc;
+  --surface-2: #f6e8ee;
+  --line: #ecd8e0;
+  --ink: #221a1e;
+  --ink-2: #65535c;
+  --ink-3: #9a8891;
+  --accent: #c05579;          /* 玫瑰粉：主按钮、强调 */
   --accent-ink: #fff;
-  --sel: #2f6f5e;             /* 选中态：墨绿 */
+  --sel: #a8426a;             /* 选中态：深玫红 */
   --radius: 14px;
-  --shadow-sm: 0 1px 2px rgba(29,26,23,.06), 0 4px 14px rgba(29,26,23,.05);
-  --shadow-md: 0 8px 30px rgba(29,26,23,.12);
+  --shadow-sm: 0 1px 2px rgba(60,30,45,.06), 0 4px 14px rgba(60,30,45,.05);
+  --shadow-md: 0 8px 30px rgba(60,30,45,.12);
   --f: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
   --f-display: "Playfair Display", "Songti SC", Georgia, serif;
 }
 
+/* 男性版：钢蓝 + 冷白纸感。只换色板，结构完全一致 */
+:root[data-gender="male"] {
+  --bg: #f3f6fa;
+  --surface: #fbfdff;
+  --surface-2: #e8eff7;
+  --line: #d5e0ec;
+  --ink: #171d24;
+  --ink-2: #4f5b68;
+  --ink-3: #8492a1;
+  --accent: #3a6ea5;
+  --accent-ink: #fff;
+  --sel: #2b5680;
+  --shadow-sm: 0 1px 2px rgba(20,40,60,.06), 0 4px 14px rgba(20,40,60,.05);
+  --shadow-md: 0 8px 30px rgba(20,40,60,.12);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #14120f;
-    --surface: #1c1916;
-    --surface-2: #241f1b;
-    --line: #362f29;
-    --ink: #f2ece4;
-    --ink-2: #b8ada1;
-    --ink-3: #7d746a;
-    --accent: #d97757;
-    --accent-ink: #1a1512;
-    --sel: #74b79f;
+    --bg: #171214;
+    --surface: #1e181b;
+    --surface-2: #272025;
+    --line: #3a2d33;
+    --ink: #f6ecef;
+    --ink-2: #bfaeb5;
+    --ink-3: #85737b;
+    --accent: #e38aa6;
+    --accent-ink: #21131a;
+    --sel: #f0b0c4;
     --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
     --shadow-md: 0 10px 34px rgba(0,0,0,.5);
+  }
+  :root[data-gender="male"] {
+    --bg: #101418;
+    --surface: #161c22;
+    --surface-2: #1d252d;
+    --line: #2b3742;
+    --ink: #eaf0f6;
+    --ink-2: #a9b6c3;
+    --ink-3: #74828f;
+    --accent: #7aa9d6;
+    --accent-ink: #0d1620;
+    --sel: #9fc8ea;
   }
 }
 
@@ -76,6 +105,22 @@ a { color: inherit; }
 }
 .tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); font-weight: 600; }
 .tabs button:not([aria-selected="true"]):hover { color: var(--ink); }
+
+/* 性别切换：只换色板与素材库，不改结构 */
+.gender-switch {
+  display: flex; gap: 3px; padding: 3px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--surface);
+}
+.gender-switch button {
+  border: 0; background: transparent; padding: 6px 12px; border-radius: 9px;
+  font-size: 12.5px; color: var(--ink-2); cursor: pointer; white-space: nowrap; transition: .18s;
+}
+.gender-switch button:hover { color: var(--ink); background: var(--surface-2); }
+.gender-switch button[aria-pressed="true"] {
+  background: var(--accent); color: var(--accent-ink); font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.gender-switch button[aria-pressed="true"]:hover { background: var(--accent); color: var(--accent-ink); }
 
 .top-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 /* 外链不换行：窄屏时宁可整体换到下一行，也不要一个字一行地竖排 */
@@ -319,6 +364,7 @@ a { color: inherit; }
 }
 @media (max-width: 560px) {
   .tabs button { padding: 8px 11px; font-size: 13px; }
+  .gender-switch button { padding: 5px 9px; font-size: 12px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 9px; padding: 0 14px 8px; }
   .lib-head, .lib-tools, .lib-foot { padding-left: 14px; padding-right: 14px; }
   .adv-body { grid-template-columns: 1fr; }
