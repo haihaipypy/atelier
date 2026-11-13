@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T02:37:12.871Z",
+  "generatedAt": "2026-11-13T07:48:21.864Z",
   "outfit": {
     "count": 1542,
     "label": "服装"
@@ -9,7 +9,7 @@
     "label": "脸型"
   },
   "pose": {
-    "count": 440,
+    "count": 567,
     "label": "姿势"
   },
   "outfit-male": {
@@ -18,7 +18,8 @@
   },
   "pose-male": {
     "count": 181,
-    "label": "男性姿势"
+    "label": "姿势（男性版）",
+    "note": "此库暂为女性素体；男性版只能借用其骨架，性别由脸与提示词决定"
   },
   "face-male": {
     "count": 48,

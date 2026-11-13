@@ -12,7 +12,7 @@
  */
 
 import { handleRequest, resolveBackends } from '../shared/router.js';
-import { buildPrompt, buildCloudflareForm, parseDataUrl, generate, classifyAiFailure, DEFAULT_MODEL } from '../shared/generate.js';
+import { buildPrompt, buildCloudflareForm, parseDataUrl, generate, classifyAiFailure, clipPoseHint, DEFAULT_MODEL } from '../shared/generate.js';
 import {
   normalizeBaseUrl,
   saveProfile,
@@ -138,6 +138,31 @@ const p = buildPrompt({ style: 'photorealistic', extra: 'add a straw hat' });
 check('包含三张图分工', /OUTFIT ONLY/.test(p) && /FACE ONLY/.test(p) && /POSE AND CAMERA ANGLE ONLY/.test(p));
 check('包含补充描述', p.includes('add a straw hat'));
 check('无拼写错误 dresed', !p.includes('dresed'));
+
+console.log('\n[5b] 男性姿势不生效的回归');
+// 现象：男性版选「双手叉腰」的姿势，生成图却是正面站姿。
+// 原因：姿势参考图是女性素体线稿，胸部曲线与「成年男性」冲突，模型直接把姿势丢了。
+const pMale = buildPrompt({ gender: 'male' });
+const pHint = buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐・单膝竖起' });
+check('男性版指出线稿是女性素体', /female artist mannequin/.test(pMale), pMale.slice(0, 120));
+check('男性版要求忽略胸部与腰胯轮廓', /bust curve|waist-to-hip ratio/.test(pMale));
+check('男性版禁止退回站姿', /Do not replace the pose with a standing/i.test(pMale));
+check('姿态要点进入提示词', /intended pose in words[\s\S]*单膝竖起/.test(pHint), pHint.slice(-260));
+check('姿态要点不越权改服装/脸', /never to override the outfit or the face/.test(pHint));
+check('女性版不写这些男性专用说明', !/female artist mannequin/.test(buildPrompt({ gender: 'female' })));
+check('要点超长会截断', clipPoseHint('x'.repeat(500)).length <= 201);
+
+// 前端要真的把要点带上：漏传时后端拼不出那句「intended pose in words」
+const appSrc = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+check('前端把姿态要点带进 /api/generate', /poseHint: poseHintFor\(state\.gender\)/.test(appSrc));
+check('直连通道也带姿态要点', /const poseHint = poseHintFor\(state\.gender\);/.test(appSrc));
+check('男性版要点附带「只取骨架」说明', /copy only its skeleton and camera/.test(appSrc));
+check('姿势卡片悬停能看到要点', /it\.pose\?\.zh/.test(appSrc));
+const poseMaleJson = await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8');
+check('男性姿势库带「借用女性素体」标注', /poseGender/.test(poseMaleJson) && /女性素体/.test(poseMaleJson));
+check('页面上有提示条', /此库是女性素体线稿/.test(appSrc) && /id="libNote"/.test(
+  await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8'),
+));
 
 console.log('\n[6] Cloudflare multipart');
 const { form, modelId } = buildCloudflareForm({ images: imgs, prompt: p, modelId: '@cf/black-forest-labs/flux-2-klein-9b' });

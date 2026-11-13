@@ -243,7 +243,7 @@ npx wrangler secret put CUSTOM_MODEL      # 例：gpt-image-1
 
 ```bash
 npm run sync              # 同步最新图库索引
-npm run dryrun            # 106 项自检，不需要任何密钥
+npm run dryrun            # 119 项自检，不需要任何密钥
 npm run dev               # wrangler dev，本地 Cloudflare 环境
 ```
 
@@ -498,7 +498,26 @@ node scripts/sync-catalogs.mjs --only pose   # 只同步一个板块
 | 脸型 | [AIモデル顔データベース](https://ai-portrait-gallery.pages.dev/) | あぎ（[@agi_aibusi](https://x.com/agi_aibusi)） | 同上 |
 | 姿势 | [ポーズ集 POSE-DB-01](https://ai-pose-gallery.pages.dev/) | ギア（[@giaaibusi](https://x.com/giaaibusi)） | 同上 |
 | 男装 / 中性装 / 男性姿势 | [Shisei 姿勢](https://github.com/wquguru/shisei) | wquguru | 图片为 **CC0 1.0**，可再分发：下载 w300 缩略图进 `web/public/library/`，大图走 jsDelivr |
+| 女性姿势补充 | 同上（Shisei `std` 系列） | wquguru | 全身女性素体，127 条并入女性姿势库 |
 | 男性脸型 | 本站自建 | 本项目 | 用图像模型生成后人工挑选，随仓库分发，不对应任何真实人物 |
+
+### 男性版的姿势为什么借女性素体
+
+Shisei 目前**没有男性姿势**：`std` 系列是女性全身素体（线稿上画了胸部曲线），`upper` 系列只画到腰胯。
+所以男性版的姿势库是「借用库」——骨架可用，轮廓不可用。
+
+这里踩过一个坑：早期只写「照搬图 3 的姿势」，模型遇到「女性素体轮廓 + 成年男性」这对矛盾时，
+最常见的处理不是融合，而是**直接丢掉姿势、输出一张正面站姿**，表现就是「选了姿势不生效」。
+
+现在按三层处理：
+
+1. 提示词里先声明「图 3 是女性人台线稿」，再要求**只取骨架与机位**（肢体位置、关节角度、
+   重心、头部朝向、取景范围），明确「轮廓不要照搬」「不许替换成站姿」；
+2. 把所选姿势的动作要点写成文字一起送进去（`poseHint`，来自图库条目的 `pose.zh`），
+   图给画面、字给语义，两者互补；措辞限定为「用来确认图 3，不得覆盖服装与脸」；
+3. 页面上直接说明这是借用库，避免用户以为选错了。
+
+这条经验同样适用于任何「参考图性别 ≠ 目标性别」的合成场景。
 
 ### 使用边界
 
@@ -555,7 +574,7 @@ atelier/
 ├── scripts/
 │   ├── sync-catalogs.mjs   #   图库同步（支持 --offline / --only）
 │   ├── preview-server.mjs  #   本地预览（静态 + API 单端口）
-│   └── dry-run.mjs         #   端到端自检（106 项断言，无需密钥）
+│   └── dry-run.mjs         #   端到端自检（119 项断言，无需密钥）
 ├── .github/workflows/
 │   └── sync-catalogs.yml   #   每日自动同步
 ├── wrangler.jsonc          # 部署配置
@@ -589,10 +608,10 @@ atelier/
 
 ## 验证状态
 
-- `dry-run.mjs`：**106 项断言全绿**，覆盖能力探测、演示生成、素材校验、multipart 字段名、3043 重试、
+- `dry-run.mjs`：**119 项断言全绿**，覆盖能力探测、演示生成、素材校验、multipart 字段名、3043 重试、
   未绑定快速失败、假 binding 走通真实调用链、非法模型回落、配额耗尽转 429、
   非配额报错不被误判为额度用完（内存/尺寸/限流分类回归）、
-  额度错误码 4006/3036 均能识别、
+  额度错误码 4006/3036 均能识别、男性姿势只取骨架不取轮廓、
   自定义接口端到端、403/429/422 错误分类、浏览器直连通道、双版本素材完整性、代理白名单
 - 浏览器端完整交互（1080×675 / 1280×800 / 1440×900）：预览 → 确认 → 三板块选齐 → 生成 → 渲染，
   控制台零报错

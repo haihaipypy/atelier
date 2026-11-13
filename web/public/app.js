@@ -95,14 +95,32 @@ function upstreamMsg(status, json, raw, endpoint) {
 }
 
 /**
+ * 送出给模型的姿态要点。
+ *
+ * 男性版用的是女性素体线稿（Shisei 没出男版姿势），线稿上的胸部曲线、腰胯比例
+ * 会和「成年男性」打架。两者冲突时模型最常见的处理是**直接丢掉姿势**、输出一张
+ * 正面站姿——也就是「选了姿势却不生效」。所以这里不删要点，而是明确说：
+ * 骨架照搬、轮廓别照搬。
+ */
+function poseHintFor(gender) {
+  const raw = state.selected.pose?.pose?.zh || '';
+  if (!raw) return '';
+  if (gender !== 'male') return raw;
+  return `${raw} (the reference is a female artist mannequin: copy only its skeleton and camera, `
+    + 'not its bust or waist-hip contour)';
+}
+
+/**
  * 直连模式下提示词要自己拼：/api/prompt 只是读模板，走本站域名不会被任何服务商拦截。
  * 失败时用一段等价的内置描述兜底，保证「不填提示词也能出图」。
  */
 async function buildPromptOnServer() {
+  const poseHint = poseHintFor(state.gender);
   const q = new URLSearchParams({
     style: $('#style').value || 'photorealistic',
     extra: $('#extra').value.trim(),
     gender: state.gender,
+    poseHint,
   });
   try {
     const r = await fetch(`/api/prompt?${q}`);
@@ -114,8 +132,12 @@ async function buildPromptOnServer() {
     /* 落到下面的兜底 */
   }
   const who = state.gender === 'male' ? '成年男性' : '成年女性';
-  return `图1是服装（忽略人台与背景），图2是${who}的脸与发型，图3是姿势。`
-    + `把三者合成到同一个${who}身上：服装材质与垂感照图1，五官与发色照图2，姿态与镜头角度照图3，`
+  const poseLine = poseHint ? `（${poseHint}）` : '';
+  return `图1是服装（忽略人台与背景），图2是${who}的脸与发型，图3是姿势${poseLine}。`
+    + `把三者合成到同一个${who}身上：服装材质与垂感照图1，五官与发色照图2，姿态与镜头角度照图3。`
+    + (state.gender === 'male'
+      ? '注意图3是女性素体线稿：只取它的骨架与机位，不要把它胸部与腰胯轮廓搬到男性身上，也不要替换成站姿。'
+      : '')
     + '输出一张真实感强的全身人物照，光影自然。';
 }
 
@@ -488,7 +510,20 @@ function renderTabsState() {
             ? '本地样例'
             : '样例';
   $('#libMeta').textContent = d ? `${d.count ?? d.items?.length ?? 0} 条 · ${mode}${d.generatedAt ? ' · ' + new Date(d.generatedAt).toLocaleDateString('zh-CN') : ''}` : '';
+
+  // 男性版的姿势库借的是女性素体线稿：这件事不说清楚，用户会以为选错了库，
+  // 或者以为「姿势没生效」是 bug（实际是女性轮廓和男性提示词互相打架，模型丢了姿势）
+  const note = state.tab === 'pose' && state.gender === 'male'
+    ? '此库是女性素体线稿，男性版只借用它的骨架与机位，成品性别由 ② 脸 与提示词决定。'
+      + '若成图退回了站姿，把动作写进「额外要求」再生成一次；也可以直接换张服装图重试。'
+    : '';
+  const el2 = $('#libNote');
+  if (el2) {
+    el2.textContent = note;
+    el2.hidden = !note;
+  }
 }
+
 
 function filtered() {
   const d = state.data[state.tab];
@@ -547,6 +582,9 @@ function renderGrid() {
       'div',
       {
         class: 'card',
+        // 姿势条目的 title 只有「后仰坐・单膝竖起」这种短名，悬停时把姿态要点补上，
+        // 让用户在选之前就知道这个姿势到底怎么摆
+        title: it.pose?.zh ? `${it.title || it.id}\n${it.pose.zh}` : undefined,
         role: 'option',
         'aria-selected': String(isSel),
         'data-id': it.id,
@@ -808,6 +846,8 @@ async function generate() {
         style: $('#style').value,
         extra: $('#extra').value.trim(),
         prompt: $('#promptOverride').value.trim(),
+        // 姿势参考图是女性素体线稿，光给图模型经常直接退回站姿；把「大约什么动作」也写成文字
+        poseHint: poseHintFor(state.gender),
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
       };

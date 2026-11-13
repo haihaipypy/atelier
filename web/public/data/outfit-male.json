@@ -1,6 +1,7 @@
 {
-  "generatedAt": "2026-11-13T02:37:12.853Z",
+  "generatedAt": "2026-11-13T07:48:21.838Z",
   "mode": "live",
+  "origin": "bundled",
   "source": {
     "label": "男装",
     "homepage": "https://github.com/wquguru/shisei",
@@ -4072,6 +4073,5 @@
       "src": "shisei",
       "license": "CC0-1.0"
     }
-  ],
-  "origin": "bundled"
+  ]
 }

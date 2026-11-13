@@ -1,12 +1,15 @@
 {
-  "generatedAt": "2026-11-13T02:37:12.855Z",
+  "generatedAt": "2026-11-13T07:48:21.839Z",
   "mode": "live",
+  "origin": "bundled",
   "source": {
-    "label": "男性姿势",
+    "label": "姿势（男性版借用女性素体骨架）",
     "homepage": "https://github.com/wquguru/shisei",
     "license": "CC0-1.0"
   },
   "count": 181,
+  "note": "此库暂为女性素体；男性版只能借用其骨架，性别由脸与提示词决定",
+  "poseGender": "F",
   "items": [
     {
       "id": "SP-P001-front",
@@ -23,6 +26,10 @@
         "Sitting leaning back, one knee raised"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor leaning back with her torso arched slightly backward, one knee raised and bent, the other leg extended forward, both hands resting on the floor behind her for support",
+        "zh": "坐姿｜后仰坐・单膝竖起；sitting on the floor leaning back with the figur"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -41,6 +48,10 @@
         "Sitting leaning back, one knee raised"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor leaning back with her torso arched slightly backward, one knee raised and bent, the other leg extended forward, both hands resting on the floor behind her for support",
+        "zh": "坐姿｜后仰坐・单膝竖起；sitting on the floor leaning back with the figur"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -59,6 +70,10 @@
         "Sitting, one-hand support, legs swept forward"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs swept together toward the front-left, leaning on one hand placed flat on the floor beside her for support, torso upright",
+        "zh": "坐姿｜单手支撑・双腿前伸；sitting on the floor with both legs swept toget"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -77,6 +92,10 @@
         "Sitting, one-hand support, legs swept forward"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs swept together toward the front-left, leaning on one hand placed flat on the floor beside her for support, torso upright",
+        "zh": "坐姿｜单手支撑・双腿前伸；sitting on the floor with both legs swept toget"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -95,6 +114,10 @@
         "Sitting, hands behind, chest out"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with legs extended forward, both hands on the floor behind her supporting her, chest pushed out proudly",
+        "zh": "坐姿｜双手后撑・挺胸坐；sitting on the floor with legs extended forward,"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -113,6 +136,10 @@
         "Sitting, hands behind, chest out"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with legs extended forward, both hands on the floor behind her supporting her, chest pushed out proudly",
+        "zh": "坐姿｜双手后撑・挺胸坐；sitting on the floor with legs extended forward,"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -131,6 +158,10 @@
         "Triangle sit, knees tilted left"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with her legs folded beneath her in a triangle shape, both knees tilted over to her left side, hands resting in her lap",
+        "zh": "坐姿｜三角坐・双膝左倾；sitting on the floor with the figure legs folded"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -149,6 +180,10 @@
         "Triangle sit, knees tilted left"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with her legs folded beneath her in a triangle shape, both knees tilted over to her left side, hands resting in her lap",
+        "zh": "坐姿｜三角坐・双膝左倾；sitting on the floor with the figure legs folded"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -167,6 +202,10 @@
         "Sitting, one knee raised, hand in hair"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with one knee raised and bent, the other leg extended, one hand raised touching her hair",
+        "zh": "坐姿｜单膝竖起・手触发；sitting on the floor with one knee raised and be"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -185,6 +224,10 @@
         "Sitting, one knee raised, hand in hair"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with one knee raised and bent, the other leg extended, one hand raised touching her hair",
+        "zh": "坐姿｜单膝竖起・手触发；sitting on the floor with one knee raised and be"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -203,6 +246,10 @@
         "Sitting, legs extended diagonally, hand on hip"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor, both legs extended straight out diagonally to her left side together, one hand resting on her hip, her other arm extended behind her with the hand on the floor supporting her upright torso",
+        "zh": "坐姿｜双腿斜伸・手扶腰；sitting on the floor, both legs extended straigh"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -221,6 +268,10 @@
         "Sitting, legs extended diagonally, hand on hip"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor, both legs extended straight out diagonally to her left side together, one hand resting on her hip, her other arm extended behind her with the hand on the floor supporting her upright torso",
+        "zh": "坐姿｜双腿斜伸・手扶腰；sitting on the floor, both legs extended straigh"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -239,6 +290,10 @@
         "Lying prone propped on both elbows"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying prone on the floor propped up on both elbows, upper body lifted, legs stretched out straight behind her",
+        "zh": "坐姿｜双肘撑地俯卧；lying prone on the floor propped up on both elbows"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -257,6 +312,10 @@
         "Lying prone propped on both elbows"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying prone on the floor propped up on both elbows, upper body lifted, legs stretched out straight behind her",
+        "zh": "坐姿｜双肘撑地俯卧；lying prone on the floor propped up on both elbows"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -275,6 +334,10 @@
         "Sitting, knees up, hands behind head"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both knees raised and bent, feet flat on the floor, both hands clasped behind her head",
+        "zh": "坐姿｜双膝竖起・双手抱头；sitting on the floor with both knees raised and"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -293,6 +356,10 @@
         "Sitting, knees up, hands behind head"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both knees raised and bent, feet flat on the floor, both hands clasped behind her head",
+        "zh": "坐姿｜双膝竖起・双手抱头；sitting on the floor with both knees raised and"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -311,6 +378,10 @@
         "Sitting leaning right on elbow"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor leaning over to her right side, propped up on her right elbow, legs extended together to her left",
+        "zh": "坐姿｜右倾・肘撑坐；sitting on the floor leaning over to the figure ri"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -329,6 +400,10 @@
         "Sitting, hand resting on ankle"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs extended straight forward, leaning slightly forward with one hand resting gently on her ankle",
+        "zh": "坐姿｜手扶脚踝坐；sitting on the floor with both legs extended straig"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -347,6 +422,10 @@
         "Sitting, hand resting on ankle"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs extended straight forward, leaning slightly forward with one hand resting gently on her ankle",
+        "zh": "坐姿｜手扶脚踝坐；sitting on the floor with both legs extended straig"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -365,6 +444,10 @@
         "Sitting, hands behind head, chest arched"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with legs extended forward, both hands clasped behind her head, chest arched outward",
+        "zh": "坐姿｜双手抱头・挺胸；sitting on the floor with legs extended forward, "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -383,6 +466,10 @@
         "Sitting, hands behind head, chest arched"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with legs extended forward, both hands clasped behind her head, chest arched outward",
+        "zh": "坐姿｜双手抱头・挺胸；sitting on the floor with legs extended forward, "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -401,6 +488,10 @@
         "Sitting, one knee up, cheek on hand"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with one knee raised and bent, her elbow resting on the raised knee and her cheek resting on that hand in a thoughtful pose, the other leg extended",
+        "zh": "坐姿｜单膝竖起・托腮；sitting on the floor with one knee raised and ben"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -419,6 +510,10 @@
         "Sitting, one knee up, cheek on hand"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with one knee raised and bent, her elbow resting on the raised knee and her cheek resting on that hand in a thoughtful pose, the other leg extended",
+        "zh": "坐姿｜单膝竖起・托腮；sitting on the floor with one knee raised and ben"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -437,6 +532,10 @@
         "Leaning back on hands, both legs lifted"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor leaning back on both hands placed behind her, both legs lifted off the ground together, balancing on her seat",
+        "zh": "坐姿｜后撑・双腿离地；sitting on the floor leaning back on both hands p"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -455,6 +554,10 @@
         "Leaning back on hands, both legs lifted"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor leaning back on both hands placed behind her, both legs lifted off the ground together, balancing on her seat",
+        "zh": "坐姿｜后撑・双腿离地；sitting on the floor leaning back on both hands p"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -473,6 +576,10 @@
         "Sitting, one knee up, holding ankle"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with one knee raised and bent, holding that leg's ankle with her hand, the other leg extended forward",
+        "zh": "坐姿｜单膝竖起・握脚踝；sitting on the floor with one knee raised and be"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -491,6 +598,10 @@
         "Standing contrapposto, hand on hip"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing in a relaxed contrapposto pose with her weight on one leg, one hand resting on her hip, the other arm hanging relaxed",
+        "zh": "站立｜站立・单手叉腰；standing in a relaxed contrapposto pose with the "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -509,6 +620,10 @@
         "Standing contrapposto, hand on hip"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing in a relaxed contrapposto pose with her weight on one leg, one hand resting on her hip, the other arm hanging relaxed",
+        "zh": "站立｜站立・单手叉腰；standing in a relaxed contrapposto pose with the "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -527,6 +642,10 @@
         "Standing, both hands lifting hair"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with both hands raised to her head, fingers running through her hair and lifting it up",
+        "zh": "站立｜站立・双手撩发；standing with both hands raised to the figure hea"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -545,6 +664,10 @@
         "Standing, both hands lifting hair"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with both hands raised to her head, fingers running through her hair and lifting it up",
+        "zh": "站立｜站立・双手撩发；standing with both hands raised to the figure hea"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -563,6 +686,10 @@
         "Standing, looking back over shoulder"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with her body turned mostly away from the camera, looking back over her shoulder toward the camera",
+        "zh": "站立｜站立・回眸；standing with the figure body turned mostly away fr"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -581,6 +708,10 @@
         "Standing, looking back over shoulder"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with her body turned mostly away from the camera, looking back over her shoulder toward the camera",
+        "zh": "站立｜站立・回眸；standing with the figure body turned mostly away fr"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -599,6 +730,10 @@
         "Standing, both hands on hips"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing straight facing forward with both hands placed firmly on her hips, elbows out, legs straight and slightly apart",
+        "zh": "站立｜站立・双手叉腰；standing straight facing forward with both hands "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -617,6 +752,10 @@
         "Standing, both hands on hips"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing straight facing forward with both hands placed firmly on her hips, elbows out, legs straight and slightly apart",
+        "zh": "站立｜站立・双手叉腰；standing straight facing forward with both hands "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -635,6 +774,10 @@
         "Standing, arms stretched overhead"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with both arms stretched straight up high overhead in a full-body stretch, legs straight",
+        "zh": "站立｜站立・双臂上伸；standing with both arms stretched straight up hig"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -653,6 +796,10 @@
         "Standing, arms stretched overhead"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with both arms stretched straight up high overhead in a full-body stretch, legs straight",
+        "zh": "站立｜站立・双臂上伸；standing with both arms stretched straight up hig"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -671,6 +818,10 @@
         "Standing, one hand behind head"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with one hand resting on the back of her head, the other arm relaxed at her side",
+        "zh": "站立｜站立・单手扶后脑；standing with one hand resting on the back of th"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -689,6 +840,10 @@
         "Standing, one hand behind head"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with one hand resting on the back of her head, the other arm relaxed at her side",
+        "zh": "站立｜站立・单手扶后脑；standing with one hand resting on the back of th"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -707,6 +862,10 @@
         "Standing, hands at neck and thigh"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with one hand resting at her neck and collarbone, the other hand resting flat on her thigh",
+        "zh": "站立｜站立・手扶颈侧与大腿；standing with one hand resting at the figure n"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -725,6 +884,10 @@
         "Standing, hands at neck and thigh"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with one hand resting at her neck and collarbone, the other hand resting flat on her thigh",
+        "zh": "站立｜站立・手扶颈侧与大腿；standing with one hand resting at the figure n"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -743,6 +906,10 @@
         "Standing, arms behind, chest out"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with both arms pulled behind her back, chest pushed out proudly, legs straight",
+        "zh": "站立｜站立・双臂后展挺胸；standing with both arms pulled behind the figur"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -761,6 +928,10 @@
         "Standing, arms behind, chest out"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with both arms pulled behind her back, chest pushed out proudly, legs straight",
+        "zh": "站立｜站立・双臂后展挺胸；standing with both arms pulled behind the figur"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -779,6 +950,10 @@
         "Standing, one leg lifted behind"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing balanced on one leg, the other leg lifted behind her with the knee bent and foot up",
+        "zh": "站立｜站立・单腿后抬；standing balanced on one leg, the other leg lifte"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -797,6 +972,10 @@
         "Standing, one leg lifted behind"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing balanced on one leg, the other leg lifted behind her with the knee bent and foot up",
+        "zh": "站立｜站立・单腿后抬；standing balanced on one leg, the other leg lifte"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -815,6 +994,10 @@
         "Standing wide stance, hands on hips"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing in a wide stance with legs apart, both hands on her hips, confident posture",
+        "zh": "站立｜站立・双腿分开叉腰；standing in a wide stance with legs apart, both"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -833,6 +1016,10 @@
         "Standing wide stance, hands on hips"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing in a wide stance with legs apart, both hands on her hips, confident posture",
+        "zh": "站立｜站立・双腿分开叉腰；standing in a wide stance with legs apart, both"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -851,6 +1038,10 @@
         "Standing, one arm up, hip pushed out"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with one arm raised up, her hip pushed out to one side in a playful pose",
+        "zh": "站立｜站立・单臂上举扭腰；standing with one arm raised up, the figure hip"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -869,6 +1060,10 @@
         "Standing, one arm up, hip pushed out"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with one arm raised up, her hip pushed out to one side in a playful pose",
+        "zh": "站立｜站立・单臂上举扭腰；standing with one arm raised up, the figure hip"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -887,6 +1082,10 @@
         "Standing, both hands at nape"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with both hands raised behind her head, resting on the nape of her neck, elbows out",
+        "zh": "站立｜站立・双手扶颈后；standing with both hands raised behind the figur"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -905,6 +1104,10 @@
         "Standing, both hands at nape"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with both hands raised behind her head, resting on the nape of her neck, elbows out",
+        "zh": "站立｜站立・双手扶颈后；standing with both hands raised behind the figur"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -923,6 +1126,10 @@
         "Standing, hair flowing in the wind"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing gracefully with her long hair flowing and billowing in the wind, arms relaxed",
+        "zh": "站立｜站立・长发飘扬；standing gracefully with the figure long hair flo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -941,6 +1148,10 @@
         "Standing on tiptoe, arms in V"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing on tiptoe with both arms raised diagonally upward in a V shape, legs straight",
+        "zh": "站立｜踮脚站立・双臂V字；standing on tiptoe with both arms raised diagon"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -959,6 +1170,10 @@
         "Standing on tiptoe, arms in V"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing on tiptoe with both arms raised diagonally upward in a V shape, legs straight",
+        "zh": "站立｜踮脚站立・双臂V字；standing on tiptoe with both arms raised diagon"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -977,6 +1192,10 @@
         "Kneeling upright, hands on thighs"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling upright on both knees on the floor, back straight, both hands resting flat on her thighs",
+        "zh": "跪姿｜跪立・双手放大腿；kneeling upright on both knees on the floor, bac"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -995,6 +1214,10 @@
         "Kneeling, hands behind head"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling upright on both knees, both hands clasped behind her head, elbows out",
+        "zh": "跪姿｜跪立・双手抱头；kneeling upright on both knees, both hands claspe"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1013,6 +1236,10 @@
         "Kneeling, hands behind head"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling upright on both knees, both hands clasped behind her head, elbows out",
+        "zh": "跪姿｜跪立・双手抱头；kneeling upright on both knees, both hands claspe"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1031,6 +1258,10 @@
         "Half-kneeling, hand on knee"
       ],
       "series": "std",
+      "pose": {
+        "en": "in a half-kneeling pose with one knee on the floor and the other foot planted flat in front with knee bent, one hand resting on her front knee",
+        "zh": "跪姿｜单膝跪・手放膝上；in a half-kneeling pose with one knee on the flo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1049,6 +1280,10 @@
         "Half-kneeling, hand on knee"
       ],
       "series": "std",
+      "pose": {
+        "en": "in a half-kneeling pose with one knee on the floor and the other foot planted flat in front with knee bent, one hand resting on her front knee",
+        "zh": "跪姿｜单膝跪・手放膝上；in a half-kneeling pose with one knee on the flo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1067,6 +1302,10 @@
         "Kneeling, upper body arched back"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees, arching her upper body backward in a deep backbend, arms hanging relaxed",
+        "zh": "跪姿｜跪立・上身后仰；kneeling on both knees, arching the figure upper "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1085,6 +1324,10 @@
         "Kneeling, arms stretched up"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees with both arms stretched straight upward toward the ceiling",
+        "zh": "跪姿｜跪立・双臂上伸；kneeling on both knees with both arms stretched s"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1103,6 +1346,10 @@
         "Kneeling, arms stretched up"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees with both arms stretched straight upward toward the ceiling",
+        "zh": "跪姿｜跪立・双臂上伸；kneeling on both knees with both arms stretched s"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1121,6 +1368,10 @@
         "Kneeling, one hand in hair, one on hip"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees, one hand raised touching her hair, the other hand resting on her hip",
+        "zh": "跪姿｜跪立・一手触发一手叉腰；kneeling on both knees, one hand raised touch"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1139,6 +1390,10 @@
         "Kneeling, one hand in hair, one on hip"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees, one hand raised touching her hair, the other hand resting on her hip",
+        "zh": "跪姿｜跪立・一手触发一手叉腰；kneeling on both knees, one hand raised touch"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1157,6 +1412,10 @@
         "Half-kneeling, looking up"
       ],
       "series": "std",
+      "pose": {
+        "en": "in a half-kneeling pose with one knee on the floor and the other foot planted in front, face turned looking upward",
+        "zh": "跪姿｜单膝跪・仰望；in a half-kneeling pose with one knee on the floor"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1175,6 +1434,10 @@
         "Half-kneeling, looking up"
       ],
       "series": "std",
+      "pose": {
+        "en": "in a half-kneeling pose with one knee on the floor and the other foot planted in front, face turned looking upward",
+        "zh": "跪姿｜单膝跪・仰望；in a half-kneeling pose with one knee on the floor"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1193,6 +1456,10 @@
         "Kneeling, hands on hips, back arched"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees with both hands on her hips, arching her back, chest out",
+        "zh": "跪姿｜跪立・叉腰后仰；kneeling on both knees with both hands on the fig"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1211,6 +1478,10 @@
         "Kneeling, hands on hips, back arched"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees with both hands on her hips, arching her back, chest out",
+        "zh": "跪姿｜跪立・叉腰后仰；kneeling on both knees with both hands on the fig"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1229,6 +1500,10 @@
         "Kneeling, hips swayed, one arm raised"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees with her hips swayed to one side, one arm raised up in the air",
+        "zh": "跪姿｜跪立・扭腰单臂上举；kneeling on both knees with the figure hips swa"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1247,6 +1522,10 @@
         "Kneeling, hips swayed, one arm raised"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees with her hips swayed to one side, one arm raised up in the air",
+        "zh": "跪姿｜跪立・扭腰单臂上举；kneeling on both knees with the figure hips swa"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1265,6 +1544,10 @@
         "W-sit, hands on thighs"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with her legs folded out to both sides of her hips, back straight, both hands resting on her thighs",
+        "zh": "侧坐・少女坐｜少女坐・双手放大腿；sitting on the floor in a W-sit with the fi"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1283,6 +1566,10 @@
         "W-sit, hands on thighs"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with her legs folded out to both sides of her hips, back straight, both hands resting on her thighs",
+        "zh": "侧坐・少女坐｜少女坐・双手放大腿；sitting on the floor in a W-sit with the fi"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1301,6 +1588,10 @@
         "W-sit, hands on floor in front"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with legs folded to both sides, leaning slightly forward with both hands placed on the floor in front of her",
+        "zh": "侧坐・少女坐｜少女坐・双手前撑；sitting on the floor in a W-sit with legs fo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1319,6 +1610,10 @@
         "W-sit, hands on floor in front"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with legs folded to both sides, leaning slightly forward with both hands placed on the floor in front of her",
+        "zh": "侧坐・少女坐｜少女坐・双手前撑；sitting on the floor in a W-sit with legs fo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1337,6 +1632,10 @@
         "W-sit, hands behind head"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with legs folded to both sides, both hands clasped behind her head",
+        "zh": "侧坐・少女坐｜少女坐・双手抱头；sitting on the floor in a W-sit with legs fo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1355,6 +1654,10 @@
         "W-sit, hands on floor behind"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with legs folded to both sides, leaning back slightly with both hands placed on the floor behind her",
+        "zh": "侧坐・少女坐｜少女坐・双手后撑；sitting on the floor in a W-sit with legs fo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1373,6 +1676,10 @@
         "W-sit, hands on floor behind"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with legs folded to both sides, leaning back slightly with both hands placed on the floor behind her",
+        "zh": "侧坐・少女坐｜少女坐・双手后撑；sitting on the floor in a W-sit with legs fo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1391,6 +1698,10 @@
         "Side sit, legs swept right"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs swept together to her right side in a side-saddle sit, torso upright and straight",
+        "zh": "侧坐・少女坐｜侧坐・双腿右流；sitting on the floor with both legs swept tog"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1409,6 +1720,10 @@
         "Side sit, legs swept right"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs swept together to her right side in a side-saddle sit, torso upright and straight",
+        "zh": "侧坐・少女坐｜侧坐・双腿右流；sitting on the floor with both legs swept tog"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1427,6 +1742,10 @@
         "Side sit, hand on cheek"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs swept together to one side, one hand raised with fingers resting gently against her cheek",
+        "zh": "侧坐・少女坐｜侧坐・手贴脸颊；sitting on the floor with both legs swept tog"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1445,6 +1764,10 @@
         "Side sit, hand on cheek"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs swept together to one side, one hand raised with fingers resting gently against her cheek",
+        "zh": "侧坐・少女坐｜侧坐・手贴脸颊；sitting on the floor with both legs swept tog"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1463,6 +1786,10 @@
         "Side sit, one arm stretched up"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs swept together to one side, one arm stretched straight upward",
+        "zh": "侧坐・少女坐｜侧坐・单臂上伸；sitting on the floor with both legs swept tog"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1481,6 +1808,10 @@
         "Side sit, one arm stretched up"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with both legs swept together to one side, one arm stretched straight upward",
+        "zh": "侧坐・少女坐｜侧坐・单臂上伸；sitting on the floor with both legs swept tog"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1499,6 +1830,10 @@
         "W-sit, hand at neck"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with legs folded to both sides, one hand resting at her neck and collarbone",
+        "zh": "侧坐・少女坐｜少女坐・手扶颈侧；sitting on the floor in a W-sit with legs fo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1517,6 +1852,10 @@
         "W-sit, hand at neck"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor in a W-sit with legs folded to both sides, one hand resting at her neck and collarbone",
+        "zh": "侧坐・少女坐｜少女坐・手扶颈侧；sitting on the floor in a W-sit with legs fo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1535,6 +1874,10 @@
         "Lying on back, arms overhead"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying flat on her back on the floor with both arms extended above her head resting on the floor, legs straight and together",
+        "zh": "躺姿｜仰卧・双臂过头；lying flat on the figure back on the floor with b"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1553,6 +1896,10 @@
         "Lying on back, arms overhead"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying flat on her back on the floor with both arms extended above her head resting on the floor, legs straight and together",
+        "zh": "躺姿｜仰卧・双臂过头；lying flat on the figure back on the floor with b"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1571,6 +1918,10 @@
         "Lying on side, cheek on hand"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying on her side on the floor, propped up on her lower elbow with her cheek resting on that hand, legs extended straight together",
+        "zh": "躺姿｜侧卧・托腮；lying on the figure side on the floor, propped up o"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1589,6 +1940,10 @@
         "Lying on side, cheek on hand"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying on her side on the floor, propped up on her lower elbow with her cheek resting on that hand, legs extended straight together",
+        "zh": "躺姿｜侧卧・托腮；lying on the figure side on the floor, propped up o"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1607,6 +1962,10 @@
         "Lying face down, legs kicked up"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying face down on her stomach on the floor, both legs bent upward behind her with feet kicked up in the air, chin resting on her hands",
+        "zh": "躺姿｜俯卧・双腿上踢；lying face down on the figure stomach on the floo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1625,6 +1984,10 @@
         "Lying on side, waist curved"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying on her side on the floor, her waist curving in an S line, legs extended together",
+        "zh": "躺姿｜侧卧・腰部曲线；lying on the figure side on the floor, the figure"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1643,6 +2006,10 @@
         "Lying on side, waist curved"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying on her side on the floor, her waist curving in an S line, legs extended together",
+        "zh": "躺姿｜侧卧・腰部曲线；lying on the figure side on the floor, the figure"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1661,6 +2028,10 @@
         "Lying on back, both legs straight up"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying flat on her back on the floor with both legs raised straight up toward the ceiling together, arms resting beside her body",
+        "zh": "躺姿｜仰卧・双腿竖直上举；lying flat on the figure back on the floor with"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1679,6 +2050,10 @@
         "Lying on back, both legs straight up"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying flat on her back on the floor with both legs raised straight up toward the ceiling together, arms resting beside her body",
+        "zh": "躺姿｜仰卧・双腿竖直上举；lying flat on the figure back on the floor with"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1697,6 +2072,10 @@
         "Lying on side, one arm overhead"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying on her side on the floor with one arm extended above her head resting on the floor, legs extended together",
+        "zh": "躺姿｜侧卧・单臂过头；lying on the figure side on the floor with one ar"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1715,6 +2094,10 @@
         "Lying on side, one arm overhead"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying on her side on the floor with one arm extended above her head resting on the floor, legs extended together",
+        "zh": "躺姿｜侧卧・单臂过头；lying on the figure side on the floor with one ar"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1733,6 +2116,10 @@
         "Lying face down, head on folded arms"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying face down on her stomach on the floor, her head resting on her folded arms used as a pillow, legs extended straight",
+        "zh": "躺姿｜俯卧・臂枕；lying face down on the figure stomach on the floor,"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1751,6 +2138,10 @@
         "Lying face down, head on folded arms"
       ],
       "series": "std",
+      "pose": {
+        "en": "lying face down on her stomach on the floor, her head resting on her folded arms used as a pillow, legs extended straight",
+        "zh": "躺姿｜俯卧・臂枕；lying face down on the figure stomach on the floor,"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1769,6 +2160,10 @@
         "Squatting, hands on knees"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low with both feet flat on the floor, both hands resting on her knees",
+        "zh": "蹲姿｜深蹲・手放膝上；squatting low with both feet flat on the floor, b"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1787,6 +2182,10 @@
         "Squatting, hands on knees"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low with both feet flat on the floor, both hands resting on her knees",
+        "zh": "蹲姿｜深蹲・手放膝上；squatting low with both feet flat on the floor, b"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1805,6 +2204,10 @@
         "Squatting, one hand on floor"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low, one hand placed flat on the floor beside her for support, the other hand resting on her knee",
+        "zh": "蹲姿｜深蹲・单手撑地；squatting low, one hand placed flat on the floor "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1823,6 +2226,10 @@
         "Squatting, one hand on floor"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low, one hand placed flat on the floor beside her for support, the other hand resting on her knee",
+        "zh": "蹲姿｜深蹲・单手撑地；squatting low, one hand placed flat on the floor "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1841,6 +2248,10 @@
         "Squatting, cheek on hand"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low with her elbow resting on her knee and her cheek resting on that hand",
+        "zh": "蹲姿｜深蹲・托腮；squatting low with the figure elbow resting on the "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1859,6 +2270,10 @@
         "Squatting, cheek on hand"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low with her elbow resting on her knee and her cheek resting on that hand",
+        "zh": "蹲姿｜深蹲・托腮；squatting low with the figure elbow resting on the "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1877,6 +2292,10 @@
         "Squatting, hand in hair"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low, one hand raised touching her hair, the other hand resting on her knee",
+        "zh": "蹲姿｜深蹲・手触发；squatting low, one hand raised touching the figure"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1895,6 +2314,10 @@
         "Squatting, hand in hair"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low, one hand raised touching her hair, the other hand resting on her knee",
+        "zh": "蹲姿｜深蹲・手触发；squatting low, one hand raised touching the figure"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1913,6 +2336,10 @@
         "Deep squat on tiptoe, both hands on floor"
       ],
       "series": "std",
+      "pose": {
+        "en": "in a deep squat up on the balls of her feet, both hands placed flat on the floor in front of her",
+        "zh": "蹲姿｜深蹲踮脚・双手撑地；in a deep squat up on the balls of the figure f"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1931,6 +2358,10 @@
         "Deep squat on tiptoe, both hands on floor"
       ],
       "series": "std",
+      "pose": {
+        "en": "in a deep squat up on the balls of her feet, both hands placed flat on the floor in front of her",
+        "zh": "蹲姿｜深蹲踮脚・双手撑地；in a deep squat up on the balls of the figure f"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1949,6 +2380,10 @@
         "Squatting, looking back"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low, her upper body turned to look back over her shoulder",
+        "zh": "蹲姿｜深蹲・回头；squatting low, the figure upper body turned to look"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1967,6 +2402,10 @@
         "Squatting, looking back"
       ],
       "series": "std",
+      "pose": {
+        "en": "squatting low, her upper body turned to look back over her shoulder",
+        "zh": "蹲姿｜深蹲・回头；squatting low, the figure upper body turned to look"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -1985,6 +2424,10 @@
         "Bent forward, hands on knees"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist, both hands resting on her knees, back nearly horizontal",
+        "zh": "前倾｜前倾・手放膝上；standing bent forward at the waist, both hands re"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2003,6 +2446,10 @@
         "Bent forward, hands on knees"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist, both hands resting on her knees, back nearly horizontal",
+        "zh": "前倾｜前倾・手放膝上；standing bent forward at the waist, both hands re"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2021,6 +2468,10 @@
         "Bent forward deeply, hands touching shins"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward deeply at the waist, both hands reaching down touching her shins",
+        "zh": "前倾｜前倾・手摸小腿；standing bent forward deeply at the waist, both h"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2039,6 +2490,10 @@
         "Bent forward deeply, hands touching shins"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward deeply at the waist, both hands reaching down touching her shins",
+        "zh": "前倾｜前倾・手摸小腿；standing bent forward deeply at the waist, both h"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2057,6 +2512,10 @@
         "Bent forward, one hand on hip, looking up"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist with one hand on her hip, her face turned looking upward",
+        "zh": "前倾｜前倾・单手叉腰仰望；standing bent forward at the waist with one han"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2075,6 +2534,10 @@
         "Bent forward, one hand on hip, looking up"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist with one hand on her hip, her face turned looking upward",
+        "zh": "前倾｜前倾・单手叉腰仰望；standing bent forward at the waist with one han"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2093,6 +2556,10 @@
         "Bent forward, hands on thighs, hips back"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist with both hands resting on her thighs, her hips pushed back",
+        "zh": "前倾｜前倾・手放大腿挺臀；standing bent forward at the waist with both ha"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2111,6 +2578,10 @@
         "Bent forward, hands on thighs, hips back"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist with both hands resting on her thighs, her hips pushed back",
+        "zh": "前倾｜前倾・手放大腿挺臀；standing bent forward at the waist with both ha"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2129,6 +2600,10 @@
         "Bent forward, arms hanging limp"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist, both arms hanging down limp and relaxed toward the floor",
+        "zh": "前倾｜前倾・双臂垂落；standing bent forward at the waist, both arms han"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2147,6 +2622,10 @@
         "Bent forward, arms hanging limp"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist, both arms hanging down limp and relaxed toward the floor",
+        "zh": "前倾｜前倾・双臂垂落；standing bent forward at the waist, both arms han"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2165,6 +2644,10 @@
         "Bent forward, one leg lifted behind"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist, balancing on one leg with the other leg lifted behind her",
+        "zh": "前倾｜前倾・单腿后抬；standing bent forward at the waist, balancing on "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2183,6 +2666,10 @@
         "Bent forward, one leg lifted behind"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing bent forward at the waist, balancing on one leg with the other leg lifted behind her",
+        "zh": "前倾｜前倾・单腿后抬；standing bent forward at the waist, balancing on "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2201,6 +2688,10 @@
         "Standing twist, arms spread wide"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with her upper body twisted to the side, both arms spread wide open",
+        "zh": "扭转｜站立扭转・双臂展开；standing with the figure upper body twisted to "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2219,6 +2710,10 @@
         "Standing twist, arms spread wide"
       ],
       "series": "std",
+      "pose": {
+        "en": "standing with her upper body twisted to the side, both arms spread wide open",
+        "zh": "扭转｜站立扭转・双臂展开；standing with the figure upper body twisted to "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2237,6 +2732,10 @@
         "Kneeling twist, looking back"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees with her upper body twisted, looking back over her shoulder",
+        "zh": "扭转｜跪立扭转・回头；kneeling on both knees with the figure upper body"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2255,6 +2754,10 @@
         "Kneeling twist, looking back"
       ],
       "series": "std",
+      "pose": {
+        "en": "kneeling on both knees with her upper body twisted, looking back over her shoulder",
+        "zh": "扭转｜跪立扭转・回头；kneeling on both knees with the figure upper body"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2273,6 +2776,10 @@
         "Sitting, upper body twisted"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with legs extended forward, her upper body twisted to the side, one hand placed on the floor behind her for support",
+        "zh": "扭转｜坐姿・上身扭转；sitting on the floor with legs extended forward, "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2291,6 +2798,10 @@
         "Sitting, upper body twisted"
       ],
       "series": "std",
+      "pose": {
+        "en": "sitting on the floor with legs extended forward, her upper body twisted to the side, one hand placed on the floor behind her for support",
+        "zh": "扭转｜坐姿・上身扭转；sitting on the floor with legs extended forward, "
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2302,13 +2813,17 @@
       "thumb": "/library/pose/SP-U001-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U001_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Both hands heart at chest"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands forming a heart shape in front of her chest",
+        "zh": "上半身｜胸前双手比心；both hands forming a in front of the figure chest"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2320,13 +2835,17 @@
       "thumb": "/library/pose/SP-U001-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U001_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Both hands heart at chest"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands forming a heart shape in front of her chest",
+        "zh": "上半身｜胸前双手比心；both hands forming a in front of the figure chest"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2338,13 +2857,17 @@
       "thumb": "/library/pose/SP-U002-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U002_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Overhead arms heart"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both arms raised above her head, hands joined forming a large heart shape overhead",
+        "zh": "上半身｜头顶双臂大爱心；both arms raised above the figure head, hands jo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2356,13 +2879,17 @@
       "thumb": "/library/pose/SP-U002-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U002_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Overhead arms heart"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both arms raised above her head, hands joined forming a large heart shape overhead",
+        "zh": "上半身｜头顶双臂大爱心；both arms raised above the figure head, hands jo"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2374,13 +2901,17 @@
       "thumb": "/library/pose/SP-U003-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U003_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Finger heart by cheek"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand beside her cheek making a small finger heart with thumb and index finger crossed",
+        "zh": "上半身｜脸颊旁手指比心；one hand beside the figure cheek making a small"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2392,13 +2923,17 @@
       "thumb": "/library/pose/SP-U003-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U003_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Finger heart by cheek"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand beside her cheek making a small finger heart with thumb and index finger crossed",
+        "zh": "上半身｜脸颊旁手指比心；one hand beside the figure cheek making a small"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2410,13 +2945,17 @@
       "thumb": "/library/pose/SP-U004-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U004_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Double peace under chin"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised beside her face making peace signs under her chin",
+        "zh": "上半身｜下巴下双剪刀手；both hands raised beside the figure face making"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2428,13 +2967,17 @@
       "thumb": "/library/pose/SP-U004-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U004_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Double peace under chin"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised beside her face making peace signs under her chin",
+        "zh": "上半身｜下巴下双剪刀手；both hands raised beside the figure face making"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2446,13 +2989,17 @@
       "thumb": "/library/pose/SP-U005-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U005_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Peace sign, back of hand"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand raised beside her face making a peace sign with the back of the hand facing forward",
+        "zh": "上半身｜手背剪刀手；one hand raised beside the figure face making a pe"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2464,13 +3011,17 @@
       "thumb": "/library/pose/SP-U005-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U005_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Peace sign, back of hand"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand raised beside her face making a peace sign with the back of the hand facing forward",
+        "zh": "上半身｜手背剪刀手；one hand raised beside the figure face making a pe"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2482,13 +3033,17 @@
       "thumb": "/library/pose/SP-U006-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U006_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Fist against cheek"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one fist held against her cheek, head tilted to one side",
+        "zh": "上半身｜拳头贴脸颊卖萌；one fist held against the figure cheek, head til"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2500,13 +3055,17 @@
       "thumb": "/library/pose/SP-U006-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U006_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Fist against cheek"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one fist held against her cheek, head tilted to one side",
+        "zh": "上半身｜拳头贴脸颊卖萌；one fist held against the figure cheek, head til"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2518,13 +3077,17 @@
       "thumb": "/library/pose/SP-U007-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U007_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Rabbit ears pose"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised beside her head with two fingers extended up like rabbit ears",
+        "zh": "上半身｜兔耳朵手势；both hands raised beside the figure head with two"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2536,13 +3099,17 @@
       "thumb": "/library/pose/SP-U007-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U007_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Rabbit ears pose"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised beside her head with two fingers extended up like rabbit ears",
+        "zh": "上半身｜兔耳朵手势；both hands raised beside the figure head with two"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2554,13 +3121,17 @@
       "thumb": "/library/pose/SP-U008-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U008_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Cat paw hands"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised beside her face with fingers curled down like cat paws",
+        "zh": "上半身｜招财猫猫爪；both hands raised beside the figure face with fing"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2572,13 +3143,17 @@
       "thumb": "/library/pose/SP-U008-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U008_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Cat paw hands"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised beside her face with fingers curled down like cat paws",
+        "zh": "上半身｜招财猫猫爪；both hands raised beside the figure face with fing"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2590,13 +3165,17 @@
       "thumb": "/library/pose/SP-U009-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U009_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Claw hands pose"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised beside her head with fingers spread wide like claws",
+        "zh": "上半身｜双手张爪吓人；both hands raised beside the figure head with fin"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2608,13 +3187,17 @@
       "thumb": "/library/pose/SP-U009-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U009_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Claw hands pose"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised beside her head with fingers spread wide like claws",
+        "zh": "上半身｜双手张爪吓人；both hands raised beside the figure head with fin"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2626,13 +3209,17 @@
       "thumb": "/library/pose/SP-U010-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U010_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Finger to lips (shh)"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one index finger raised vertically in front of her chin, the other arm relaxed at her side",
+        "zh": "上半身｜食指竖在唇前（嘘）；one index finger raised vertically in front of"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2644,13 +3231,17 @@
       "thumb": "/library/pose/SP-U010-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U010_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Finger to lips (shh)"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one index finger raised vertically in front of her chin, the other arm relaxed at her side",
+        "zh": "上半身｜食指竖在唇前（嘘）；one index finger raised vertically in front of"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2662,13 +3253,17 @@
       "thumb": "/library/pose/SP-U011-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U011_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Head tilt, hand at head"
       ],
       "series": "upper",
+      "pose": {
+        "en": "head tilted to one side, one hand touching the side of her head",
+        "zh": "上半身｜歪头手扶头侧；head tilted to one side, one hand touching the si"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2680,13 +3275,17 @@
       "thumb": "/library/pose/SP-U011-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U011_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Head tilt, hand at head"
       ],
       "series": "upper",
+      "pose": {
+        "en": "head tilted to one side, one hand touching the side of her head",
+        "zh": "上半身｜歪头手扶头侧；head tilted to one side, one hand touching the si"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2698,13 +3297,17 @@
       "thumb": "/library/pose/SP-U012-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U012_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Blowing a kiss"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand stretched toward the viewer with the palm facing up, the other hand relaxed",
+        "zh": "上半身｜伸手飞吻；one hand stretched toward the viewer with the palm"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2716,13 +3319,17 @@
       "thumb": "/library/pose/SP-U012-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U012_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Blowing a kiss"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand stretched toward the viewer with the palm facing up, the other hand relaxed",
+        "zh": "上半身｜伸手飞吻；one hand stretched toward the viewer with the palm"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2734,13 +3341,17 @@
       "thumb": "/library/pose/SP-U013-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U013_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Chin on palms (flower)"
       ],
       "series": "upper",
+      "pose": {
+        "en": "chin resting on both open palms, elbows bent, hands cupping her face from below like a flower",
+        "zh": "上半身｜双手托下巴花朵手；chin resting on both open palms, elbows bent, h"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2752,13 +3363,17 @@
       "thumb": "/library/pose/SP-U013-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U013_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Chin on palms (flower)"
       ],
       "series": "upper",
+      "pose": {
+        "en": "chin resting on both open palms, elbows bent, hands cupping her face from below like a flower",
+        "zh": "上半身｜双手托下巴花朵手；chin resting on both open palms, elbows bent, h"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2770,13 +3385,17 @@
       "thumb": "/library/pose/SP-U014-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U014_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Finger poking cheek"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one index finger poking her own cheek, head tilted to one side",
+        "zh": "上半身｜食指戳脸颊；one index finger poking the figure own cheek, head"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2788,13 +3407,17 @@
       "thumb": "/library/pose/SP-U014-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U014_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Finger poking cheek"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one index finger poking her own cheek, head tilted to one side",
+        "zh": "上半身｜食指戳脸颊；one index finger poking the figure own cheek, head"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2806,13 +3429,17 @@
       "thumb": "/library/pose/SP-U015-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U015_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Hands over mouth"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands held up together in front of the lower half of her face",
+        "zh": "上半身｜双手捂嘴；both hands held up together in front of the lower h"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2824,13 +3451,17 @@
       "thumb": "/library/pose/SP-U015-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U015_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Hands over mouth"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands held up together in front of the lower half of her face",
+        "zh": "上半身｜双手捂嘴；both hands held up together in front of the lower h"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2842,13 +3473,17 @@
       "thumb": "/library/pose/SP-U016-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U016_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Palms together pleading"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both palms pressed together in front of her chest in a pleading gesture, head tilted",
+        "zh": "上半身｜双手合十拜托；both palms pressed together in front of the figur"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2860,13 +3495,17 @@
       "thumb": "/library/pose/SP-U016-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U016_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Palms together pleading"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both palms pressed together in front of her chest in a pleading gesture, head tilted",
+        "zh": "上半身｜双手合十拜托；both palms pressed together in front of the figur"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2878,13 +3517,17 @@
       "thumb": "/library/pose/SP-U017-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U017_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Self-hug, shy"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both arms wrapped around her own shoulders in a self-hug, head lowered slightly",
+        "zh": "上半身｜抱自己害羞；both arms wrapped around the figure own shoulders"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2896,13 +3539,17 @@
       "thumb": "/library/pose/SP-U017-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U017_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Self-hug, shy"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both arms wrapped around her own shoulders in a self-hug, head lowered slightly",
+        "zh": "上半身｜抱自己害羞；both arms wrapped around the figure own shoulders"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2914,13 +3561,17 @@
       "thumb": "/library/pose/SP-U018-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U018_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Finger frame"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised in front of her face forming a rectangular frame with her fingers",
+        "zh": "上半身｜手指取景框；both hands raised in front of the figure face form"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2932,13 +3583,17 @@
       "thumb": "/library/pose/SP-U018-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U018_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Finger frame"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands raised in front of her face forming a rectangular frame with her fingers",
+        "zh": "上半身｜手指取景框；both hands raised in front of the figure face form"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2950,13 +3605,17 @@
       "thumb": "/library/pose/SP-U019-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U019_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Hand at ear (hair tuck)"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand raised to the side of her head at ear height, the other arm relaxed",
+        "zh": "上半身｜手撩耳边发；one hand raised to the side of the figure head at"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2968,13 +3627,17 @@
       "thumb": "/library/pose/SP-U019-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U019_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Hand at ear (hair tuck)"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand raised to the side of her head at ear height, the other arm relaxed",
+        "zh": "上半身｜手撩耳边发；one hand raised to the side of the figure head at"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -2986,13 +3649,17 @@
       "thumb": "/library/pose/SP-U020-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U020_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Hands cupping cheeks"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands cupping her cheeks from both sides",
+        "zh": "上半身｜双手捧脸颊；both hands cupping the figure cheeks from both sid"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3004,13 +3671,17 @@
       "thumb": "/library/pose/SP-U020-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U020_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Hands cupping cheeks"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands cupping her cheeks from both sides",
+        "zh": "上半身｜双手捧脸颊；both hands cupping the figure cheeks from both sid"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3022,13 +3693,17 @@
       "thumb": "/library/pose/SP-U021-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U021_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Salute"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand raised flat to her forehead in a salute, the other arm at her side",
+        "zh": "上半身｜敬礼；one hand raised flat to the figure forehead in a salu"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3040,13 +3715,17 @@
       "thumb": "/library/pose/SP-U021-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U021_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Salute"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand raised flat to her forehead in a salute, the other arm at her side",
+        "zh": "上半身｜敬礼；one hand raised flat to the figure forehead in a salu"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3058,13 +3737,17 @@
       "thumb": "/library/pose/SP-U022-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U022_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Pointing at camera"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one arm extended forward pointing straight at the viewer with her index finger",
+        "zh": "上半身｜手指镜头；one arm extended forward pointing straight at the v"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3076,13 +3759,17 @@
       "thumb": "/library/pose/SP-U022-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U022_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Pointing at camera"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one arm extended forward pointing straight at the viewer with her index finger",
+        "zh": "上半身｜手指镜头；one arm extended forward pointing straight at the v"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3094,13 +3781,17 @@
       "thumb": "/library/pose/SP-U023-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U023_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Hand at face, arm out"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand raised in front of her face, the other arm stretched out to the side",
+        "zh": "上半身｜单手遮脸伸懒腰；one hand raised in front of the figure face, the"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3112,13 +3803,17 @@
       "thumb": "/library/pose/SP-U023-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U023_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Hand at face, arm out"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand raised in front of her face, the other arm stretched out to the side",
+        "zh": "上半身｜单手遮脸伸懒腰；one hand raised in front of the figure face, the"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3130,13 +3825,17 @@
       "thumb": "/library/pose/SP-U024-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U024_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Half-heart + hand on chest"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand making a half-heart shape beside her cheek, the other hand placed flat on her chest",
+        "zh": "上半身｜半心贴脸・单手抚胸；one hand making a half- beside the figure chee"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3148,13 +3847,17 @@
       "thumb": "/library/pose/SP-U024-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U024_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Half-heart + hand on chest"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one hand making a half-heart shape beside her cheek, the other hand placed flat on her chest",
+        "zh": "上半身｜半心贴脸・单手抚胸；one hand making a half- beside the figure chee"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3166,13 +3869,17 @@
       "thumb": "/library/pose/SP-U025-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U025_front.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Peeking through fingers"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands held up in front of her face with fingers spread, peeking through the gaps",
+        "zh": "上半身｜指缝偷看；both hands held up in front of the figure face with"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3184,13 +3891,17 @@
       "thumb": "/library/pose/SP-U025-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U025_diag.webp",
       "cats": [
-        "可爱系"
+        "上半身"
       ],
       "tags": [
         "可爱系",
         "Peeking through fingers"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands held up in front of her face with fingers spread, peeking through the gaps",
+        "zh": "上半身｜指缝偷看；both hands held up in front of the figure face with"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3202,13 +3913,17 @@
       "thumb": "/library/pose/SP-U035-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U035_front.webp",
       "cats": [
-        "胸线强调系"
+        "上半身"
       ],
       "tags": [
         "胸线强调系",
         "Hands flat on collarbones"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands placed flat on her collarbones, shoulders raised slightly",
+        "zh": "上半身｜双手平放锁骨；both hands placed flat on the figure collarbone"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3220,13 +3935,17 @@
       "thumb": "/library/pose/SP-U035-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U035_diag.webp",
       "cats": [
-        "胸线强调系"
+        "上半身"
       ],
       "tags": [
         "胸线强调系",
         "Hands flat on collarbones"
       ],
       "series": "upper",
+      "pose": {
+        "en": "both hands placed flat on her collarbones, shoulders raised slightly",
+        "zh": "上半身｜双手平放锁骨；both hands placed flat on the figure collarbone"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3238,13 +3957,17 @@
       "thumb": "/library/pose/SP-U040-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U040_front.webp",
       "cats": [
-        "胸线强调系"
+        "上半身"
       ],
       "tags": [
         "胸线强调系",
         "Elbow on knee, chin on hand"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one elbow propped on her raised knee, chin resting on that hand",
+        "zh": "上半身｜单肘支膝托腮；one elbow propped on the figure raised knee, ch"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     },
@@ -3256,16 +3979,19 @@
       "thumb": "/library/pose/SP-U040-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/upper_U040_diag.webp",
       "cats": [
-        "胸线强调系"
+        "上半身"
       ],
       "tags": [
         "胸线强调系",
         "Elbow on knee, chin on hand"
       ],
       "series": "upper",
+      "pose": {
+        "en": "one elbow propped on her raised knee, chin resting on that hand",
+        "zh": "上半身｜单肘支膝托腮；one elbow propped on the figure raised knee, ch"
+      },
       "src": "shisei",
       "license": "CC0-1.0"
     }
-  ],
-  "origin": "bundled"
+  ]
 }

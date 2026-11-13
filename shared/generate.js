@@ -41,12 +41,26 @@ export const MODELS = {
 export const DEFAULT_MODEL = '@cf/black-forest-labs/flux-2-klein-9b';
 
 /**
+ * 姿态要点清洗：前端从图库条目里带一段「坐在地面、单膝竖起、双手撑地」这类要点。
+ * 截断到 200 字符是为了不喧宾夺主——多图合成里文字太长会盖掉「图1只给衣服」的约束。
+ */
+export function clipPoseHint(s) {
+  const t = String(s || '').replace(/\s+/g, ' ').trim();
+  return t.length > 200 ? `${t.slice(0, 200)}…` : t;
+}
+
+/**
  * 构造合成指令。要点：
  * - 明确每张参考图的职责（角色分工是 prompt 结构里最关键的一环）
  * - 明确「必须保留什么」「必须替换什么」，避免模型照抄服装图的空白人体
  * - 姿势线稿要显式说明「只取骨架与角度，不要线稿风格」
+ *
+ * @param {object} p
+ * @param {string} [p.poseHint] 用户所选姿势的姿态要点（来自图库条目），
+ *        用来把「大约什么姿势」写成文字。参考图给的是画面，文字补的是语义：
+ *        两者一起给，模型在这类多图合成里才更容易听懂。
  */
-export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'female' } = {}) {
+export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'female', poseHint = '' } = {}) {
   const styleLine = {
     photorealistic:
       'Photorealistic editorial fashion photography, realistic skin texture, natural light, ' +
@@ -56,11 +70,26 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
       'full-body character illustration, simple gradient background.',
   }[style] || 'Photorealistic editorial photography.';
 
-  // 男性版的参考图（中性人台、中性人偶）不带性别信息，必须显式说明，否则模型会按默认女性渲染
+  // 男性版的参考图没有男性特征（中性人台 + 女性素体人偶），必须显式说明，
+  // 否则模型会按默认女性渲染，或者干脆丢掉姿势、退回站姿
   const subject =
     gender === 'male'
       ? 'The person is an adult man: male facial structure, male body proportions, flat chest, no makeup.'
       : 'The person is an adult woman: female facial structure, female body proportions.';
+
+  // 姿势参考图是女性素体线稿：轮廓里的胸部曲线、腰胯比例会跟「成年男性」打架。
+  // 实测这两条提示互斥时，模型最常见的处理方式是直接忽略姿势、输出一张正面站姿——
+  // 也就是「姿势不生效」。所以要分两段写清楚：轮廓可以无视，骨架必须照搬。
+  const poseRef =
+    gender === 'male'
+      ? 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY. It is drawn on a female artist mannequin: ' +
+        'ignore that mannequin\'s female body shape (its bust curve, waist-to-hip ratio and overall silhouette) ' +
+        'entirely, and do NOT carry any feminine body shape over to the man. Keep only its skeleton: ' +
+        'which limb is where, joint angles, weight distribution, head direction, cropped view and camera height. ' +
+        'The man in the final image must be posed exactly like that skeleton, with a male body. ' +
+        'Do not replace the pose with a standing or walking pose.'
+      : 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
+        'placement, leg crossing, hand positions and viewpoint exactly.';
 
   const parts = [
     'Compose ONE single new image of one person, using the three reference images below.',
@@ -70,11 +99,15 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
       'a mannequin, do not leave the torso hollow, and do not copy its standing front view.',
     'Reference image 2 defines the FACE ONLY: use this exact face identity, facial features, ' +
       'hairstyle and hair color for the person.',
-    'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
-      'placement, leg crossing, hand positions and viewpoint exactly. Ignore its line-art style, ' +
-      'its blank face and its simplified proportions — the result must be a finished rendered image.',
+    poseRef,
+    'Ignore the line-art style, the blank featureless head and the simplified proportions of ' +
+      'reference image 3 — the result must be a finished rendered image.',
     'The person is dressed in the outfit from image 1, has the face from image 2, and holds the ' +
       'pose from image 3. Keep anatomy correct and proportions natural in the new pose.',
+    // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
+    poseHint
+      ? `The intended pose in words (use it to confirm image 3, never to override the outfit or the face): ${poseHint}.`
+      : '',
     styleLine,
     extra,
   ];
@@ -241,7 +274,7 @@ export function buildCloudflareForm({ images, prompt, modelId, width = 1024, hei
  * @param {object}   p.env     Worker 的 env（读 AI binding 与 FLUX_MODEL）
  * @param {Function} p.aiRun   env.AI.run 的绑定版本（丢失 this 会报错，必须 bind）
  */
-export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style }) {
+export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, gender, poseHint }) {
   assertThreeImages(images);
 
   if (typeof aiRun !== 'function') {
@@ -250,7 +283,7 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
     });
   }
 
-  const finalPrompt = prompt || buildPrompt({ style });
+  const finalPrompt = prompt || buildPrompt({ style, gender, poseHint });
   // 优先级：请求里显式指定（白名单校验）→ 环境变量 → 默认
   const allowed = new Set(Object.values(MODELS).map((m) => m.modelId));
   const wanted = model || env.FLUX_MODEL || DEFAULT_MODEL;

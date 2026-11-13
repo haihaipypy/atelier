@@ -3,7 +3,7 @@
  * 只用 Web 标准 API（fetch / Request / Response / FormData），Node 里也能直接跑 dry-run。
  */
 
-import { generate, buildPrompt, MODELS, DEFAULT_MODEL, HttpError, assertThreeImages } from './generate.js';
+import { generate, buildPrompt, clipPoseHint as clipHint, MODELS, DEFAULT_MODEL, HttpError, assertThreeImages } from './generate.js';
 import { makeDemoImage } from './demo-image.js';
 import {
   readProfile,
@@ -124,7 +124,8 @@ export async function handleRequest(request, env = {}, aiRun = null) {
     const style = url.searchParams.get('style') || 'photorealistic';
     const extra = url.searchParams.get('extra') || '';
     const gender = url.searchParams.get('gender') === 'male' ? 'male' : 'female';
-    return json({ prompt: buildPrompt({ style, extra, gender }) });
+    const poseHint = clipHint(url.searchParams.get('poseHint'));
+    return json({ prompt: buildPrompt({ style, extra, gender, poseHint }) });
   }
 
   /**
@@ -200,7 +201,8 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         assertThreeImages(body.images);
         const out = await generateCustom({
           images: body.images,
-          prompt: body.prompt || buildPrompt({ style: body.style, extra: body.extra, gender: body.gender }),
+          prompt: body.prompt
+            || buildPrompt({ style: body.style, extra: body.extra, gender: body.gender, poseHint: clipHint(body.poseHint) }),
           size: `${body.width || 1024}x${body.height || 1024}`,
           profile,
           signal: AbortSignal.timeout(Number(env.CUSTOM_TIMEOUT_MS || 120000)),
@@ -221,6 +223,7 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         style: body.style,
         extra: body.extra,
         gender: body.gender,
+        poseHint: clipHint(body.poseHint),
         width: body.width || 1024,
         height: body.height || 1024,
         seed: body.seed,

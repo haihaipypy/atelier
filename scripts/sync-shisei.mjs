@@ -37,6 +37,11 @@ const IMG = `${CDN}/images`;
 
 const CONCURRENCY = 10;
 
+/** Shisei 没有男性姿势：std 系列是女性全身素体，upper 系列连双腿都不画（只到腰胯） */
+const POSE_GENDER = 'F';
+const POSE_GENDER_NOTE =
+  '此库暂为女性素体；男性版只能借用其骨架，性别由脸与提示词决定';
+
 /** 服装大类 → 中文分类（LG 内衣不收，故不列） */
 const CAT_ZH = {
   AC: '配饰',
@@ -141,11 +146,45 @@ function poseItem(it, view) {
     cats: [it.class_cn || '姿势'],
     tags: [it.class_cn, it.name_en].filter(Boolean).slice(0, 3),
     series: it.series,
+    // 上游的英文姿态描述，例如 "sitting on the floor leaning back with her torso arched…"。
+    // 这张人偶是女性素体（画了胸部曲线），描述里的 her / she 会把性别一起带进提示词，
+    // 生成时和「成年男性」冲突——所以留英文原文备用，另存一份中性化的中文要点。
+    pose: {
+      en: it.desc_en || '',
+      zh: poseZh(it).slice(0, 60),
+    },
     src: 'shisei',
     license: 'CC0-1.0',
     _remote: name ? `${IMG}/line/w300/${name}` : '',
   };
 }
+
+/**
+ * 姿态要点（中文）。
+ *
+ * 为什么不直接用上游 desc_en：那是给女性素体写的（159/181 条带 her），直接塞进
+ * 男性版提示词会和「成年男性」打架，模型往往退回成站立。这里只保留「哪只手撑地、
+ * 哪条腿屈/伸、躯干朝哪边倾」这类与性别无关的骨架信息，
+ * 并把代词统一换成中性词，避免把性别一起带进去。
+ */
+function poseZh(it) {
+  const classZh = it.class_cn || '姿势';
+  const nameZh = it.name_cn || it.name_en || '';
+  const desc = neutralDesc(it.desc_en);
+  return `${classZh}｜${nameZh}${desc ? `；${desc}` : ''}`;
+}
+
+/** 英文描述的中性化：代词替换 + 女性专属造型词剔除 */
+function neutralDesc(src) {
+  return String(src || '')
+    .replace(/\b(her|she|hers|herself)\b/gi, 'the figure')
+    // 这些词只出现在女性造型上，男性版照抄会把性别带偏
+    .replace(/\b(heart[ -]?shaped?|hearts?|cute|kawaii)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*,\s*,/g, ',')
+    .trim();
+}
+
 
 function strip(items) {
   return items.map(({ _remote, ...rest }) => rest);
@@ -200,6 +239,12 @@ async function main() {
   const malePoses = usablePoses.flatMap((it) =>
     poseViews.filter((v) => it.views?.[v]).map((v) => poseItem(it, v)),
   );
+  // upper 系列只画到腰部，配「全身照」会得到一张半身图；分类名改成能看懂的样式
+  for (const it of malePoses) {
+    if (it.series !== 'upper') continue;
+    it.cats = ['上半身'];
+    it.pose.zh = `上半身｜${it.title}；${neutralDesc(String(it.pose.zh).split('；').slice(1).join('；'))}`.trim();
+  }
 
   if (!noImages) {
     console.log('下载缩略图（w300）→ web/public/library …');
@@ -228,12 +273,30 @@ async function main() {
     items: strip(maleOutfits),
   });
   await writeCatalog('pose-male.json', {
-    label: '男性姿势',
+    label: '姿势（男性版借用女性素体骨架）',
     homepage: 'https://github.com/wquguru/shisei',
     items: strip(malePoses),
+    // 这是个「借用库」：上游没有男性姿势，男的只能拿女性素体的骨架用。
+    // 标出来，前端才能对用户讲清楚「图是女性的，但性别由脸决定」。
+    extra: { note: POSE_GENDER_NOTE, poseGender: POSE_GENDER },
   });
   console.log(`  ✓ outfit-male: ${maleOutfits.length} 条`);
   console.log(`  ✓ pose-male: ${malePoses.length} 条`);
+
+  // ── 并入女性姿势库：Shisei 的 std 系列是全身女性素体，正好补女性版的站立/坐卧姿势
+  const posePath = path.join(OUT_DIR, 'pose.json');
+  const prevPose = JSON.parse(await readFile(posePath, 'utf8'));
+  const keptPose = (prevPose.items || []).filter((it) => it.src !== 'shisei');
+  const femalePoses = malePoses.filter((it) => it.series !== 'upper');
+  const mergedPose = [...keptPose, ...femalePoses].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  prevPose.items = mergedPose;
+  prevPose.count = mergedPose.length;
+  prevPose.sources = [
+    ...(prevPose.sources || []).filter((x) => x.label !== 'Shisei'),
+    { label: 'Shisei', homepage: 'https://github.com/wquguru/shisei', license: 'CC0-1.0', count: femalePoses.length },
+  ];
+  await writeFile(posePath, JSON.stringify(prevPose, null, 2));
+  console.log(`  ✓ pose（女性）: ${keptPose.length} + ${femalePoses.length} = ${mergedPose.length} 条`);
 
   // ── 并入女性服装库：保留原有上游条目，去除旧的本项目 Shisei 条目后重新追加
   const outfitPath = path.join(OUT_DIR, 'outfit.json');
@@ -258,7 +321,8 @@ async function main() {
   meta.generatedAt = new Date().toISOString();
   meta.outfit = { count: merged.length, label: '服装' };
   meta['outfit-male'] = { count: maleOutfits.length, label: '男装' };
-  meta['pose-male'] = { count: malePoses.length, label: '男性姿势' };
+  meta['pose'] = { count: mergedPose.length, label: '姿势' };
+  meta['pose-male'] = { count: malePoses.length, label: '姿势（男性版）', note: POSE_GENDER_NOTE };
   await writeFile(metaPath, JSON.stringify(meta, null, 2));
 
   console.log('完成。');
