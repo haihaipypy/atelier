@@ -192,8 +192,27 @@ async function syncOne(kind, { offline }) {
   }
 
   items.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+
+  // 上游索引是整份重建的，本地用 sync-shisei.mjs 补进来的 Shisei 素材（src: 'shisei'）
+  // 不在上游里，直接覆盖就会把 275 条女性/中性装冲掉，且没有任何报错提示。
+  const outPath = path.join(OUT_DIR, `${kind}.json`);
+  if (kind === 'outfit' && existsSync(outPath)) {
+    try {
+      const prev = JSON.parse(await readFile(outPath, 'utf8'));
+      const bundled = (prev.items || []).filter((it) => it.src === 'shisei');
+      const seen = new Set(items.map((it) => it.id));
+      const keep = bundled.filter((it) => !seen.has(it.id));
+      if (keep.length) {
+        items = items.concat(keep).sort((a, b) => String(a.id).localeCompare(String(b.id)));
+        console.log(`  · 保留 ${keep.length} 条 Shisei 补充素材`);
+      }
+    } catch {
+      /* 旧文件读不出来就按上游原样写，下次跑 sync-shisei 还能补回来 */
+    }
+  }
+
   await writeFile(
-    path.join(OUT_DIR, `${kind}.json`),
+    outPath,
     JSON.stringify({
       generatedAt: new Date().toISOString(),
       mode,
