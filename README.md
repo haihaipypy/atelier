@@ -18,28 +18,28 @@
 
 点卡片先弹大图，看清细节再「确认选择」，避免误点覆盖已有选择。
 
-![选择服装](docs/images/step-1-outfit.png)
+![选择服装](docs/images/demo-outfit.png)
 
 ### 2. 选一张脸
 
 服装、脸、姿势三个槽位各自独立，选完一个会自动跳到下一个未选的板块。
 
-![选择脸型](docs/images/step-2-face.png)
+![选择脸型](docs/images/demo-face.png)
 
 ### 3. 选一张姿势
 
 姿势是黑白线稿人偶，只提供骨架与机位，成品不会是线稿风。
 
-![选择姿势](docs/images/step-3-pose.png)
+![选择姿势](docs/images/demo-pose.png)
 
 ### 4. 合成
 
-三格就位后点「生成合成图」。真实生成 10–30 秒，出图后可下载，底部显示所用模型与耗时。
+三格就位后点「生成合成图」，10–30 秒出成品，可下载，底部显示所用模型与耗时。
 
-![三步选素材 → 合成结果](docs/images/hero-flow.png)
+![合成结果](docs/images/demo-result.png)
 
-图中「合成结果」一格是版式示意，真实成品由 Workers AI 现场生成。
-仓库里不放别人的成品图充数，效果请以自己部署后出的图为准。
+上图是实测输出：`@cf/black-forest-labs/flux-2-klein-9b`，耗时 3.1 秒。
+同一套脸与姿势，只换服装图再生成，就是同一个人的不同穿搭。
 
 ### 更多玩法
 
