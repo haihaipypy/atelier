@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T07:48:21.864Z",
+  "generatedAt": "2026-11-14T00:57:22.542Z",
   "outfit": {
     "count": 1542,
     "label": "服装"
@@ -9,7 +9,7 @@
     "label": "脸型"
   },
   "pose": {
-    "count": 440,
+    "count": 567,
     "label": "姿势"
   },
   "outfit-male": {
