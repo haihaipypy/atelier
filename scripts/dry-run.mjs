@@ -391,6 +391,10 @@ console.log('\n[18] 浏览器直连通道（静态检查）');
   check('直连模式不走 /api/generate', /if \(direct\) \{\s*j = await generateDirect/.test(app));
   check('右上角有作者主页链接', /id="authorLink" href="https:\/\/www\.1day\.vip"/.test(html));
   check('项目地址旁有项目文档链接', /项目地址<\/a>\s*<a class="ghost" href="https:\/\/blog\.1day\.vip\/post\/ai-character-atelier"/.test(html));
+  // 手机端顶栏：商标、页签、切换、外链都必须完整显示，不能被压成竖排或溢出
+  const cssSrc = await readFile(path.join(ROOT, 'web/public/styles.css'), 'utf8');
+  check('顶栏各组不随空间压缩', /\.brand \{[^}]*flex: none/.test(cssSrc) && /\.tabs \{[^}]*flex: none/.test(cssSrc));
+  check('窄屏页签组独占一行', /@media \(max-width: 399px\)[\s\S]{0,300}\.tabs \{ order: 3;/.test(cssSrc));
   // 前端拼的端点规则要与后端一致
   const norm = (raw) => {
     let u = String(raw || '').trim();
@@ -477,6 +481,19 @@ console.log('\n[21] 文档拆分');
   check('详细说明接手了错误码表', /unsupported_country_region_territory/.test(manual));
   check('详细说明含部署细节', /automatic provisioning|自动资源供给/.test(manual));
   check('详细说明不再重复断言数量', !/项断言/.test(readme));
+
+  // README 里引用的每张图都得真的存在，别让首屏裂图
+  const imgs = [...readme.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]).filter((u) => !/^https?:/.test(u));
+  let broken = [];
+  for (const rel of imgs) {
+    try {
+      await readFile(path.join(ROOT, rel));
+    } catch {
+      broken.push(rel);
+    }
+  }
+  check('README 图片全部存在', broken.length === 0 && imgs.length >= 5, `${imgs.length} 张，缺 ${broken.join(',') || '无'}`);
+  check('演示章节覆盖四步', ['选一张服装', '选一张脸', '选一张姿势', '合成'].every((t) => readme.includes(t)));
 }
 
 console.log(`\n结果：${pass} 通过，${fail} 失败\n`);

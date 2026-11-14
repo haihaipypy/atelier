@@ -907,10 +907,13 @@ function showResult(j) {
   const meta = $('#resultMeta');
   meta.innerHTML = '';
   if (j.demo) {
-    meta.append(el('span', {}, '演示模式（本地预览拼接图），配置模型密钥后即为真实生成结果'));
+    // 演示模式不写耗时：假图耗时恒为 0.0s，摆出来只是噪声
+    meta.append(el('span', {}, '演示模式：这是本地拼的版式预览图，绑定 Workers AI 后即为真实生成结果'));
+    if (j.model) meta.append(el('span', {}, `模型：${j.model}`));
+  } else {
+    if (j.model) meta.append(el('span', {}, `模型：${j.model}`));
+    if (j.ms) meta.append(el('span', {}, `耗时 ${(j.ms / 1000).toFixed(1)}s`));
   }
-  if (j.model) meta.append(el('span', {}, `模型：${j.model}`));
-  if (j.ms) meta.append(el('span', {}, `耗时 ${(j.ms / 1000).toFixed(1)}s`));
   const dl = el('a', { href: src, download: `atelier-${Date.now()}.png` }, '下载');
   meta.append(dl);
   if (j.requestId) meta.append(el('span', {}, `#${j.requestId}`));
