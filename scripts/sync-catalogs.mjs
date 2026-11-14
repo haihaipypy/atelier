@@ -196,7 +196,9 @@ async function syncOne(kind, { offline }) {
   // 上游索引是整份重建的，本地用 sync-shisei.mjs 补进来的 Shisei 素材（src: 'shisei'）
   // 不在上游里，直接覆盖就会把 275 条女性/中性装冲掉，且没有任何报错提示。
   const outPath = path.join(OUT_DIR, `${kind}.json`);
-  if (kind === 'outfit' && existsSync(outPath)) {
+  // 服装和姿势都补过 Shisei 素材（outfit 275 条、pose 127 条），
+  // 它们不在上游索引里，整份重写会被静默覆盖，页面看着素材变少却查不出原因。
+  if ((kind === 'outfit' || kind === 'pose') && existsSync(outPath)) {
     try {
       const prev = JSON.parse(await readFile(outPath, 'utf8'));
       const bundled = (prev.items || []).filter((it) => it.src === 'shisei');

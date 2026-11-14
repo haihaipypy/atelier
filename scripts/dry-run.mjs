@@ -494,6 +494,10 @@ console.log('\n[21] 文档拆分');
   }
   check('README 图片全部存在', broken.length === 0 && imgs.length >= 5, `${imgs.length} 张，缺 ${broken.join(',') || '无'}`);
   check('演示章节覆盖四步', ['选一张服装', '选一张脸', '选一张姿势', '合成'].every((t) => readme.includes(t)));
+
+  // 定时同步是整份重写：服装和姿势都补过 Shisei 条目，漏一个就会被静默覆盖
+  const sync = await readFile(path.join(ROOT, 'scripts/sync-catalogs.mjs'), 'utf8');
+  check('定时同步不会覆盖 Shisei 姿势', /kind === 'outfit' \|\| kind === 'pose'/.test(sync));
 }
 
 console.log(`\n结果：${pass} 通过，${fail} 失败\n`);
