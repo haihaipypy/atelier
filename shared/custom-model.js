@@ -158,7 +158,7 @@ export async function clearProfile(env) {
  *   b64  —— 参考图走 data URI（最通用，本项目的默认：前端已压缩到 <512）
  *   auto —— 先用 b64，遇到「不支持图生图」类错误再提示用户切换
  */
-export async function generateCustom({ images, prompt, size, profile, signal }) {
+export async function generateCustom({ images, prompt, size, ratio, profile, signal }) {
   if (!profile.ready) throw new HttpError(400, '自定义模型尚未配置完整');
 
   const endpoint = /\/images\/generations$/.test(profile.baseUrl)
@@ -174,13 +174,17 @@ export async function generateCustom({ images, prompt, size, profile, signal }) 
     }
   }
 
+  // size 可能是像素（960x1280）也可能是档位（2K）。Agnes 这一系用「档位 + 比例」，
+  // 比例必须单独给，否则服务端只能按档位的默认比例出图，和用户选的画幅对不上。
   let body = {
     model: profile.model,
     prompt,
     n: 1,
     size,
-    ...extra,
   };
+  if (ratio) body.ratio = ratio;
+  // 额外参数放最后，用户显式写了的 size / ratio 说了算
+  body = { ...body, ...extra };
 
   // 多图输入：位置按 profile.imageMode 决定（默认 extra_body.image）
   const withImages = attachImages(body, images, profile.imageMode || 'extra_body');

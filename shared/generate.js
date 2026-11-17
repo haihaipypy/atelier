@@ -60,6 +60,20 @@ export const POSE_FRAMINGS = ['full', 'upper'];
 export const normalizeFraming = (v) => (v === 'upper' ? 'upper' : 'full');
 
 /**
+ * 上半身取景的「补全许可」。
+ *
+ * 线稿只画上半身，衣服却是到脚的长袍——若只说「不许改成站姿」，模型只能交出一张
+ * 无腿的悬空半身。所以明确允许它在看不见的地方自然补全：动作不变，只是画幅更紧。
+ * 这句是修「上半身姿势生不出来」的关键：之前的写法是「禁止一切改动」，
+ * 模型找不到可执行的出口，干脆退回全身站姿。
+ */
+const UPPER_REFILL =
+  ' Reframing allowed: this is the same pose seen through a tighter crop, not a different pose. ' +
+  'You may naturally complete the parts the reference does not show (the lower body from the waist ' +
+  'down, feet, the space around the figure) as long as the hand positions, arm angles, head ' +
+  'direction, camera height and upper-body framing stay the same.';
+
+/**
  * 构造合成指令。要点：
  * - 明确每张参考图的职责（角色分工是 prompt 结构里最关键的一环）
  * - 明确「必须保留什么」「必须替换什么」，避免模型照抄服装图的空白人体
@@ -88,7 +102,7 @@ export function buildPrompt({
         'waist, so the result must be cropped the same way: head and upper body fill the frame, ' +
         'the bottom edge cuts off around the upper thighs at the latest, legs and feet are ' +
         'NOT visible. Do not pull back to a full-body shot and do not change the pose just ' +
-        'because the body is cropped.'
+        'because the body is cropped.' + UPPER_REFILL
       : 'FRAMING: full-body shot from head to feet, with the person fully inside the frame.';
 
   const styleLine = framing === 'upper'
@@ -127,8 +141,13 @@ export function buildPrompt({
         'which limb is where, joint angles, weight distribution, head direction, cropped view and camera height. ' +
         'The man in the final image must be posed exactly like that skeleton, with a male body. ' +
         'Do not replace the pose with a standing or walking pose.'
-      : 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
-        'placement, leg crossing, hand positions and viewpoint exactly.';
+      : framing === 'upper'
+        ? 'Reference image 3 defines the UPPER-BODY POSE AND CAMERA ONLY: reproduce its hand ' +
+          'positions, arm angles, shoulder tilt, head direction and viewpoint exactly, and keep ' +
+          'the torso upright. Below the waist the reference says nothing — complete the figure ' +
+          'naturally, letting the outfit from image 1 decide what the lower half wears.'
+        : 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
+          'placement, leg crossing, hand positions and viewpoint exactly.';
 
   const parts = [
     'Compose ONE single new image of one person, using the three reference images below.',

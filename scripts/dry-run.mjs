@@ -174,6 +174,12 @@ check('上半身：明确裁到腰胯以上', /waist-up shot only/i.test(pUpper)
 check('上半身：禁止拉回全身', /Do not pull back to a full-body shot/i.test(pUpper));
 check('上半身：不出现 full-body 取景描述', !/FRAMING: full-body/i.test(pUpper));
 check('上半身：风格行也改中景', /waist-up portrait/.test(pUpper) && !/full-body shot,/.test(pUpper));
+// 只写「禁止改动」会把模型逼进死胡同：线稿只有上半身，它交不出带腿的成品，于是退回全身站姿。
+// 必须给出可执行的出口——允许自然补全看不见的部分。
+check('上半身：允许自然补全下半身', /Reframing allowed/.test(pUpper) && /lower body from the waist/.test(pUpper));
+check('上半身：补全时动作不许变', /hand positions, arm angles, head direction, camera height and upper-body framing stay the same/.test(pUpper));
+check('上半身：不再宣称图3定义全身姿势', !/defines the POSE AND CAMERA ANGLE ONLY/.test(pUpper));
+check('全身：不给补全许可', !/Reframing allowed/.test(pFull));
 check('全身：仍要求完整入画', /FRAMING: full-body shot from head to feet/i.test(pFull));
 check('全身：不出现半身裁切说明', !/waist-up/i.test(pFull));
 check('取景参数非法值回落为全身', /FRAMING: full-body/i.test(buildPrompt({ poseFraming: '  xxx ' })));
@@ -182,8 +188,14 @@ check('取景参数非法值回落为全身', /FRAMING: full-body/i.test(buildPr
 check('前端把取景带进 /api/generate', /poseFraming: framingOfSelection\(\)/.test(appSrc));
 check('直连通道也带取景', /poseFraming,\s*\}\)/.test(appSrc));
 check('上半身姿势识别基于 series / 分类', /series === 'upper'/.test(appSrc) && /includes\('上半身'\)/.test(appSrc));
-check('上半身姿势改 1:1 画幅', /function fixFraming[\s\S]{0,200}1024, 1024/.test(appSrc));
-check('横向画幅抬成竖幅', /if \(w > h\) return \[960, 1280\]/.test(appSrc));
+check('上半身姿势改 1:1 画幅', /framing === 'upper' \? '1:1'/.test(appSrc));
+check('横向画幅抬成竖幅', /ratio === '4:3' \? '3:4'/.test(appSrc));
+// 自定义模型只认「档位 + 比例」（Agnes 的 size:"2K" + ratio:"3:4"），像素值会被拒或悄悄标准化
+check('自定义通道给 size 档位', /size: 'auto'/.test(appSrc));
+check('自定义通道单给 ratio', /ratio: CUSTOM_SIZE\[ratio\] \|\| '3:4'/.test(appSrc));
+check('直连请求带 ratio', /if \(ratio\) body\.ratio = ratio/.test(appSrc));
+check('额外参数优先级高于自动尺寸', /body = \{ \.\.\.body, \.\.\.extra \}/.test(appSrc) && /body = \{ \.\.\.body, \.\.\.extra \}/.test(
+  await readFile(path.join(ROOT, 'shared/custom-model.js'), 'utf8')));
 
 // 路由层透传：漏传时后端拿到的永远是 full，取景修正形同虚设
 const upperPrompt = await (

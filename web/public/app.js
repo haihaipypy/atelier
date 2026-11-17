@@ -83,6 +83,19 @@ function normBase(raw) {
 const endpointOf = (baseUrl) => `${normBase(baseUrl)}/images/generations`;
 
 /**
+ * 自定义模型的尺寸写法。
+ *
+ * Workers AI 吃精确像素（960×1280），但 Agnes 这一系只认「档位 + 比例」：
+ * size 填 "2K"、"ratio" 填 "3:4"。像素值塞进去要么被拒，要么被服务端悄悄标准化，
+ * 出来是意料之外的比例。所以这里两样都给，用户可在「额外参数」里覆盖。
+ * size:auto = 交给服务端按档位推断，比我们自己猜像素稳。
+ */
+const CUSTOM_SIZE = { '1:1': '1:1', '3:4': '3:4', '9:16': '9:16', '4:3': '4:3' };
+function customSizeFor(ratio) {
+  return { size: 'auto', ratio: CUSTOM_SIZE[ratio] || '3:4' };
+}
+
+/**
  * 参考图的三种送法，各家 OpenAI 兼容网关不一样，只能让用户选。
  *
  * 实测踩坑：默认送 extra_body.image（Agnes 用这个），换一家服务后直接报
@@ -213,7 +226,7 @@ async function buildPromptOnServer() {
  * 之所以需要它：不少模型服务商会整段屏蔽云厂商出口 IP（Cloudflare 首当其冲），
  * 服务端中转会直接被 403。代价是要求对方允许跨域（CORS），否则浏览器会拦下。
  */
-async function generateDirect({ images, prompt, size }) {
+async function generateDirect({ images, prompt, size, ratio }) {
   const cfg = readLocalCfg();
   if (!cfg?.baseUrl || !cfg?.apiKey || !cfg?.model) throw new Error('直连模式还没有在本机保存配置');
   const endpoint = endpointOf(cfg.baseUrl);
@@ -226,7 +239,10 @@ async function generateDirect({ images, prompt, size }) {
       throw new Error('额外参数不是合法 JSON');
     }
   }
-  let body = { model: cfg.model, prompt, n: 1, size, ...extra };
+  let body = { model: cfg.model, prompt, n: 1, size };
+  if (ratio) body.ratio = ratio;
+  // 额外参数放最后：用户显式写了的 size / ratio 说了算
+  body = { ...body, ...extra };
   body = attachImages(body, images, imageModeOf(cfg));
   // 顶层已有图时再把同样的图塞进 extra_body，等于把数组又发了一遍——上游会判成「缺图」
   body.extra_body = { ...(body.extra_body || {}), response_format: 'b64_json' };
@@ -951,17 +967,22 @@ async function generate() {
     // 这正是选了姿势却退回全身站姿的成因之一。上半身姿势统一改成 1:1 中景；
     // 全身姿势若选了横向画幅会把脚裁掉，抬成竖幅肖像。
     const framing = framingOfSelection();
-    const [width, height] = fixFraming([rx, ry], framing);
-    if (width !== rx || height !== ry) {
+    const targetRatio = framing === 'upper' ? '1:1' : ratio === '4:3' ? '3:4' : ratio;
+    const [width, height] = RATIO_MAP[targetRatio] || [1024, 1024];
+
+    if (targetRatio !== ratio) {
       const why = framing === 'upper'
         ? '上半身姿势：画幅自动切为 1:1 中景，避免被拉成全身'
         : '横向画幅装不下全身，已改为竖幅肖像';
-      $('#hint').textContent = `${why}（${width}×${height}）。`;
+      $('#hint').textContent = `${why}（${targetRatio}）。`;
     }
 
     const engineReady =
       state.engine === 'custom' ? customChannelReady() : !!state.config.engines?.includes('cloudflare');
     const direct = state.engine === 'custom' && state.relay === 'browser';
+    // 自定义模型不一定吃 960x1280 这种精确尺寸：Agnes 这一系用「档位 + 比例」
+    // （size:"2K" + ratio:"3:4"），照抄像素尺寸会被拒或悄悄标准化。比例必须单独给。
+    const customSize = customSizeFor(targetRatio);
     setBusy(
       true,
       direct
@@ -976,7 +997,7 @@ async function generate() {
       j = await generateDirect({
         images,
         prompt: $('#promptOverride').value.trim() || (await buildPromptOnServer()),
-        size: `${width}x${height}`,
+        ...customSize,
       });
     } else {
       const payload = {
@@ -991,6 +1012,9 @@ async function generate() {
         poseFraming: framingOfSelection(),
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
+        // 自定义通道不吃精确像素，单独给「档位 + 比例」；Workers AI 用上面的 width/height
+        size: state.engine === 'custom' ? customSize.size : undefined,
+        ratio: state.engine === 'custom' ? customSize.ratio : undefined,
       };
 
       const r = await fetch('/api/generate', {

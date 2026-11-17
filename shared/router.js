@@ -211,7 +211,9 @@ export async function handleRequest(request, env = {}, aiRun = null) {
               poseHint: clipHint(body.poseHint),
               poseFraming: body.poseFraming,
             }),
-          size: `${body.width || 1024}x${body.height || 1024}`,
+          // 前端给了档位/比例就用它；否则退回像素
+          size: body.size || `${body.width || 1024}x${body.height || 1024}`,
+          ratio: body.ratio,
           profile,
           signal: AbortSignal.timeout(Number(env.CUSTOM_TIMEOUT_MS || 120000)),
         });
