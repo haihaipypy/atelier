@@ -187,6 +187,23 @@ check('页面上有提示条', /此库是女性素体线稿/.test(appSrc) && /id
   await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8'),
 ));
 
+console.log('\n[5d] 姿势被站姿覆盖的回归');
+// 现象：图3 是双腿分开、重心偏一侧、单臂前垂的线稿，成品却是并腿站直、双手贴身的正面站姿。
+// 三处诱导：① 风格句写死 full-body shot；② 服装句反复强调 standing front view；
+// ③ 姿态要点用「确认」口吻，模型宁可听文字也不看图。三条各自都能把姿势拽回默认站姿。
+const pPose = buildPrompt({ gender: 'female', poseHint: '站立｜双腿分开・单臂前垂' });
+const appSrcPose = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+check('风格句不再写死景别', !/full-body/i.test(pPose), pPose.match(/[^.]*full-body[^.]*/i)?.[0]);
+check('服装句不再提站姿', !/standing front view/i.test(pPose));
+check('服装句明确不取图1的姿态', /NO body posture, leg position or camera from image 1/.test(pPose));
+check('姿态要点改为命令口吻', /The stance must follow image 3/.test(pPose));
+check('点出模型默认滑向的四种站姿', /straighten the legs[\s\S]*close the gap between the feet[\s\S]*square the hips/.test(pPose));
+check('男性版同样带反默认站姿约束', /The stance must follow image 3/.test(buildPrompt({ gender: 'male', poseHint: '站立' })));
+check('风格句仍描述质感与光线', /realistic skin texture/.test(pPose) && /natural light/.test(pPose));
+// 直连兜底文案是另一条独立路径（/api/prompt 挂掉时才会用到），同样不能写死景别
+check('兜底文案不再写死全身照', !/全身人物照/.test(appSrcPose) && /不要并腿/.test(appSrcPose));
+check('兜底文案也排除图1的站姿', /也不要取它的站姿/.test(appSrcPose));
+
 console.log('\n[5e] 姿势库排序：全身站立优先');
 // 现象：点开姿势库第一页全是坐姿（上游按编号排，P001 是「仰反弓坐姿」），站姿被埋到几十页后
 const appSrc2 = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');

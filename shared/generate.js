@@ -69,13 +69,17 @@ export function clipPoseHint(s) {
  *        两者一起给，模型在这类多图合成里才更容易听懂。
  */
 export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'female', poseHint = '' } = {}) {
+  // 镜头信息里绝不能出现 "full-body" 这类景别词。
+  // 原因：图3 是姿势参考，图1 的服装常常是连衣裙/半身裙，两样一起给的时候模型
+  // 会去找一个"能把整套衣服完整展示"的安全站姿——最省事的就是正面站直、双手贴身。
+  // 景别交给图3（它自己裁到哪就是哪），这里只描述质感与光线。
   const styleLine = {
     photorealistic:
       'Photorealistic editorial fashion photography, realistic skin texture, natural light, ' +
-      'clean seamless studio background, full-body shot, 85mm lens, sharp focus.',
+      'clean seamless studio background, 85mm lens, sharp focus.',
     anime:
       'High-quality anime illustration, clean cel shading with soft gradients, ' +
-      'full-body character illustration, simple gradient background.',
+      'simple gradient background.',
   }[style] || 'Photorealistic editorial photography.';
 
   // 男性版的参考图没有男性特征（中性人台 + 女性素体人偶），必须显式说明，
@@ -112,8 +116,9 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
     'Compose ONE single new image of one person, using the three reference images below.',
     subject,
     'Reference image 1 defines the OUTFIT ONLY: copy its garments, colors, fabric, patterns, ' +
-      'accessories and footwear exactly as shown. Ignore the empty body inside it — do not render ' +
-      'a mannequin, do not leave the torso hollow, and do not copy its standing front view.',
+      'accessories and footwear exactly as shown. Ignore whatever body is inside it — do not render ' +
+      'a mannequin and do not leave the torso hollow. Its pose means nothing: take NO body posture, ' +
+      'leg position or camera from image 1, even when image 1 shows a person standing straight.',
     'Reference image 2 defines the FACE ONLY: use this exact face identity, facial features, ' +
       'hairstyle and hair color for the person.',
     poseRef,
@@ -123,6 +128,12 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
       'pose from image 3. Keep anatomy correct and proportions natural in the new pose.',
     // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
     hintLine,
+    // 反例比正例管用：模型对「站直、双手贴身」的默认偏好极强，不点名的话，
+    // 只要服装是长裙就会自己滑回正面站姿。这一句放在姿势段之后、风格之前，
+    // 让它落在模型最后读到的位置附近。
+    'The stance must follow image 3, not a default catalogue pose. Do not straighten the legs, ' +
+      'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
+      'and do not drop the arms flat against the sides, unless image 3 itself shows exactly that.',
     styleLine,
     extra,
   ];
