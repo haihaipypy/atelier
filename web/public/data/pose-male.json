@@ -850,7 +850,7 @@
     {
       "id": "SP-P021-front",
       "code": "P021",
-      "title": "站立・手扶颈侧与大腿",
+      "title": "站立・单臂高举",
       "angle": "正面",
       "thumb": "/library/pose/SP-P021-front.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P021_front.webp",
@@ -859,12 +859,12 @@
       ],
       "tags": [
         "站立",
-        "Standing, hands at neck and thigh"
+        "One arm raised high overhead"
       ],
       "series": "std",
       "pose": {
-        "en": "standing with one hand resting at her neck and collarbone, the other hand resting flat on her thigh",
-        "zh": "站立｜站立・手扶颈侧与大腿；standing with one hand resting at the figure n"
+        "en": "standing with one arm raised high above her head, the hand open, the other arm hanging relaxed at her side, legs straight and slightly apart",
+        "zh": "站立｜单臂高举・另臂下垂"
       },
       "src": "shisei",
       "license": "CC0-1.0"
@@ -872,7 +872,7 @@
     {
       "id": "SP-P021-diag",
       "code": "P021",
-      "title": "站立・手扶颈侧与大腿",
+      "title": "站立・单臂高举",
       "angle": "斜侧",
       "thumb": "/library/pose/SP-P021-diag.webp",
       "full": "https://cdn.jsdelivr.net/gh/wquguru/shisei@v0.4.1/images/line/w900/std_P021_diag.webp",
@@ -881,12 +881,12 @@
       ],
       "tags": [
         "站立",
-        "Standing, hands at neck and thigh"
+        "One arm raised high overhead"
       ],
       "series": "std",
       "pose": {
-        "en": "standing with one hand resting at her neck and collarbone, the other hand resting flat on her thigh",
-        "zh": "站立｜站立・手扶颈侧与大腿；standing with one hand resting at the figure n"
+        "en": "standing with one arm raised high above her head, the hand open, the other arm hanging relaxed at her side, legs straight and slightly apart",
+        "zh": "站立｜单臂高举・另臂下垂"
       },
       "src": "shisei",
       "license": "CC0-1.0"

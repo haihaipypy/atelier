@@ -496,39 +496,38 @@ Shisei 目前**没有男性姿势**：`std` 系列是女性全身素体（线稿
 
 现在按三层处理：
 
-1. 提示词里**先要求照搬、再交代换身体**：先写「图 3 是姿势来源，骨架逐项照搬」，再逐肢体点名
-   （举起的胳膊仍然举着、抬起的膝盖仍然抬起、撑在地上的手仍然撑在地上），最后只用一句话说明
-   「唯一要丢掉的是人台的女性身体表面（胸部与臀胯曲线）」，末尾收一句 `The skeleton is copied;
-   the body is male.`；
-2. 把所选姿势的动作要点写成文字一起送进去（`poseHint`）。男性版**取 `pose.en` 而不是 `pose.zh`**，
-   原因见下一节；
-3. 页面上直接说明这是借用库，避免用户以为选错了。
+1. **姿势段和女性版同构**，只有一句话：`Reference image 3 defines the POSE AND CAMERA ANGLE
+   ONLY: …`，男性版在后面补三个肢体例子（举起的胳膊仍然举着、肘角保持原样、手在头边就留在头边）；
+2. **「换身体」挪到性别声明里**，不再挤在姿势段：`Reference image 3 is drawn on a female artist
+   mannequin: give its skeleton a male body and ignore only the mannequin's bust and hip curve`；
+3. 页面上说明这是借用库，避免用户以为选错了。
 
-#### 为什么男性版的要点改用 `pose.en`
+顺序很关键。之前「换身体」的说明占了姿势段的大半，等模型读到「照搬骨架」时，那句话的
+分量已经被摊薄了。现在姿势段和女性版几乎一样长，模型对待它的方式和对待女性版一致。
 
-`pose.zh` 只存了前 60 个字符，中英混排后英文被截在半句：
+#### 文字比线稿更有说服力
 
-```
-站立｜单手高举；standing with one arm rais
-```
+这是三轮返工里最反直觉的一条：**同一张图给文字描述和线稿，模型听文字的。**
 
-清洗掉这半句之后只剩「站立｜单手高举；」——对模型几乎没有信息量，等于姿势**没有文字落脚点**。
-而 `pose.en` 是完整的一句（男性库中位 92 字符，最长 210）：
+男性库的文字来自上游 Shisei 的姿态描述，和线稿并**不是**严格一一对应。实测到的例子：
 
-```
-standing with one arm raised high above the head, the other arm hanging at the side, legs apart
-```
+| 条目 | 线稿画的 | 上游文字写的 | 成品 |
+|---|---|---|---|
+| `SP-P021` | 单臂高举过头、手掌张开 | 一手扶颈侧、一手贴大腿 | 手摸脖子 + 手贴大腿 |
 
-句子里出现 `her` / `she` 是正常的：它描述的就是图 3 那个人台的姿势，而括注里已经写明
-「把同一套肢体配置套到男性身上」。清洗函数 `clipPoseHint` 因此改成**只对含中文的要点
-砍英文尾**——纯英文要点如果走那条规则，最后一个单词会被当成截断残句一起砍掉。
+用户看的是举手的线稿，拿到的是摸脖子的成品，只能说「姿势还是不对」。
 
-> 女性库不需要换字段：它的条目大多没有 `pose.zh`，提示词里根本不出现要点句，靠图 3 本身
-> 就够了。这次改动对女性版是**逐字无变化**的，自检里用四组女性提示词做了逐字比对。
+所以男性版**不再把要点写进提示词**（`poseHint` 对 `gender: 'male'` 直接丢弃），姿势只认图 3。
+女性版之所以一直稳定，正是因为它几乎不发要点——现在两边一致了。要点仍保留在页面上
+（卡片标题、悬停提示），那是给人看的。
+
+已发现的错位条目按图修正，并写进 `scripts/sync-shisei.mjs` 的 `POSE_TEXT_FIX`，
+重新同步也不会被覆盖。这类修正只在「对着原图看过」的条目上做，不做批量猜测——
+改错文字比不改更糟。
 
 #### 同一句「忽略」说四遍的代价
 
-上一版男性段落里，「忽略这张人台」被说了四遍：`ignore that mannequin`、`do NOT carry any
+再上一版男性段落里，「忽略这张人台」被说了四遍：`ignore that mannequin`、`do NOT carry any
 feminine body shape`、`never its bust or waist-hip contour`、`Do not replace the pose with a
 standing or walking pose`——而「照搬」只有一句。
 
@@ -593,6 +592,19 @@ and do not drop the arms flat against the sides, unless image 3 itself shows exa
 
 > 画幅只做**默认**切换：只要你手动改过画幅，之后就不再替你动。
 
+两个库的 upper 线稿**裁切高度不一样**，所以取景措辞也不能共用一句：
+
+| 库 | 线稿画到 | 提示词怎么写 |
+|---|---|---|
+| 女性库 | 胸下缘 | 「裁到大腿中部，和图 3 的裁切完全一致」 |
+| 男性库 | 胯（大腿根） | 「比图 3 略松一点，裁到大腿中部」+「图 3 出现的手、前臂、腰、胯都留在画面内」 |
+
+共用一句的代价很具体：女性库说「和图 3 一样」= 到胸口，男性库照说就变成「到胯」，
+而下一句又写着 `cropped at mid-thigh`，前后矛盾，模型只能自己挑一个。
+
+男性版多出的那半句「没有手被切在画面边缘」是补另一个常见问题：上半身姿势里常有一只手
+垂在身侧，按胸口取景正好把它切掉，模型索性把这只手也省了。
+
 ### 腿上的服装为什么会被丢掉
 
 坐姿、蹲姿、躺姿这类姿势有个共同的坑：姿势完全正确、裙子上半身也对，
@@ -618,6 +630,29 @@ and crossed legs included. If image 1 shows no legwear, the legs stay bare.
 
 > 这条约束**故意不写成「全身都按图 1 覆盖」**。那样写，露肩、露背、单肩这类剪裁会被模型
 > 好心补上布料——修好腿的同时毁掉领口。所以覆盖范围只提到腿脚，上身交给图 1 的原始剪裁。
+
+男性版这一段要换一份清单，原因是原句的字面歧义：
+
+```
+（女性）— tights, stockings, socks, boots, shoes — … If image 1 shows no legwear, the legs stay bare.
+（男性）— trousers, jeans, chinos, socks, boots, shoes — … If image 1 has no legwear at all, …
+```
+
+男性套装是长裤，而原句的清单里只有「丝袜、长袜、袜子」，还跟着一句「图 1 没有腿袜就光腿」。
+按字面理解，长裤不算 legwear，于是坐姿/躺姿真的会出一条光腿。
+
+#### 男性坐姿为什么要单独提「地面」
+
+男性库的 181 条姿势里，坐姿 26、侧坐 15、跪姿 16、蹲姿 12、躺姿 13——**全是地面姿势**，
+线稿里没有椅子。模型对「坐下」的默认联想偏偏是椅子，很容易给人补一张凳子，
+或者干脆把人扶起来站着。所以男性全身分支多一句：
+
+```
+If image 3 is seated, kneeling, crouching or lying down, he stays on the floor in exactly that
+position — do not lift him onto a chair or a stool, and do not stand him up.
+```
+
+半身像不带这句：裁到大腿中部，椅子本来就看不见，字数留给取景说明更值。
 
 ### 使用边界
 

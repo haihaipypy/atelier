@@ -139,25 +139,36 @@ check('包含三张图分工', /OUTFIT ONLY/.test(p) && /FACE ONLY/.test(p) && /
 check('包含补充描述', p.includes('add a straw hat'));
 check('无拼写错误 dresed', !p.includes('dresed'));
 
-console.log('\n[5b] 男性姿势不生效的回归');
-// 现象：男性版选「双手叉腰」的姿势，生成图却是正面站姿。
-// 原因：姿势参考图是女性素体线稿，胸部曲线与「成年男性」冲突，模型直接把姿势丢了。
+console.log('\n[5b] 男性姿势：文字不得压过线稿');
+// 三次返工后定位到的真因：模型更信文字，而男性库的文字来自上游，和线稿并非严格对应。
+// SP-P021 的线稿是「单臂高举」，上游文字写的却是「一手扶颈侧、一手贴大腿」——
+// 成品真的出现了扶颈 + 贴腿：用户看着举手的线稿，得到摸脖子的成品。
+// 女性版之所以一直稳，正因为它的条目几乎都没有要点，姿势只能看线稿。
 const pMale = buildPrompt({ gender: 'male' });
-const pHint = buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐・单膝竖起' });
-check('男性版把图3 当姿势来源', /Reference image 3 is the source of the pose/.test(pMale), pMale.slice(0, 120));
-check('男性版仍换男性身体', /flat chest, male shoulder width/.test(pMale));
-check('男性版只丢女性轮廓一项', /bust and hip curve/.test(pMale) && !/ignore that mannequin/i.test(pMale));
-check('姿态要点进入提示词', /written out[\s\S]*单膝竖起/.test(pHint), pHint.slice(-260));
-check('姿态要点不越权改服装/脸', /never to override the outfit or the face/.test(
-  buildPrompt({ gender: 'female', poseHint: '坐姿｜后仰坐・单膝竖起' })));
+const pMaleSit = buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐・单膝竖起' });
+const pFemale = buildPrompt({ gender: 'female', poseHint: '坐姿｜后仰坐・单膝竖起' });
+check('男性提示词不再注入姿态要点', !/单膝竖起/.test(pMaleSit), pMaleSit.slice(-300));
+check('女性提示词仍注入姿态要点', /单膝竖起/.test(pFemale));
+check('女性要点仍是确认口吻，不改命令', /use it to confirm image 3/.test(pFemale));
+// 姿势段必须和女性同构：同一句主干，男性只多三个肢体例子
+const poseLine = (p) => p.slice(p.indexOf('Reference image 3 defines the POSE'), p.indexOf('Ignore the line-art'));
+check('男女姿势段同构', /^Reference image 3 defines the POSE AND CAMERA ANGLE ONLY/.test(
+  buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐' }).slice(
+    buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐' }).indexOf('Reference image 3 defines the POSE'))));
+check('姿势段长度差在 300 字符内', Math.abs(poseLine(buildPrompt({ gender: 'female' })).length
+  - poseLine(buildPrompt({ gender: 'male' })).length) < 300,
+  `${poseLine(buildPrompt({ gender: 'female' })).length} vs ${poseLine(buildPrompt({ gender: 'male' })).length}`);
+check('「换身体」只在性别声明里说一次', (pMale.match(/give its skeleton a male body/g) || []).length === 1
+  && !/ignore that mannequin/i.test(pMale));
+check('男性版不再用「别退回站姿」的否定句', !/Do not replace the pose with a standing/i.test(pMale));
 check('要点超长会截断', clipPoseHint('x'.repeat(500)).length <= 201);
 
-// 之前男性版给要点额外挂了一句英文括注，前端挂一次、后端又挂一次，同一句话出现两遍；
-// 叠上「线稿女 / 人物男」的冲突，模型反而更容易丢掉姿势。现在只由后端按 gender 拼一次。
-check('男性版「女性轮廓」只交代一次', (pHint.match(/female body surface/g) || []).length === 1);
-check('男性版要点不再带重复括注', !/not its bust or waist-hip contour\)/.test(pHint));
-// 否定句里带上动作词就等于给模型递了个候选动作：「别退回站姿」实测最容易被选中
-check('男性版不再用「别退回站姿」的否定句', !/Do not replace the pose with a standing/i.test(pMale));
+// 已知的数据错位：P021 线稿是单臂高举，上游文字却写「手扶颈侧与大腿」
+const malePoseJsonEarly = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8'));
+const p021 = malePoseJsonEarly.items.filter((it) => it.code === 'P021');
+check('P021 文字已按线稿修正', p021.length === 2 && p021.every((it) => /单臂高举/.test(it.title)),
+  p021.map((it) => it.title).join(','));
+check('P021 不再残留「手扶颈侧」', p021.every((it) => !/颈侧/.test(it.title + it.pose.zh + it.pose.en)));
 
 // 半句英文是纯干扰：图库要点只存 60 字符，中英混排时英文会被截在 …leaning back with the figur
 const halfEn = '坐姿｜后仰坐・单膝竖起；sitting on the floor leaning back with the figur';
@@ -169,19 +180,18 @@ check('现有姿势要点清洗后无半英文尾', zhs.every((s) => !/[A-Za-z]{
   zhs.map((s) => clipPoseHint(s)).find((s) => /[A-Za-z]{3,}$/.test(s)) || '全部干净');
 
 // 关键：这些改动不能污染女性版——女性提示词里不能出现男性专用措辞
-const pFemale = buildPrompt({ gender: 'female', poseHint: '坐姿｜后仰坐・单膝竖起' });
 const pFemalePlain = buildPrompt({ gender: 'female' });
-check('女性版不写这些男性专用说明', !/female artist mannequin/.test(pFemale));
-check('女性版不提骨架/轮廓那套', !/skeleton|bust|waist-to-hip|adult man/.test(pFemale));
-check('女性版要点只作确认，不改成命令', /use it to confirm image 3/.test(pFemale));
+// 注意别用 「male body」做关键词：女性版的 female body proportions 里就含这四个字母
+check('女性版不写男性专用说明', !/female artist mannequin|skeleton|flat chest|adult man:/i.test(pFemale));
 check('女性版主体约束与不填要点时一致', pFemale.replace(/ The intended pose in words[^.]*\./, '') === pFemalePlain);
+check('女性版不提裤子（那是男性套装的腿装）', !/trousers, jeans|chinos/.test(pFemale));
+check('女性版不变地面句', !/stays on the floor in exactly/.test(pFemale));
 
-// 前端要真的把要点带上：漏传时后端拼不出那句「intended pose in words」
+// 前端仍在计算要点（卡片悬停、/api/generate 都用到），只是后端不再把它写进男性提示词
 const appSrc = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
 check('前端把姿态要点带进 /api/generate', /poseHint: poseHintFor\(\)/.test(appSrc));
 check('直连通道也带姿态要点', /const poseHint = poseHintFor\(\);/.test(appSrc));
 check('要点不再带性别说明（避免重复）', !/copy only its skeleton and camera/.test(appSrc));
-check('前端也会丢掉被截断的英文尾', /replace\(\/\\s\*\[A-Za-z\]/.test(appSrc));
 check('姿势卡片悬停能看到要点', /it\.pose\?\.zh/.test(appSrc));
 const poseMaleJson = await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8');
 check('男性姿势库带「借用女性素体」标注', /poseGender/.test(poseMaleJson) && /女性素体/.test(poseMaleJson));
@@ -227,7 +237,10 @@ check('全身不带半身取景段', !/FRAMING/.test(pFull) && !/mid-thigh/.test
 check('全身不写方画幅', !/square; frame the figure/.test(pFull));
 check('全身画幅描述是竖版', /taller than wide/.test(pFull));
 const pMaleUpper = buildPrompt({ gender: 'male', halfBody: true, frame: [1024, 1024] });
-check('男性半身同样走进取景段', /cropped at mid-thigh/.test(pMaleUpper) && !/default catalogue pose/.test(pMaleUpper));
+check('男性半身同样走进取景段', /cropped around mid-thigh/.test(pMaleUpper) && !/default catalogue pose/.test(pMaleUpper));
+check('男性半身按「裁到胯」描述 image 3', /stops at the hip/.test(pMaleUpper));
+check('男性半身不套用女性的「胸下缘」', !/stops below the chest/.test(pMaleUpper));
+check('男性半身要求 line 里的手不切边', /no hand is cut off at the edge/.test(pMaleUpper));
 
 // 前端判定：两个库的半身标记不一样，认错就退回全身构图
 const appUpper = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
@@ -286,36 +299,40 @@ check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
 // 提示词长度要控制：T5 有效窗口 512 token，涨太多会把前面的职责分工挤出去
 check('提示词仍在合理长度内', pSit.length < 2200, `${pSit.length} 字符`);
 
-console.log('\n[5h] 男性姿势再次不生效：举起的胳膊被放下');
-// 现象：图3 是单手高举过头的站立姿势，成品却是双手垂在身侧的正面站姿。
-// 旧版男性段落把「忽略」说了四遍（ignore that mannequin / do NOT carry / never /
-// do not replace the pose with a standing pose），「照搬」只有一句——模型权衡下来
-// 干脆整张图都不用。加上要点通道对男性基本是空的（见下面 pose.en 那条），
-// 姿势彻底没有落脚点。
-const pM = buildPrompt({ gender: 'male', poseHint: 'standing with one arm raised high above the head, the other arm hanging at the side, legs apart' });
-check('男性版逐肢体点名：举起的胳膊仍然举着',
-  /a raised arm stays raised above the head/.test(pM));
-check('男性版逐肢体点名：抬起的膝盖仍然抬起', /a bent or lifted knee stays bent/.test(pM));
-check('男性版要求照搬骨架要素', /which limb is where, every joint angle, the weight-bearing leg/.test(pM));
-check('男性版把「换身体」放在照搬之后',
-  pM.indexOf('keep the same skeleton') < pM.indexOf('Give that skeleton a male body'));
-check('男性版不再连说忽略', !/ignore that mannequin|its overall silhouette/i.test(pM));
-check('「忽略」只留一处，且只针对身体表面', (pM.match(/female body surface/g) || []).length === 1);
-check('男性版提示词长度未失控', pM.length < 2700, `${pM.length} 字符`);
+console.log('\n[5h] 男性姿势第三次返工：肢体要逐个点名');
+// 现象：图3 是单臂高举过头，成品却是手扶颈侧、另一手贴大腿。
+// 真因见 [5b]（文字压过线稿），但姿势段本身也退化了：为了「换身体」把骨架、关节、
+// 轮廓全堆进去，「照搬」的信息被摊薄。现在姿势段与女性同构，只多三个肢体例子。
+const pM = buildPrompt({ gender: 'male', poseHint: 'standing with one arm raised high above the head' });
+check('姿势段逐肢体点名：举起的胳膊仍然举着', /a raised arm stays raised high/.test(pM));
+check('姿势段逐肢体点名：肘角保持原样', /a bent elbow keeps its exact angle/.test(pM));
+check('姿势段逐肢体点名：手在头边就留在头边', /a hand at the head stays at the head/.test(pM));
+check('姿势段仍要求照搬机位与朝向', /viewpoint exactly/.test(pM));
+check('姿势段不再塞换身体的说明', !/bust|waist-to-hip|skeleton/.test(
+  pM.slice(pM.indexOf('Reference image 3 defines the POSE'), pM.indexOf('Ignore the line-art'))));
+check('男性提示词长度未失控', pM.length < 2700, `${pM.length} 字符`);
 
 // 女性版必须逐字不受影响：出现任何一条男性专用措辞都算污染
 const pF = buildPrompt({ gender: 'female', poseHint: '站立｜单手高举' });
 for (const [label, re] of [
-  ['姿势来源句', /is the source of the pose/],
   ['逐肢体点名', /raised arm stays raised/],
-  ['换男性身体', /flat chest, male shoulder width/],
-  ['女性身体表面', /female body surface/],
-  ['要点改写句', /written out/],
+  ['换男性身体', /give its skeleton a male body/],
+  ['地面句', /stays on the floor in exactly/],
+  ['裤子清单', /trousers, jeans/],
 ]) check(`女性版不含男性专用措辞：${label}`, !re.test(pF));
 check('女性版仍走原来的确认式要点', /use it to confirm image 3/.test(pF));
 
-// 要点字段：男性库的 pose.zh 只存 60 字符，清洗完只剩「站立｜单手高举；」这种小标题，
-// 等于什么也没说；pose.en 才是完整的一句。取错字段就是「姿势没有文字落脚点」。
+// 男性坐姿：线稿全是地面姿势（26 坐 + 16 跪 + 12 蹲 + 13 躺），线稿里没有椅子
+const pSitM = buildPrompt({ gender: 'male', frame: [960, 1280] });
+check('男性全身强调留在地面', /he stays on the floor in exactly that position/.test(pSitM));
+check('男性不给人加椅子凳子', /do not lift him onto a chair or a stool/.test(pSitM));
+check('男性腿部清单点名裤子', /trousers, jeans, chinos, socks, boots, shoes/.test(pSitM));
+check('男性「没腿袜就光腿」不再误伤长裤', !/If image 1 shows no legwear, the legs stay bare/.test(pSitM));
+const pUpM = buildPrompt({ gender: 'male', halfBody: true, frame: [1024, 1024] });
+check('半身不带地面句（裁到大腿，椅子看不见）', !/stays on the floor in exactly/.test(pUpM));
+
+// 要点字段：男性库的 pose.zh 只存 60 字符，清洗完只剩小标题；pose.en 才是完整的一句。
+// 虽然男性提示词不再注入要点，前端仍要算对，卡片悬停与诊断都用它。
 check('纯英文要点不会被砍掉最后一个词',
   clipPoseHint('standing with both arms raised overhead') === 'standing with both arms raised overhead',
   clipPoseHint('standing with both arms raised overhead'));
@@ -324,7 +341,7 @@ check('中英混排仍砍掉半句英文尾',
 const longEn = clipPoseHint('standing with the left arm raised high above the head while the right hand rests on the hip and the weight shifts onto one leg, the torso turned away from the camera and the head tilted back'.repeat(2));
 check('超长英文确实被截短', longEn.length <= 201, `${longEn.length} 字符`);
 check('超长英文按词边界截断', /…$/.test(longEn) && !/\s…$/.test(longEn), longEn);
-check('截断后不出现半个单词', !/[A-Za-z]…$/.test(longEn.slice(-3)) || /\b\w+…$/.test(longEn), longEn);
+check('截断后不出现半个单词', /\b\w+…$/.test(longEn), longEn);
 
 const maleItems = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8')).items;
 const betterEn = maleItems.filter((it) => String(it.pose?.en || '').length > String(clipPoseHint(it.pose?.zh || '')).length * 3);

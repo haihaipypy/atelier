@@ -245,6 +245,17 @@ async function main() {
     it.cats = ['上半身'];
     it.pose.zh = `上半身｜${it.title}；${neutralDesc(String(it.pose.zh).split('；').slice(1).join('；'))}`.trim();
   }
+  // 上游文字与线稿不符的条目按图修正，必须在上面那一轮之后覆盖
+  let textFixed = 0;
+  for (const it of malePoses) {
+    const fix = POSE_TEXT_FIX[it.code];
+    if (!fix) continue;
+    it.title = fix.title;
+    it.tags = fix.tags;
+    it.pose = { ...it.pose, en: fix.en, zh: fix.zh };
+    textFixed += 1;
+  }
+  if (textFixed) console.log(`姿势文字修正：${textFixed} 条（线稿与上游描述不符）`);
 
   if (!noImages) {
     console.log('下载缩略图（w300）→ web/public/library …');

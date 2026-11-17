@@ -113,57 +113,73 @@ export function buildPrompt({
 
 
   // 男性版的参考图没有男性特征（中性人台 + 女性素体人偶），必须显式说明，
-  // 否则模型会按默认女性渲染，或者干脆丢掉姿势、退回站姿
+  // 否则模型会按默认女性渲染，或者干脆丢掉姿势、退回站姿。
+  //
+  // 「换身体」这件事放在这里，不放在姿势段里：姿势段越短，模型越容易把它当硬约束。
+  // 女性版的姿势段只有一句话，效果稳定；男性版曾经在同一位置堆了 600 字符的
+  // 骨架/轮廓/否定说明，权重被摊薄后模型挑了最省事的做法——整张图不用。
   const subject =
     gender === 'male'
-      ? 'The person is an adult man: male facial structure, male body proportions, flat chest, no makeup.'
+      ? 'The person is an adult man: male facial structure, male body proportions, flat chest, no makeup. ' +
+        'Reference image 3 is drawn on a female artist mannequin: give its skeleton a male body and ' +
+        'ignore only the mannequin\'s bust and hip curve, because the pose itself is copied as drawn.'
       : 'The person is an adult woman: female facial structure, female body proportions.';
 
-  // 姿势参考图是女性素体线稿：轮廓里的胸部曲线、腰胯比例会跟「成年男性」打架。
+  // 姿势段：男女共用同一句主干，差别只有男性那句「逐肢体、肘角不变」。
   //
-  // 男性分支重写过一次，原因是旧版把「忽略」说了四遍（ignore / do NOT carry / never /
-  // do not replace），而「照搬」只有一句，模型权衡下来干脆整张图都不用了——选了
-  // 「单手高举」却输出双手垂在身侧的正面站姿。现在改成**先照搬、后换身体**：
-  // 逐肢体点名（举起的胳膊不能放下、抬起的膝盖不能放平），「女性轮廓」只在最后
-  // 用一句话交代一次。措辞从「别站直」这类否定句换成「举起的胳膊仍然举着」这类
-  // 正向描述——否定句里出现的动作词（standing / walking）本身就会被模型当成候选姿态。
+  // 这一句是三次返工后收敛出来的写法。要点是**短**：姿势段的长度直接决定它被
+  // 当成硬约束还是背景描述。曾经为了「换身体」把骨架、关节、轮廓全塞进来，
+  // 结果选了「单手高举」却输出手扶后颈、另一只手插兜的成品——手抬起来了，
+  // 但抬到哪儿完全由模型自己决定。
   const poseRef =
     gender === 'male'
-      ? 'Reference image 3 is the source of the pose: keep the same skeleton — which limb is where, ' +
-        'every joint angle, the weight-bearing leg, the head direction, the crop and the camera height — ' +
-        'and take it limb by limb: a raised arm stays raised above the head, an arm held out stays held ' +
-        'out, a bent or lifted knee stays bent, a hand on the floor stays on the floor. Give that ' +
-        'skeleton a male body (flat chest, male shoulder width, male waist-to-hip) and drop only the ' +
-        'mannequin\'s female body surface, its bust and hip curve. The skeleton is copied; the body is male.'
+      ? 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
+        'placement, leg crossing, hand positions and viewpoint exactly, limb by limb — a raised arm ' +
+        'stays raised high, a bent elbow keeps its exact angle, a hand at the head stays at the head.'
       : 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
         'placement, leg crossing, hand positions and viewpoint exactly.';
-  // 姿态要点的措辞分性别：男性版多一句「照搬到男性身上」——参考图是女性素体线稿，
-  // 轮廓和「成年男性」冲突时模型会连姿势一起丢掉；女性版只做「确认」，多说反而添乱。
+  // 姿态要点只对女性版注入，男性版**一个字都不注入**。
+  //
+  // 这条是实测出来的，不是保守：男性库的文字来自上游（Shisei）的姿态描述，和线稿
+  // 并不是严格一一对应。SP-P021 的线稿是「单臂高举」，上游文字写的却是「一手扶颈侧、
+  // 一手贴大腿」——两者冲突时，模型照的是**文字**：成品真的出现了扶颈 + 贴腿。
+  // 用户看到的是线稿举着手、成品摸着脖子，只能说「姿势还是不对」。
+  // 女性版之所以一直稳，正因为它的条目几乎都没有要点，姿势只能看线稿。
+  //
+  // 要点仍保留在页面上（卡片标题、悬停提示），那是给人看的；模型只认图 3。
   const hint = clipPoseHint(poseHint);
-  const hintLine = hint
-    ? gender === 'male'
-      ? `Image 3's pose, written out (apply this same limb configuration to the man): ${hint}.`
-      : `The intended pose in words (use it to confirm image 3, never to override the outfit or the face): ${hint}.`
+  const hintLine = hint && gender !== 'male'
+    ? `The intended pose in words (use it to confirm image 3, never to override the outfit or the face): ${hint}.`
     : '';
 
   // 上半身姿势是另一套取景规则。
   //
-  // 这类线稿只画到胸下缘（upper 系列连双腿都不画），而图1 往往是长裙或整套造型。
-  // 一旦要求「把服装完整展示出来」，模型就必须自己编一个下半身——编的过程中
-  // 最省事的做法是让手臂自然垂下，胸前的手势（比心、剪刀手、托腮）全部丢失。
-  // 实测症状：选了「胸前双手心形」，成品是双手垂在身侧、还额外补了腿和鞋。
-  //
-  // 所以这里改成正向要求：按线稿裁到大腿中部，手要比划出来，衣服能露多少露多少。
+  // 女性库的 upper 线稿只画到胸下缘，男性库的 upper 线稿画到胯（大腿根）。
+  // 两边的裁切不同，取景措辞也就不能共用一句：说「和 image 3 完全一样」在女性库
+  // 是「到胸口」，到男性库就变成「到胯」——而下面还写着 cropped at mid-thigh，自相矛盾。
+  // 男性版因此改成「比 image 3 略松一点，裁到大腿中部」，并要求 image 3 里出现的
+  // 手、前臂、腰、胯全部留在画面内——半身像最容易丢的就是垂在身侧的那只手。
   const framing = halfBody
-    ? 'FRAMING — image 3 is an upper-body reference: it stops below the chest and has no legs. ' +
-      'Render a medium close-up cropped at mid-thigh, exactly like the crop of image 3, and fill the ' +
-      'frame with the upper body instead of zooming out. Do not invent legs, feet, shoes or a ' +
-      'standing full-length stance, and do not show the hem of the garment if it falls outside that crop. ' +
-      'The arms, hands and head are fully visible in this crop, so every hand gesture from image 3 ' +
-      'must be reproduced and clearly readable — do not lower the arms, and do not hide the hands ' +
-      'behind the body, under the hair or outside the frame. When image 3 shows the hands doing ' +
-      'something (heart shape, peace sign, hands on cheeks, finger heart), that gesture is the ' +
-      'subject of the picture and the face must stay visible behind or between the hands.'
+    ? gender === 'male'
+      ? 'FRAMING — image 3 is an upper-body reference: it stops at the hip and shows no legs below ' +
+        'that. Render a medium shot cropped around mid-thigh, slightly looser than image 3, and fill ' +
+        'the frame with the body instead of zooming out. Everything image 3 does show — both hands, ' +
+        'the forearms, the waist and the tilt of the hips — stays inside the frame, so no hand is cut ' +
+        'off at the edge. Do not invent legs, feet, shoes or a standing full-length stance, and do not ' +
+        'show the hem of the garment if it falls outside that crop. Every hand gesture from image 3 ' +
+        'must be reproduced and clearly readable — do not lower the arms, and do not hide the hands ' +
+        'behind the body, under the hair or outside the frame. When image 3 shows the hands doing ' +
+        'something (heart shape, peace sign, hands on cheeks, finger heart), that gesture is the ' +
+        'subject of the picture and the face must stay visible behind or between the hands.'
+      : 'FRAMING — image 3 is an upper-body reference: it stops below the chest and has no legs. ' +
+        'Render a medium close-up cropped at mid-thigh, exactly like the crop of image 3, and fill the ' +
+        'frame with the upper body instead of zooming out. Do not invent legs, feet, shoes or a ' +
+        'standing full-length stance, and do not show the hem of the garment if it falls outside that crop. ' +
+        'The arms, hands and head are fully visible in this crop, so every hand gesture from image 3 ' +
+        'must be reproduced and clearly readable — do not lower the arms, and do not hide the hands ' +
+        'behind the body, under the hair or outside the frame. When image 3 shows the hands doing ' +
+        'something (heart shape, peace sign, hands on cheeks, finger heart), that gesture is the ' +
+        'subject of the picture and the face must stay visible behind or between the hands.'
     : '';
 
   // 站姿反例只对全身取景有意义。半身像里「别并腿」既不可见，又会把模型
@@ -173,6 +189,24 @@ export function buildPrompt({
     : 'The stance must follow image 3, not a default catalogue pose. Do not straighten the legs, ' +
       'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
       'and do not drop the arms flat against the sides, unless image 3 itself shows exactly that.';
+
+  // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
+  // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
+  // 把人扶起来站着——两者都让姿势对不上。女性库混着椅坐与地面坐，这句话只对男性加。
+  // 半身像裁到大腿中部，椅子本来就看不见，这句只对全身加，省下来的字数留给取景说明
+  const floorLine = gender === 'male' && !halfBody
+    ? 'If image 3 is seated, kneeling, crouching or lying down, he stays on the floor in exactly ' +
+      'that position — do not lift him onto a chair or a stool, and do not stand him up.'
+    : '';
+
+  const legwearLine = gender === 'male'
+    ? 'Image 3 is an unclothed mannequin, so its bare legs are not a styling choice: put on the ' +
+      'legwear and footwear from image 1 — trousers, jeans, chinos, socks, boots, shoes — on the ' +
+      'final pose, bent and crossed legs included. If image 1 has no legwear at all, the legs stay ' +
+      'bare as image 1 shows.'
+    : 'Image 3 is an unclothed mannequin, so its bare legs are not a styling choice: put on the legwear ' +
+      'and footwear from image 1 — tights, stockings, socks, boots, shoes — on the final pose, bent ' +
+      'and crossed legs included. If image 1 shows no legwear, the legs stay bare.';
 
   const parts = [
     'Compose ONE single new image of one person, using the three reference images below.',
@@ -185,9 +219,9 @@ export function buildPrompt({
     // 腿部服装单独说一遍，但只限定腿脚：坐姿、蹲姿、躺姿的姿势线稿腿是裸露的素体，
     // 而「图1 的姿态一律不要」这句很容易连带把腿上的东西一起否掉——丝袜、靴子就没了。
     // 不写成「全身都按图1 覆盖」，否则露肩、露背这类剪裁会被模型补上布料。
-    'Image 3 is an unclothed mannequin, so its bare legs are not a styling choice: put on the legwear ' +
-      'and footwear from image 1 — tights, stockings, socks, boots, shoes — on the final pose, bent ' +
-      'and crossed legs included. If image 1 shows no legwear, the legs stay bare.',
+    // 男性版必须点名裤子：原句列的是 tights / stockings / socks，配一句「图1 没有腿袜就光腿」，
+    // 男性套装是长裤，按字面理解就是「没有腿袜 → 光腿」，坐姿容易直接出一条光腿。
+    legwearLine,
     'Reference image 2 defines the FACE ONLY: use this exact face identity, facial features, ' +
       'hairstyle and hair color for the person.',
     poseRef,
@@ -202,6 +236,7 @@ export function buildPrompt({
     // 只要服装是长裙就会自己滑回正面站姿。这一句放在姿势段之后、风格之前，
     // 让它落在模型最后读到的位置附近。
     stanceGuard,
+    floorLine,
     frameLine,
     styleLine,
     extra,
