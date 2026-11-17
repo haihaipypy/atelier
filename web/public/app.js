@@ -82,6 +82,41 @@ function normBase(raw) {
 
 const endpointOf = (baseUrl) => `${normBase(baseUrl)}/images/generations`;
 
+/**
+ * 参考图的三种送法，各家 OpenAI 兼容网关不一样，只能让用户选。
+ *
+ * 实测踩坑：默认送 extra_body.image（Agnes 用这个），换一家服务后直接报
+ * 「extra_body.image 必须包含图片值」——它把 image 当成必填字符串，收到数组就判空。
+ * 这类报错原文很误导（明明传了图），所以这里把三种主流写法做成选项，
+ * 并在报错时提示「换一种送法」，而不是让用户自己猜。
+ */
+const IMAGE_MODES = ['extra_body', 'array', 'singular'];
+const IMAGE_MODE_LABEL = {
+  extra_body: 'extra_body.image（OpenAI 扩展，Agnes 等）',
+  array: 'image: [url…]（顶层数组）',
+  singular: 'image: "url"（顶层单张，兼容最广）',
+};
+
+/** 把参考图塞进请求体，返回新的 body（不改原对象） */
+function attachImages(body, images, mode) {
+  const list = (images || []).filter(Boolean);
+  if (!list.length) return body;
+  if (mode === 'array') return { ...body, image: list };
+  if (mode === 'singular') {
+    const first = list[0];
+    const rest = list.slice(1);
+    return {
+      ...body,
+      image: first,
+      extra_body: { ...(body.extra_body || {}), ...(rest.length ? { image: rest } : {}) },
+    };
+  }
+  return { ...body, extra_body: { ...(body.extra_body || {}), image: list } };
+}
+
+const imageModeOf = (cfg) =>
+  IMAGE_MODES.includes(cfg?.imageMode) ? cfg.imageMode : 'extra_body';
+
 /** 上游 4xx/5xx 的提示文案（与后端保持一致，前端直连时自己拼） */
 function upstreamMsg(status, json, raw, endpoint) {
   const upstream = String(json?.error?.message || json?.message || raw || '')
@@ -191,9 +226,11 @@ async function generateDirect({ images, prompt, size }) {
       throw new Error('额外参数不是合法 JSON');
     }
   }
-  const body = { model: cfg.model, prompt, n: 1, size, ...extra };
-  if (images?.length) body.extra_body = { ...(body.extra_body || {}), image: images };
+  let body = { model: cfg.model, prompt, n: 1, size, ...extra };
+  body = attachImages(body, images, imageModeOf(cfg));
+  // 顶层已有图时再把同样的图塞进 extra_body，等于把数组又发了一遍——上游会判成「缺图」
   body.extra_body = { ...(body.extra_body || {}), response_format: 'b64_json' };
+  if (!body.extra_body.image && !body.image) delete body.extra_body.image;
 
   const started = Date.now();
   let res;
@@ -218,7 +255,19 @@ async function generateDirect({ images, prompt, size }) {
   } catch {
     /* 非 JSON 交给下面报错 */
   }
-  if (!res.ok) throw new Error(upstreamMsg(res.status, json, raw, endpoint));
+  if (!res.ok) {
+    const msg = upstreamMsg(res.status, json, raw, endpoint);
+    const up = String(json?.error?.message || json?.message || raw || '');
+    // 「image 必须包含图片值」这类原文最容易误导：图其实传了，只是这家不认这种送法。
+    // 直接把「换一种参考图送法」写进报错，省掉用户翻文档猜。
+    const imageish = /image/i.test(up) && /(必须|不能为空|required|empty|missing|invalid)/i.test(up);
+    throw new Error(
+      imageish
+        ? `${msg}\n参考图其实已经带了（${images?.length || 0} 张），是这家服务不认「${IMAGE_MODE_LABEL[imageModeOf(cfg)]}」这种送法。`
+          + '点「修改自定义模型」，把「参考图送法」换成另一种再试：通常先试「image 单张」，其次「顶层数组」。'
+        : msg,
+    );
+  }
 
   const item = json?.data?.[0] || json?.images?.[0] || json?.output?.[0] || null;
   const b64 = item?.b64_json || item?.base64 || (typeof item === 'string' ? null : null);
@@ -417,6 +466,9 @@ function paintModelPanel() {
   if (src?.baseUrl && !$('#cfgBaseUrl').value) $('#cfgBaseUrl').value = src.baseUrl;
   if (src?.model && !$('#cfgModel').value) $('#cfgModel').value = src.model;
   if (isBrowser && local?.extraJson && !$('#cfgExtra').value) $('#cfgExtra').value = local.extraJson;
+  // 参考图送法是本机偏好（服务端那套不走这个字段），每次打开抽屉都按已存的回填
+  const im = $('#cfgImageMode');
+  if (im && local && !im.dataset.touched) im.value = imageModeOf(local);
 }
 
 function renderEngineBadge() {
@@ -1249,6 +1301,7 @@ const readCfg = () => ({
   apiKey: $('#cfgApiKey').value.trim(),
   model: $('#cfgModel').value.trim(),
   sendMode: $('#cfgSendMode').value,
+  imageMode: $('#cfgImageMode').value,
   extraJson: $('#cfgExtra').value.trim(),
 });
 
@@ -1276,6 +1329,7 @@ async function saveCfg() {
       baseUrl,
       apiKey: cfg.apiKey || prev.apiKey || '',
       model: cfg.model,
+      imageMode: cfg.imageMode,
       extraJson: cfg.extraJson,
     };
     if (!baseUrl) return cfgMsg('请填写 Base URL', false);

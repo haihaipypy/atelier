@@ -18,6 +18,7 @@ import {
   saveProfile,
   publicProfile,
   generateCustom,
+  attachImages,
 } from '../shared/custom-model.js';
 import { createServer } from 'node:http';
 
@@ -389,6 +390,39 @@ try {
 } finally {
   await srv.close();
 }
+
+console.log('\n[15b] 参考图送法（Agnes 之外的网关）');
+// 现象：换一家服务后报「extra_body.image 必须包含图片值」，但图明明传了 3 张。
+// 原因：它不认 extra_body.image 这个位置，把 image 当顶层必填字符串。
+const bodyExtra = attachImages({ model: 'm', prompt: 'p' }, ['a', 'b', 'c'], 'extra_body');
+const bodyArray = attachImages({ model: 'm', prompt: 'p' }, ['a', 'b', 'c'], 'array');
+const bodySingle = attachImages({ model: 'm', prompt: 'p' }, ['a', 'b', 'c'], 'singular');
+check('默认 extra_body.image 是数组', JSON.stringify(bodyExtra.extra_body.image) === '["a","b","c"]');
+check('array 模式放顶层 image 数组', JSON.stringify(bodyArray.image) === '["a","b","c"]' && !bodyArray.extra_body);
+check('singular 模式首图走顶层字符串', bodySingle.image === 'a' && typeof bodySingle.image === 'string');
+check('singular 模式其余图不丢', JSON.stringify(bodySingle.extra_body.image) === '["b","c"]');
+check('无参考图时不塞 image 字段', !('image' in attachImages({ model: 'm' }, [], 'singular')));
+
+const srvMode = await startFakeImageServer();
+try {
+  const base = { baseUrl: `http://127.0.0.1:${srvMode.port}/v1`, apiKey: 'k', model: 'm', ready: true };
+  await generateCustom({ images: imgs, prompt: 'p', size: '1024x1024', profile: { ...base, imageMode: 'singular' } });
+  check('服务端按 imageMode=singular 发送', typeof srvMode.lastBody?.image === 'string' && srvMode.lastBody.image.startsWith('data:image/'));
+  await generateCustom({ images: imgs, prompt: 'p', size: '1024x1024', profile: { ...base, imageMode: 'array' } });
+  check('服务端按 imageMode=array 发送', Array.isArray(srvMode.lastBody?.image) && srvMode.lastBody.image.length === 3);
+  check('response_format 仍在 extra_body', srvMode.lastBody?.extra_body?.response_format === 'b64_json');
+  await generateCustom({ images: imgs, prompt: 'p', size: '1024x1024', profile: base });
+  check('未指定时回落 extra_body.image', Array.isArray(srvMode.lastBody?.extra_body?.image));
+} finally {
+  await srvMode.close();
+}
+
+// 前端直连用的是同一套拼装逻辑：两边不一致时，直连能过、中转报错（或反过来）
+const frontModeSrc = appSrc.slice(appSrc.indexOf('const IMAGE_MODES'), appSrc.indexOf('const imageModeOf'));
+check('前端送法选项与服务端一致', ['extra_body', 'array', 'singular'].every((m) => frontModeSrc.includes(`'${m}'`)));
+check('前端拼装与服务端同构', /if \(mode === 'array'\) return \{ \.\.\.body, image: list \}/.test(appSrc));
+check('抽屉提供送法下拉', /id="cfgImageMode"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
+check('缺图类报错提示换送法', /imageish[\s\S]{0,300}换成另一种再试/.test(appSrc));
 
 console.log('\n[16] 自定义模型：错误分类');
 const srv2 = await startFakeImageServer({ fail: 401 });

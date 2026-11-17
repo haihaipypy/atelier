@@ -197,6 +197,14 @@
     <label>模型名称
       <input id="cfgModel" placeholder="例如 agnes-image-2.5-flash、gpt-image-1" spellcheck="false" />
     </label>
+    <label>参考图在请求体里的位置
+      <select id="cfgImageMode">
+        <option value="extra_body" selected>extra_body.image: [图…]（Agnes 等 OpenAI 扩展）</option>
+        <option value="array">image: [图…]（顶层数组）</option>
+        <option value="singular">image: "图"（顶层单张，兼容最广）</option>
+      </select>
+      <small>报「extra_body.image 必须包含图片值」时换一种：先试「顶层单张」，再试「顶层数组」。</small>
+    </label>
     <label>参考图传递方式
       <select id="cfgSendMode">
         <option value="auto" selected>自动（data URI，最通用）</option>

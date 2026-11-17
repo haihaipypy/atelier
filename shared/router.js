@@ -101,6 +101,7 @@ export async function handleRequest(request, env = {}, aiRun = null) {
             model: String(body.model || ''),
             ready: !!(body.baseUrl && body.apiKey && body.model),
             sendMode: body.sendMode || 'auto',
+            imageMode: body.imageMode,
             extraJson: '',
           }
         : await readProfile(env);

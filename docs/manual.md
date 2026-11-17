@@ -151,6 +151,28 @@ npx wrangler secret put CUSTOM_MODEL      # 例：gpt-image-1
 
 页面弹窗底部会直接说明当前是哪种模式，不会让你白填。
 
+### 报「extra_body.image 必须包含图片值」怎么办
+
+这个报错的意思是**位置不对**，不是图没传——图已经带了（3 张，data URI），
+只是这家服务不认 `extra_body.image` 这个位置，它把 `image` 当成顶层的必填字符串，
+收到数组就判成「空」。各家 OpenAI 兼容网关的写法确实不一：
+
+| 送法 | 请求体 | 典型来源 |
+|---|---|---|
+| `extra_body`（默认） | `extra_body.image: [图…]` | Agnes 与多数聚合网关 |
+| `array` | `image: [图…]` | 部分自建服务 |
+| `singular` | `image: "图"` ＋ `extra_body.image: [其余图…]` | 兼容最广，单图必填的网关 |
+
+改法：在「修改自定义模型」里把**参考图在请求体里的位置**换成另一种，再点「保存并测试」。
+一般顺序是 `singular` → `array`。服务端中转可用环境变量固定：
+
+```bash
+npx wrangler secret put CUSTOM_IMAGE_MODE   # extra_body | array | singular
+```
+
+报错信息本身也会提示这一句，不用回来翻文档。三张图不会丢：`singular` 模式下第一张走顶层、
+其余两张仍在 `extra_body.image`。
+
 ### 本地开发
 
 ```bash
