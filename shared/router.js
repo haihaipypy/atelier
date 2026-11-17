@@ -125,7 +125,10 @@ export async function handleRequest(request, env = {}, aiRun = null) {
     const extra = url.searchParams.get('extra') || '';
     const gender = url.searchParams.get('gender') === 'male' ? 'male' : 'female';
     const poseHint = clipHint(url.searchParams.get('poseHint'));
-    return json({ prompt: buildPrompt({ style, extra, gender, poseHint }) });
+    // 上半身姿势要换一套取景规则（裁到大腿中部、手必须露出），详见 buildPrompt 的 framing 段
+    const halfBody = url.searchParams.get('halfBody') === '1';
+    const frame = [Number(url.searchParams.get('w')) || 0, Number(url.searchParams.get('h')) || 0];
+    return json({ prompt: buildPrompt({ style, extra, gender, poseHint, halfBody, frame }) });
   }
 
   /**
@@ -202,7 +205,14 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         const out = await generateCustom({
           images: body.images,
           prompt: body.prompt
-            || buildPrompt({ style: body.style, extra: body.extra, gender: body.gender, poseHint: clipHint(body.poseHint) }),
+            || buildPrompt({
+              style: body.style,
+              extra: body.extra,
+              gender: body.gender,
+              poseHint: clipHint(body.poseHint),
+              halfBody: body.halfBody === true,
+              frame: [Number(body.width) || 0, Number(body.height) || 0],
+            }),
           size: `${body.width || 1024}x${body.height || 1024}`,
           profile,
           signal: AbortSignal.timeout(Number(env.CUSTOM_TIMEOUT_MS || 120000)),
@@ -224,6 +234,7 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         extra: body.extra,
         gender: body.gender,
         poseHint: clipHint(body.poseHint),
+        halfBody: body.halfBody === true,
         width: body.width || 1024,
         height: body.height || 1024,
         seed: body.seed,

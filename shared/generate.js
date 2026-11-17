@@ -67,8 +67,20 @@ export function clipPoseHint(s) {
  * @param {string} [p.poseHint] 用户所选姿势的姿态要点（来自图库条目），
  *        用来把「大约什么姿势」写成文字。参考图给的是画面，文字补的是语义：
  *        两者一起给，模型在这类多图合成里才更容易听懂。
+ * @param {boolean} [p.halfBody] 所选姿势是否「上半身」类（线稿只画到胸下缘）。
+ *        这类条目自己没有 pose.zh 要点，也撑不起全身构图：让它出全身，
+ *        模型只能自己编下半身，编的过程中会把胸前手势一起丢掉。
+ * @param {[number, number]} [p.frame] 画幅 [宽, 高]，用来在提示词里描述画幅比例。
+ *        只作描述，不参与尺寸校验——尺寸仍然是 width/height 参数说了算。
  */
-export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'female', poseHint = '' } = {}) {
+export function buildPrompt({
+  style = 'photorealistic',
+  extra = '',
+  gender = 'female',
+  poseHint = '',
+  halfBody = false,
+  frame = null,
+} = {}) {
   // 镜头信息里绝不能出现 "full-body" 这类景别词。
   // 原因：图3 是姿势参考，图1 的服装常常是连衣裙/半身裙，两样一起给的时候模型
   // 会去找一个"能把整套衣服完整展示"的安全站姿——最省事的就是正面站直、双手贴身。
@@ -81,6 +93,18 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
       'High-quality anime illustration, clean cel shading with soft gradients, ' +
       'simple gradient background.',
   }[style] || 'Photorealistic editorial photography.';
+
+  // 画幅描述：不写景别，只写形状，避免又把模型往「站直展示全身」上推
+  let frameLine = '';
+  if (Array.isArray(frame) && frame[0] > 0 && frame[1] > 0) {
+    const r = frame[0] / frame[1];
+    frameLine = Math.abs(r - 1) < 0.04
+      ? 'The output canvas is square; frame the figure to fill it, not to fit it.'
+      : r < 1
+        ? 'The output canvas is taller than wide; frame the figure to fill its width as well as its height.'
+        : 'The output canvas is wider than tall; frame the figure to fill its height as well as its width.';
+  }
+
 
   // 男性版的参考图没有男性特征（中性人台 + 女性素体人偶），必须显式说明，
   // 否则模型会按默认女性渲染，或者干脆丢掉姿势、退回站姿
@@ -112,6 +136,34 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
       : `The intended pose in words (use it to confirm image 3, never to override the outfit or the face): ${hint}.`
     : '';
 
+  // 上半身姿势是另一套取景规则。
+  //
+  // 这类线稿只画到胸下缘（upper 系列连双腿都不画），而图1 往往是长裙或整套造型。
+  // 一旦要求「把服装完整展示出来」，模型就必须自己编一个下半身——编的过程中
+  // 最省事的做法是让手臂自然垂下，胸前的手势（比心、剪刀手、托腮）全部丢失。
+  // 实测症状：选了「胸前双手心形」，成品是双手垂在身侧、还额外补了腿和鞋。
+  //
+  // 所以这里改成正向要求：按线稿裁到大腿中部，手要比划出来，衣服能露多少露多少。
+  const framing = halfBody
+    ? 'FRAMING — image 3 is an upper-body reference: it stops below the chest and has no legs. ' +
+      'Render a medium close-up cropped at mid-thigh, exactly like the crop of image 3, and fill the ' +
+      'frame with the upper body instead of zooming out. Do not invent legs, feet, shoes or a ' +
+      'standing full-length stance, and do not show the hem of the garment if it falls outside that crop. ' +
+      'The arms, hands and head are fully visible in this crop, so every hand gesture from image 3 ' +
+      'must be reproduced and clearly readable — do not lower the arms, and do not hide the hands ' +
+      'behind the body, under the hair or outside the frame. When image 3 shows the hands doing ' +
+      'something (heart shape, peace sign, hands on cheeks, finger heart), that gesture is the ' +
+      'subject of the picture and the face must stay visible behind or between the hands.'
+    : '';
+
+  // 站姿反例只对全身取景有意义。半身像里「别并腿」既不可见，又会把模型
+  // 往「画出腿」上拽——那样正好丢掉手势，与半身的要求相反。
+  const stanceGuard = halfBody
+    ? ''
+    : 'The stance must follow image 3, not a default catalogue pose. Do not straighten the legs, ' +
+      'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
+      'and do not drop the arms flat against the sides, unless image 3 itself shows exactly that.';
+
   const parts = [
     'Compose ONE single new image of one person, using the three reference images below.',
     subject,
@@ -128,12 +180,12 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
       'pose from image 3. Keep anatomy correct and proportions natural in the new pose.',
     // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
     hintLine,
+    framing,
     // 反例比正例管用：模型对「站直、双手贴身」的默认偏好极强，不点名的话，
     // 只要服装是长裙就会自己滑回正面站姿。这一句放在姿势段之后、风格之前，
     // 让它落在模型最后读到的位置附近。
-    'The stance must follow image 3, not a default catalogue pose. Do not straighten the legs, ' +
-      'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
-      'and do not drop the arms flat against the sides, unless image 3 itself shows exactly that.',
+    stanceGuard,
+    frameLine,
     styleLine,
     extra,
   ];
@@ -350,7 +402,7 @@ export function buildCloudflareForm({ images, prompt, modelId, width = 1024, hei
  * @param {object}   p.env     Worker 的 env（读 AI binding 与 FLUX_MODEL）
  * @param {Function} p.aiRun   env.AI.run 的绑定版本（丢失 this 会报错，必须 bind）
  */
-export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, gender, poseHint }) {
+export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, gender, poseHint, halfBody }) {
   assertThreeImages(images);
 
   if (typeof aiRun !== 'function') {
@@ -359,7 +411,7 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
     });
   }
 
-  const finalPrompt = prompt || buildPrompt({ style, gender, poseHint });
+  const finalPrompt = prompt || buildPrompt({ style, gender, poseHint, halfBody, frame: [width, height] });
   // 优先级：请求里显式指定（白名单校验）→ 环境变量 → 默认
   const allowed = new Set(Object.values(MODELS).map((m) => m.modelId));
   const wanted = model || env.FLUX_MODEL || DEFAULT_MODEL;

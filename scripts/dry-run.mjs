@@ -204,6 +204,55 @@ check('风格句仍描述质感与光线', /realistic skin texture/.test(pPose) 
 check('兜底文案不再写死全身照', !/全身人物照/.test(appSrcPose) && /不要并腿/.test(appSrcPose));
 check('兜底文案也排除图1的站姿', /也不要取它的站姿/.test(appSrcPose));
 
+console.log('\n[5f] 上半身姿势的取景回归');
+// 现象：选「胸前双手心形」的线稿（只画到胸下缘），成品却是并腿站直、双手垂在身侧，
+// 还自己补了腿和鞋。根因是全身那套提示词在逼模型展示完整服装，它只好编下半身，
+// 编的过程中手势被丢掉。
+const pUpper = buildPrompt({ gender: 'female', halfBody: true, frame: [1024, 1024] });
+const pFull = buildPrompt({ gender: 'female', poseHint: '站立｜双腿分开', frame: [960, 1280] });
+check('半身要求按图3裁到大腿中部', /cropped at mid-thigh/.test(pUpper));
+check('半身禁止凭空补腿脚鞋', /Do not invent legs, feet, shoes/.test(pUpper));
+check('半身要求手势可辨认', /every hand gesture from image 3 must be reproduced/.test(pUpper));
+check('半身点名不许放下手臂', /do not lower the arms/.test(pUpper));
+check('半身点出常见手势', /heart shape, peace sign, hands on cheeks/.test(pUpper));
+check('半身要求脸在手后仍可见', /face must stay visible behind or between the hands/.test(pUpper));
+check('半身不再要求并腿等站姿反例', !/default catalogue pose/.test(pUpper));
+check('方画幅有对应描述', /square; frame the figure to fill it/.test(pUpper));
+
+// 关键：全身这条路径一个字都不能受影响
+check('全身仍带站姿反例', /default catalogue pose/.test(pFull));
+check('全身不带半身取景段', !/FRAMING/.test(pFull) && !/mid-thigh/.test(pFull));
+check('全身不写方画幅', !/square; frame the figure/.test(pFull));
+check('全身画幅描述是竖版', /taller than wide/.test(pFull));
+const pMaleUpper = buildPrompt({ gender: 'male', halfBody: true, frame: [1024, 1024] });
+check('男性半身同样走进取景段', /cropped at mid-thigh/.test(pMaleUpper) && !/default catalogue pose/.test(pMaleUpper));
+
+// 前端判定：两个库的半身标记不一样，认错就退回全身构图
+const appUpper = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+const isHalfSrc = appUpper.slice(appUpper.indexOf('function isHalfBodyPose('), appUpper.indexOf('/** 页面上的画幅选项'));
+// 注意 new Function 里不能直接 return 外层变量名，必须写成闭包，否则返回的是函数本身
+const isHalf = (st) => new Function('state', `${isHalfSrc}; return isHalfBodyPose();`)(st);
+check('女性库「上半身·单人」判为半身',
+  isHalf({ selected: { pose: { cats: ['可爱系', '上半身·单人'] } } }) === true);
+check('男性库 series=upper 判为半身',
+  isHalf({ selected: { pose: { series: 'upper', cats: ['上半身'] } } }) === true);
+check('全身站姿不判为半身',
+  isHalf({ selected: { pose: { cats: ['站立', '全身·单人·常规'] } } }) === false);
+check('没选姿势时不判为半身', isHalf({ selected: { pose: null } }) === false);
+
+// 两个库的数据都要能被上面这条判定正确分类
+const upperFemale = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose.json'), 'utf8')).items
+  .filter((it) => isHalf({ selected: { pose: it } }));
+check('女性库确实有上半身条目且能被识别', upperFemale.length > 100, `${upperFemale.length} 条`);
+const standFemale = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose.json'), 'utf8')).items
+  .filter((it) => (it.cats || []).includes('站立') && isHalf({ selected: { pose: it } }));
+check('站立条目不会被误判为半身', standFemale.length === 0, `${standFemale.length} 条被误判`);
+
+check('选半身姿势会自动切方图', /sel\.value = isHalfBodyPose\(\) \? RATIO_HALF : '3:4'/.test(appUpper));
+check('用户改过画幅就不再自动切', /if \(state\.ratioTouched\) return;/.test(appUpper));
+check('半身标记送进中转通道', /halfBody,\n\s*model:/.test(appUpper));
+check('半身标记送进 /api/prompt', /halfBody: halfBody \? '1' : '0'/.test(appUpper));
+
 console.log('\n[5e] 姿势库排序：全身站立优先');
 // 现象：点开姿势库第一页全是坐姿（上游按编号排，P001 是「仰反弓坐姿」），站姿被埋到几十页后
 const appSrc2 = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');

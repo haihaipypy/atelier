@@ -25,6 +25,8 @@ const state = {
   custom: { configured: false },
   engine: 'cloudflare',
   relay: 'browser',   // 自定义模型由谁发请求：browser 直连 / server 中转
+  // 用户是否手动改过画幅：改过就不再替他自动切，避免「我明明选了竖版」
+  ratioTouched: false,
   busy: false,
 };
 
@@ -116,17 +118,42 @@ function poseHintFor() {
 }
 
 /**
+ * 所选姿势是不是「上半身」类。
+ *
+ * 两个库的标记不一样：女性库来自上游姿势站，分类是「上半身·单人」；
+ * 男性库来自 Shisei，`series === 'upper'` 且分类被改成「上半身」。
+ * 判错的代价很具体：上半身线稿只画到胸下缘，按全身出图时模型会自己编腿，
+ * 编的过程中胸前的手势（比心、剪刀手）全部丢掉——所以这里两种标记都要认。
+ */
+function isHalfBodyPose() {
+  const it = state.selected.pose;
+  if (!it) return false;
+  const cats = it.cats || [];
+  return it.series === 'upper' || cats.includes('上半身') || cats.includes('上半身·单人');
+}
+
+/** 页面上的画幅选项（key 与 #ratio 的 option 值一致） */
+const RATIO_MAP = { '3:4': [960, 1280], '1:1': [1024, 1024], '9:16': [720, 1280], '4:3': [1280, 960] };
+const RATIO_HALF = '1:1';
+
+/**
  * 直连模式下提示词要自己拼：/api/prompt 只是读模板，走本站域名不会被任何服务商拦截。
  * 失败时用一段等价的内置描述兜底，保证「不填提示词也能出图」。
  */
-async function buildPromptOnServer() {
+async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null } = {}) {
   const poseHint = poseHintFor();
   const q = new URLSearchParams({
     style: $('#style').value || 'photorealistic',
     extra: $('#extra').value.trim(),
     gender: state.gender,
     poseHint,
+    // 半身姿势要换一套取景规则，服务端按这个标记拼 FRAMING 段
+    halfBody: halfBody ? '1' : '0',
   });
+  if (frame) {
+    q.set('w', String(frame[0]));
+    q.set('h', String(frame[1]));
+  }
   try {
     const r = await fetch(`/api/prompt?${q}`);
     if (r.ok) {
@@ -140,8 +167,17 @@ async function buildPromptOnServer() {
   const poseLine = poseHint ? `（${poseHint}）` : '';
   // 兜底文案同样不能写死「全身照」：图3 裁到哪就是哪，写死景别等于让模型自己
   // 挑一个能装下整身的姿势——通常就是并腿站直
-  return `图1是服装（忽略人台与背景，也不要取它的站姿），图2是${who}的脸与发型，图3是姿势${poseLine}。`
-    + `把三者合成到同一个${who}身上：服装材质与垂感照图1，五官与发色照图2，姿态与镜头角度照图3。`
+  const base = `图1是服装（忽略人台与背景，也不要取它的站姿），图2是${who}的脸与发型，图3是姿势${poseLine}。`
+    + `把三者合成到同一个${who}身上：服装材质与垂感照图1，五官与发色照图2，姿态与镜头角度照图3。`;
+  // 半身走另一套：裁到大腿中部、手必须露出来、不许补腿
+  if (halfBody) {
+    return base
+      + '图3是上半身参考（只画到胸下缘，没有腿）：按它的裁切出中景半身像，裁到大腿中部，人物占满画面。'
+      + '不要凭空补出腿、脚、鞋，也不要画出裁切范围以外的裙摆。'
+      + '手在这个景别里必须完整可见，图3 的手势（比心、剪刀手、托脸）要照做，不要把手放下或藏到身后。'
+      + '输出一张真实感强的半身人像，光影自然。';
+  }
+  return base
     + `站姿以图3为准：不要并腿，不要把手贴在身侧，不要正对镜头收肩跨。`
     + (state.gender === 'male'
       ? '注意图3是女性素体线稿：只取它的骨架与机位，不要把它胸部与腰胯轮廓搬到男性身上，也不要替换成站姿。'
@@ -763,6 +799,22 @@ function selectItem(it) {
   }
   renderGrid();
   updateSlots();
+  syncRatioForPose();
+}
+
+/**
+ * 上半身姿势配方图。
+ *
+ * 画幅选项默认是 3:4 竖版（人像），那是给全身准备的。半身构图塞进竖长画布，
+ * 下方会空出一大截，模型为了填满就往下补腿——胸前手势于是在这一步被挤掉。
+ * 只做「默认」：用户手动改过画幅就不再干预。
+ */
+function syncRatioForPose() {
+  if (state.ratioTouched) return;
+  const sel = $('#ratio');
+  if (!sel || !RATIO_MAP[sel.value]) return;
+  if (!state.selected.pose) return;
+  sel.value = isHalfBodyPose() ? RATIO_HALF : '3:4';
 }
 
 function updateSlotThumb(kind) {
@@ -868,11 +920,12 @@ function loadImage(src) {
 
 /* ─────────────────────────── 生成 ─────────────────────────── */
 
-/* 尺寸统一为 16/64 的倍数（FLUX 系列对非对齐尺寸容易内部报错），且都在 256–1920 内 */
-const RATIO_MAP = { '3:4': [960, 1280], '1:1': [1024, 1024], '9:16': [720, 1280], '4:3': [1280, 960] };
-
 async function generate() {
   if (state.busy) return;
+  // 选的是上半身姿势就用方图：竖长画幅本来就是为全身准备的，给半身留出大片空白，
+  // 模型为了填满它就会往下画腿，手势反而被挤掉。用户自己的画幅选择不覆盖，只做默认。
+  const halfBody = isHalfBodyPose();
+  // 画幅以 select 当前值为准：syncRatioForPose 已在选姿势时把它切好，用户手动改过也会体现在这里
   const ratio = $('#ratio').value;
   const [width, height] = RATIO_MAP[ratio] || [1024, 1024];
   setBusy(true, '正在准备参考图…');
@@ -911,7 +964,8 @@ async function generate() {
     if (direct) {
       j = await generateDirect({
         images,
-        prompt: $('#promptOverride').value.trim() || (await buildPromptOnServer()),
+        prompt: $('#promptOverride').value.trim()
+          || (await buildPromptOnServer({ halfBody, frame: [width, height] })),
         size: `${width}x${height}`,
       });
     } else {
@@ -924,6 +978,7 @@ async function generate() {
         prompt: $('#promptOverride').value.trim(),
         // 姿势参考图是女性素体线稿，光给图模型经常直接退回站姿；把「大约什么动作」也写成文字
         poseHint: poseHintFor(),
+        halfBody,
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
       };
@@ -1024,6 +1079,10 @@ function bindUI() {
     $('#resultMeta').innerHTML = '';
   });
   $('#genBtn').addEventListener('click', generate);
+  // 用户自己挑过画幅之后就别再自动改，免得「我明明选了竖版」
+  $('#ratio').addEventListener('change', () => {
+    state.ratioTouched = true;
+  });
 
   // 通道切换
   $('#engine').addEventListener('change', (e) => {
