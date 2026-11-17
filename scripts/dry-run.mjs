@@ -438,6 +438,11 @@ check('缺图类报错提示换送法', /imageish[\s\S]{0,300}换成另一种再
 
 // 排查工具：上游只说「image 必须包含图片值」时，界面看不出请求体到底长什么样
 check('记下实际请求体', /state\.lastReq = \{ endpoint, body, mode/.test(appSrc));
+// 真凶：toReference 返回 {dataUrl,w,h}，参考图数组里塞的是对象而不是 data URI 字符串，
+// 上游读不到图 → 「image 必须包含图片值」。断言这条路径取的是字符串。
+check('参考图取 dataUrl 字符串', /return ref\.dataUrl;/.test(appSrc) && !/return await toReference\(/.test(appSrc));
+check('自定义通道参考图用 PNG', /state\.engine === 'custom' \? 'png' : 'jpeg'/.test(appSrc));
+check('Workers AI 仍用 JPEG', /toDataURL\('image\/jpeg', REF_QUALITY\)/.test(appSrc));
 check('失败后可下载诊断', /function downloadDiag/.test(appSrc) && /id="diagBtn"/.test(
   await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
 check('诊断导出会截断图片', /已截断/.test(appSrc));

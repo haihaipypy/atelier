@@ -879,7 +879,7 @@ function prefetchReference(it) {
 
 /** 任意图片来源 → 统一尺寸的 PNG dataURL（兜底 JPEG，避免 PNG 过大）。
  *  上游图片一律走本站 /api/proxy，避免跨域图读进 canvas 时偶发卡死。 */
-async function toReference(src) {
+async function toReference(src, fmt = 'jpeg') {
   const img = await loadImage(proxied(src));
   const scale = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
   const w = Math.max(64, Math.round(img.width * scale));
@@ -897,6 +897,9 @@ async function toReference(src) {
   //   1. canvas 的 PNG 是 RGBA（带 alpha 通道），部分推理后端遇到会直接抛 3043；
   //   2. 480px 照片 PNG 约 400–700KB，JPEG 只要 40–70KB，三张一起能让请求体小一个量级，
   //      而请求体过大同样是 3043 的常见诱因。
+  // 自定义网关用 PNG：Agnes 的图生图示例清一色是 data:image/png;base64，
+  // JPEG data URI 在个别网关会被判成「图片无效」。Workers AI 仍走 JPEG（体积小、避开 3043）。
+  if (fmt === 'png') return { dataUrl: canvas.toDataURL('image/png'), w, h };
   return { dataUrl: canvas.toDataURL('image/jpeg', REF_QUALITY), w, h };
 }
 
@@ -953,6 +956,7 @@ async function generate() {
   const diagBtn = $('#diagBtn');
   if (diagBtn) diagBtn.hidden = true;
   try {
+    const refFmt = state.engine === 'custom' ? 'png' : 'jpeg';
     // 三张并行处理：串行等待时每张都要单独跨域往返，累计很容易触发超时
     const images = await Promise.all(
       SLOTS.map(async (k) => {
@@ -962,12 +966,16 @@ async function generate() {
         // 直接用原图会拖来 1MB+ 的 PNG，三张并发容易超时。上传的图没有原图之分，用 thumb。
         const first = s.origin === 'upload' ? s.thumb : s.thumb || s.full;
         const fallback = s.full && s.full !== first ? s.full : null;
+        let ref;
         try {
-          return await toReference(first);
+          ref = await toReference(first, refFmt);
         } catch (e) {
           if (!fallback) throw e;
-          return await toReference(fallback);
+          ref = await toReference(fallback, refFmt);
         }
+        // 这里必须取字符串：上游只认 data URI 本身，塞 {dataUrl,w,h} 对象过去
+        // 会被判成「image 必须包含图片值」（图其实带了，只是它读不到）。
+        return ref.dataUrl;
       }),
     );
 
@@ -988,9 +996,9 @@ async function generate() {
     const engineReady =
       state.engine === 'custom' ? customChannelReady() : !!state.config.engines?.includes('cloudflare');
     const direct = state.engine === 'custom' && state.relay === 'browser';
-    // 自定义模型不一定吃 960x1280 这种精确尺寸：Agnes 这一系用「档位 + 比例」
-    // （size:"2K" + ratio:"3:4"），照抄像素尺寸会被拒或悄悄标准化。比例必须单独给。
-    const customSize = customSizeFor(targetRatio);
+    // 自定义通道同时给像素尺寸与比例：有的网关认 960x1280，有的认「档位 + ratio」，
+    // 两样都给最稳。像素若不合规，多数网关会按 ratio 自己归一。
+    const customSize = { size: `${width}x${height}`, ratio: targetRatio };
     setBusy(
       true,
       direct
