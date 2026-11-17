@@ -70,7 +70,7 @@ function normBase(raw) {
 const endpointOf = (baseUrl) => `${normBase(baseUrl)}/images/generations`;
 
 /** 上游 4xx/5xx 的提示文案（与后端保持一致，前端直连时自己拼） */
-function upstreamMsg(status, json, raw, endpoint) {
+function upstreamMsg(status, json, raw, endpoint, refs) {
   const upstream = String(json?.error?.message || json?.message || raw || '')
     .replace(/\s+/g, ' ')
     .trim()
@@ -91,7 +91,10 @@ function upstreamMsg(status, json, raw, endpoint) {
                 ? '上游不接受这组参数（size / model / response_format 可能不支持）'
                 : '';
   const detail = upstream ? `（上游：${upstream}${code ? ` · ${code}` : ''}）` : '';
-  return `自定义模型返回 ${status}${hint ? `：${hint}` : ''}${detail}`;
+  // 上游含糊说「图无效」时，只有把「这次送了几张、什么格式、多大」摊开，
+  // 才能分清是压根没带图，还是带了但对方不认这个格式——两种改法完全不同
+  const sent = refs ? `｜本次送出 ${describeRefImages(refs)}` : '';
+  return `自定义模型返回 ${status}${hint ? `：${hint}` : ''}${detail}${sent}`;
 }
 
 /**
@@ -144,6 +147,47 @@ async function buildPromptOnServer() {
 }
 
 /**
+ * 参考图归一化（与 shared/generate.js 的 normalizeRefImages 保持一致）。
+ *
+ * 前端为什么也要有一份：直连模式下请求根本不经过 Worker，服务端那道防线用不上。
+ * 而 toReference() 返回的是 { dataUrl, w, h }，一不小心就会把对象塞进请求体——
+ * 上游只回「image 必须包含图片值」，界面上的缩略图却都在，现象完全指不到格式问题。
+ */
+function normalizeRefImages(images) {
+  const list = Array.isArray(images) ? images : [];
+  const out = [];
+  for (const it of list) {
+    if (typeof it === 'string') {
+      const s = it.trim();
+      if (s) out.push(s);
+      continue;
+    }
+    const s = typeof it?.dataUrl === 'string' ? it.dataUrl
+      : typeof it?.url === 'string' ? it.url
+        : '';
+    if (s.trim()) out.push(s.trim());
+  }
+  return out;
+}
+
+/** 参考图摘要：拼进错报文，让人一眼看出是没带图还是格式不对（同 shared 的 describeRefImages） */
+function describeRefImages(images) {
+  const list = Array.isArray(images) ? images : [];
+  if (!list.length) return '参考图 0 张';
+  const kinds = {};
+  let bytes = 0;
+  for (const it of list) {
+    const s = typeof it === 'string' ? it : '';
+    const m = /^data:image\/([a-z0-9.+-]+)/i.exec(s);
+    const kind = m ? m[1].toLowerCase() : /^https?:\/\//i.test(s) ? 'url' : 'unknown';
+    kinds[kind] = (kinds[kind] || 0) + 1;
+    bytes += s.length;
+  }
+  const detail = Object.entries(kinds).map(([k, v]) => `${k}×${v}`).join(' ');
+  return `参考图 ${list.length} 张（${detail}），约 ${Math.round(bytes / 1024)}KB`;
+}
+
+/**
  * 浏览器直连：请求从用户的网络发出，不经过 Worker。
  * 之所以需要它：不少模型服务商会整段屏蔽云厂商出口 IP（Cloudflare 首当其冲），
  * 服务端中转会直接被 403。代价是要求对方允许跨域（CORS），否则浏览器会拦下。
@@ -162,7 +206,11 @@ async function generateDirect({ images, prompt, size }) {
     }
   }
   const body = { model: cfg.model, prompt, n: 1, size, ...extra };
-  if (images?.length) body.extra_body = { ...(body.extra_body || {}), image: images };
+  const refs = normalizeRefImages(images);
+  if (refs.length !== (Array.isArray(images) ? images.length : 0)) {
+    throw new Error(`参考图格式不对：每张都得是 data:image/...;base64 的字符串（本次 ${describeRefImages(refs)}）`);
+  }
+  if (refs.length) body.extra_body = { ...(body.extra_body || {}), image: refs };
   body.extra_body = { ...(body.extra_body || {}), response_format: 'b64_json' };
 
   const started = Date.now();
@@ -188,7 +236,7 @@ async function generateDirect({ images, prompt, size }) {
   } catch {
     /* 非 JSON 交给下面报错 */
   }
-  if (!res.ok) throw new Error(upstreamMsg(res.status, json, raw, endpoint));
+  if (!res.ok) throw new Error(upstreamMsg(res.status, json, raw, endpoint, refs));
 
   const item = json?.data?.[0] || json?.images?.[0] || json?.output?.[0] || null;
   const b64 = item?.b64_json || item?.base64 || (typeof item === 'string' ? null : null);

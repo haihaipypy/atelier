@@ -12,7 +12,7 @@
  */
 
 import { handleRequest, resolveBackends } from '../shared/router.js';
-import { buildPrompt, buildCloudflareForm, parseDataUrl, generate, classifyAiFailure, clipPoseHint, DEFAULT_MODEL } from '../shared/generate.js';
+import { buildPrompt, buildCloudflareForm, parseDataUrl, generate, classifyAiFailure, clipPoseHint, normalizeRefImages, describeRefImages, DEFAULT_MODEL } from '../shared/generate.js';
 import {
   normalizeBaseUrl,
   saveProfile,
@@ -388,6 +388,43 @@ try {
   await srv.close();
 }
 
+// toReference() 返回 { dataUrl, w, h }，历史上有一次改动把对象直接塞进了 extra_body.image，
+// 上游只回「image 必须包含图片值」——界面上三张图都在，根本看不出是格式问题。
+// 现在进请求体前统一归一化，堵死这条复发路径。
+const srvObj = await startFakeImageServer();
+try {
+  const profile = { baseUrl: `http://127.0.0.1:${srvObj.port}/v1`, apiKey: 'k', model: 'm', ready: true };
+  await generateCustom({
+    images: imgs.map((u) => ({ dataUrl: u, w: 320, h: 480 })),
+    prompt: 'x',
+    size: '1024x1024',
+    profile,
+  });
+  const sent = srvObj.lastBody?.extra_body?.image || [];
+  check('对象包装的参考图会被归一化成字符串',
+    sent.length === 3 && sent.every((x) => typeof x === 'string' && x.startsWith('data:image/')),
+    sent.map((x) => typeof x).join(','));
+} finally {
+  await srvObj.close();
+}
+
+// 彻底不是图的东西，要在本地就报清楚，别丢给上游去猜
+try {
+  await generateCustom({
+    images: [{ foo: 1 }, { bar: 2 }, { baz: 3 }],
+    prompt: 'x',
+    size: '1024x1024',
+    profile: { baseUrl: 'http://127.0.0.1:1/v1', apiKey: 'k', model: 'm', ready: true },
+  });
+  check('非图对象应报错', false);
+} catch (e) {
+  check('非图对象 → 本地明确报「格式不对」', /参考图格式不对/.test(e.message), e.message);
+  check('报错里写明实际张数', /参考图 0 张/.test(e.message), e.message);
+}
+
+check('参考图摘要含格式与体积', /参考图 3 张（image\/webp×3|webp×3）/.test(describeRefImages(imgs)),
+  describeRefImages(imgs));
+
 console.log('\n[16] 自定义模型：错误分类');
 const srv2 = await startFakeImageServer({ fail: 401 });
 try {
@@ -412,6 +449,8 @@ for (const [code, expectStatus, pattern, label] of [
     check(`${code} → HTTP ${expectStatus}`, e.status === expectStatus, `status=${e.status}`);
     check(label, pattern.test(e.message), e.message);
     check(`${code} → 带出上游原文`, /上游：/.test(e.message) && e.detail?.upstreamStatus === code, e.message);
+    // 「图无效」类报错只有带上本次发送摘要，才能分清洗是没带图还是格式不对
+    check(`${code} → 报错带本次送出摘要`, /本次送出 参考图 0 张/.test(e.message), e.message);
   } finally {
     await s.close();
   }
@@ -435,6 +474,10 @@ console.log('\n[18] 浏览器直连通道（静态检查）');
   check('localStorage 里没有明文变量名误用', !/sessionStorage\.setItem\(.apiKey/.test(app));
   check('有请求发起位置选择器', /id="cfgRelay"/.test(html) && /value="browser"/.test(html));
   check('直连模式不走 /api/generate', /if \(direct\) \{\s*j = await generateDirect/.test(app));
+  // 直连不经过 Worker，服务端那道归一化用不上，前端必须自带一份等价实现
+  check('直连前先归一化参考图', /const refs = normalizeRefImages\(images\)/.test(app));
+  check('直连接口收的是字符串', /image: refs \}/.test(app) && !/image: images \}/.test(app));
+  check('直连报错带本次送出摘要', /upstreamMsg\(res\.status, json, raw, endpoint, refs\)/.test(app));
   check('右上角有作者主页链接', /id="authorLink" href="https:\/\/www\.1day\.vip"/.test(html));
   check('项目地址旁有项目文档链接', /项目地址<\/a>\s*<a class="ghost" href="https:\/\/blog\.1day\.vip\/post\/ai-character-atelier"/.test(html));
   // 手机端顶栏：商标、页签、切换、外链都必须完整显示，不能被压成竖排或溢出
@@ -455,6 +498,21 @@ console.log('\n[18] 浏览器直连通道（静态检查）');
   check('端点拼接：保留已有 /v1', norm('https://a.com/v1/') === 'https://a.com/v1');
   check('端点拼接：完整端点不重复拼', norm('https://a.com/v1/images/generations') === 'https://a.com/v1');
   check('端点拼接：补协议', norm('a.com/v1') === 'https://a.com/v1');
+
+  // 前端那份 normalizeRefImages 必须与 shared 里的行为一致，否则直连和中转会分叉
+  const feSrc = app.slice(app.indexOf('function normalizeRefImages('), app.indexOf('/** 参考图摘要'));
+  const feNorm = new Function(`${feSrc}; return normalizeRefImages;`)();
+  const cases = [
+    ['data:image/jpeg;base64,AAA', 'data:image/jpeg;base64,BBB'],
+    [{ dataUrl: 'data:image/png;base64,CCC', w: 320, h: 480 }],
+    ['data:image/jpeg;base64,AAA', { url: 'https://a.com/x.png' }],
+    [{ foo: 1 }, null, ''],
+    [],
+  ];
+  check('前后端归一化结果完全一致',
+    cases.every((c) => JSON.stringify(feNorm(c)) === JSON.stringify(normalizeRefImages(c))),
+    cases.map((c) => JSON.stringify(feNorm(c))).join(' | '));
+  check('前端归一化也会丢掉空值', feNorm([{ foo: 1 }, null, '']).length === 0);
 }
 
 console.log('\n[19] 设置面板与抽屉排版（回归）');

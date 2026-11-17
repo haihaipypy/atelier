@@ -242,6 +242,56 @@ export class HttpError extends Error {
   }
 }
 
+/**
+ * 参考图归一化：把「看起来像图」的东西收敛成 data URI 字符串。
+ *
+ * 这条防线是踩过坑才加的：`toReference()` 返回的是 `{ dataUrl, w, h }`，
+ * 中途有人把 `return ref.dataUrl` 改回 `return ref`，于是 `extra_body.image`
+ * 里塞进三个对象。上游读不到图，只回一句「image 必须包含图片值」，
+ * 而界面上的三张缩略图都在——从现象完全看不出是格式问题。
+ *
+ * 现在无论谁传对象、传 URL、传字符串，都先在这里收敛；拿不到图就明确报错，
+ * 不再把结构错误留给上游去猜。
+ */
+export function normalizeRefImages(images) {
+  const list = Array.isArray(images) ? images : [];
+  const out = [];
+  for (const it of list) {
+    if (typeof it === 'string') {
+      const s = it.trim();
+      if (s) out.push(s);
+      continue;
+    }
+    // 兼容 { dataUrl } / { url } 这类包装对象
+    const s = typeof it?.dataUrl === 'string' ? it.dataUrl
+      : typeof it?.url === 'string' ? it.url
+        : '';
+    if (s.trim()) out.push(s.trim());
+  }
+  return out;
+}
+
+/**
+ * 参考图摘要：拼进错误文案，让「带没带图、什么格式、多大」一眼可见。
+ * 上游 400 只说「image 必须包含图片值」时，靠这行就能分清
+ * 「压根没传」和「传了但它不认这个格式」——两种情况改法完全不同。
+ */
+export function describeRefImages(images) {
+  const list = Array.isArray(images) ? images : [];
+  if (!list.length) return '参考图 0 张';
+  const kinds = {};
+  let bytes = 0;
+  for (const it of list) {
+    const s = typeof it === 'string' ? it : '';
+    const m = /^data:image\/([a-z0-9.+-]+)/i.exec(s);
+    const kind = m ? m[1].toLowerCase() : /^https?:\/\//i.test(s) ? 'url' : 'unknown';
+    kinds[kind] = (kinds[kind] || 0) + 1;
+    bytes += s.length;
+  }
+  const detail = Object.entries(kinds).map(([k, v]) => `${k}×${v}`).join(' ');
+  return `参考图 ${list.length} 张（${detail}），约 ${Math.round(bytes / 1024)}KB`;
+}
+
 export function assertThreeImages(images) {
   if (!Array.isArray(images) || images.length !== 3) {
     throw new HttpError(400, '需要恰好三张参考图：服装、脸、姿势');

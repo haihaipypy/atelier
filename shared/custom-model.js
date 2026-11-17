@@ -12,7 +12,7 @@
  *   2. KV（页面里填，随时改）：binding 名 CONFIG，键名 profile
  */
 
-import { HttpError } from './generate.js';
+import { HttpError, normalizeRefImages, describeRefImages } from './generate.js';
 
 const KEY = 'profile';
 
@@ -147,9 +147,18 @@ export async function generateCustom({ images, prompt, size, profile, signal }) 
     ...extra,
   };
 
-  // 多图输入：放进 extra_body.image（与 Agnes / 多数聚合网关一致）
-  if (images?.length) {
-    body.extra_body = { ...(body.extra_body || {}), image: images };
+  // 多图输入：放进 extra_body.image（与 Agnes / 多数聚合网关一致）。
+  // 先归一化再送：数组里若混进 { dataUrl, w, h } 这种包装对象，上游只会回
+  // 「image 必须包含图片值」，而界面上三张缩略图都在，根本看不出是格式问题。
+  const refs = normalizeRefImages(images);
+  if (refs.length !== (Array.isArray(images) ? images.length : 0)) {
+    throw new HttpError(
+      400,
+      `参考图格式不对：每张都得是 data:image/...;base64 开头的字符串（本次 ${describeRefImages(refs)}）`,
+    );
+  }
+  if (refs.length) {
+    body.extra_body = { ...(body.extra_body || {}), image: refs };
   }
   // 明确要 base64，省掉二次下载
   body.extra_body = { ...(body.extra_body || {}), response_format: 'b64_json' };
@@ -199,7 +208,12 @@ export async function generateCustom({ images, prompt, size, profile, signal }) 
                 : res.status === 400 || res.status === 422
                   ? '上游不接受这组参数（size / model / response_format 可能不支持）'
                   : '';
-    const detail = upstream ? `（上游：${upstream}${code ? ` · ${code}` : ''}）` : '';
+    // 带上「这次到底送了什么」：上游含糊报「图无效」时，这行能立刻分清洗是没带、
+    // 格式不对、还是体积问题，不用再去下载诊断文件
+    const sent = describeRefImages(refs);
+    const detail = upstream
+      ? `（上游：${upstream}${code ? ` · ${code}` : ''}｜本次送出 ${sent}）`
+      : `（本次送出 ${sent}）`;
     // 4xx 是配置或凭据问题，不该当成网关故障（502）报给前端
     const status = res.status === 429 ? 429 : res.status >= 500 ? 502 : 400;
     throw new HttpError(status, `自定义模型返回 ${res.status}${hint ? '：' + hint : ''}${detail}`, {
