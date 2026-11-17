@@ -144,18 +144,20 @@ console.log('\n[5b] 男性姿势不生效的回归');
 // 原因：姿势参考图是女性素体线稿，胸部曲线与「成年男性」冲突，模型直接把姿势丢了。
 const pMale = buildPrompt({ gender: 'male' });
 const pHint = buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐・单膝竖起' });
-check('男性版指出线稿是女性素体', /female artist mannequin/.test(pMale), pMale.slice(0, 120));
-check('男性版要求忽略胸部与腰胯轮廓', /bust curve|waist-to-hip ratio/.test(pMale));
-check('男性版禁止退回站姿', /Do not replace the pose with a standing/i.test(pMale));
-check('姿态要点进入提示词', /intended pose in words[\s\S]*单膝竖起/.test(pHint), pHint.slice(-260));
+check('男性版把图3 当姿势来源', /Reference image 3 is the source of the pose/.test(pMale), pMale.slice(0, 120));
+check('男性版仍换男性身体', /flat chest, male shoulder width/.test(pMale));
+check('男性版只丢女性轮廓一项', /bust and hip curve/.test(pMale) && !/ignore that mannequin/i.test(pMale));
+check('姿态要点进入提示词', /written out[\s\S]*单膝竖起/.test(pHint), pHint.slice(-260));
 check('姿态要点不越权改服装/脸', /never to override the outfit or the face/.test(
   buildPrompt({ gender: 'female', poseHint: '坐姿｜后仰坐・单膝竖起' })));
 check('要点超长会截断', clipPoseHint('x'.repeat(500)).length <= 201);
 
 // 之前男性版给要点额外挂了一句英文括注，前端挂一次、后端又挂一次，同一句话出现两遍；
 // 叠上「线稿女 / 人物男」的冲突，模型反而更容易丢掉姿势。现在只由后端按 gender 拼一次。
-check('男性版只取骨架的说明只出现一次', (pHint.match(/copy only its skeleton|take only its/g) || []).length === 1);
+check('男性版「女性轮廓」只交代一次', (pHint.match(/female body surface/g) || []).length === 1);
 check('男性版要点不再带重复括注', !/not its bust or waist-hip contour\)/.test(pHint));
+// 否定句里带上动作词就等于给模型递了个候选动作：「别退回站姿」实测最容易被选中
+check('男性版不再用「别退回站姿」的否定句', !/Do not replace the pose with a standing/i.test(pMale));
 
 // 半句英文是纯干扰：图库要点只存 60 字符，中英混排时英文会被截在 …leaning back with the figur
 const halfEn = '坐姿｜后仰坐・单膝竖起；sitting on the floor leaning back with the figur';
@@ -283,6 +285,65 @@ check('半身仍禁止补腿，与腿袜约束并存', /Do not invent legs, feet
 check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
 // 提示词长度要控制：T5 有效窗口 512 token，涨太多会把前面的职责分工挤出去
 check('提示词仍在合理长度内', pSit.length < 2200, `${pSit.length} 字符`);
+
+console.log('\n[5h] 男性姿势再次不生效：举起的胳膊被放下');
+// 现象：图3 是单手高举过头的站立姿势，成品却是双手垂在身侧的正面站姿。
+// 旧版男性段落把「忽略」说了四遍（ignore that mannequin / do NOT carry / never /
+// do not replace the pose with a standing pose），「照搬」只有一句——模型权衡下来
+// 干脆整张图都不用。加上要点通道对男性基本是空的（见下面 pose.en 那条），
+// 姿势彻底没有落脚点。
+const pM = buildPrompt({ gender: 'male', poseHint: 'standing with one arm raised high above the head, the other arm hanging at the side, legs apart' });
+check('男性版逐肢体点名：举起的胳膊仍然举着',
+  /a raised arm stays raised above the head/.test(pM));
+check('男性版逐肢体点名：抬起的膝盖仍然抬起', /a bent or lifted knee stays bent/.test(pM));
+check('男性版要求照搬骨架要素', /which limb is where, every joint angle, the weight-bearing leg/.test(pM));
+check('男性版把「换身体」放在照搬之后',
+  pM.indexOf('keep the same skeleton') < pM.indexOf('Give that skeleton a male body'));
+check('男性版不再连说忽略', !/ignore that mannequin|its overall silhouette/i.test(pM));
+check('「忽略」只留一处，且只针对身体表面', (pM.match(/female body surface/g) || []).length === 1);
+check('男性版提示词长度未失控', pM.length < 2700, `${pM.length} 字符`);
+
+// 女性版必须逐字不受影响：出现任何一条男性专用措辞都算污染
+const pF = buildPrompt({ gender: 'female', poseHint: '站立｜单手高举' });
+for (const [label, re] of [
+  ['姿势来源句', /is the source of the pose/],
+  ['逐肢体点名', /raised arm stays raised/],
+  ['换男性身体', /flat chest, male shoulder width/],
+  ['女性身体表面', /female body surface/],
+  ['要点改写句', /written out/],
+]) check(`女性版不含男性专用措辞：${label}`, !re.test(pF));
+check('女性版仍走原来的确认式要点', /use it to confirm image 3/.test(pF));
+
+// 要点字段：男性库的 pose.zh 只存 60 字符，清洗完只剩「站立｜单手高举；」这种小标题，
+// 等于什么也没说；pose.en 才是完整的一句。取错字段就是「姿势没有文字落脚点」。
+check('纯英文要点不会被砍掉最后一个词',
+  clipPoseHint('standing with both arms raised overhead') === 'standing with both arms raised overhead',
+  clipPoseHint('standing with both arms raised overhead'));
+check('中英混排仍砍掉半句英文尾',
+  clipPoseHint('站立｜单手高举；standing with one arm rais') === '站立｜单手高举；');
+const longEn = clipPoseHint('standing with the left arm raised high above the head while the right hand rests on the hip and the weight shifts onto one leg, the torso turned away from the camera and the head tilted back'.repeat(2));
+check('超长英文确实被截短', longEn.length <= 201, `${longEn.length} 字符`);
+check('超长英文按词边界截断', /…$/.test(longEn) && !/\s…$/.test(longEn), longEn);
+check('截断后不出现半个单词', !/[A-Za-z]…$/.test(longEn.slice(-3)) || /\b\w+…$/.test(longEn), longEn);
+
+const maleItems = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8')).items;
+const betterEn = maleItems.filter((it) => String(it.pose?.en || '').length > String(clipPoseHint(it.pose?.zh || '')).length * 3);
+check('男性库绝大多数条目 pose.en 信息量远大于 pose.zh', betterEn.length / maleItems.length > 0.8,
+  `${betterEn.length}/${maleItems.length}`);
+
+// 前端取值：男性优先 pose.en，女性只认 pose.zh（多取一个字段就是行为变化）
+const appM = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+const hintSrc = appM.slice(appM.indexOf('function poseHintFor('), appM.indexOf('function isHalfBodyPose('));
+const hintFor = (st) => new Function('state', `${hintSrc}; return poseHintFor();`)(st);
+const samplePose = { zh: '站立｜单手高举；standing with one arm rais', en: 'standing with one arm raised high above the head, the other arm hanging at the side' };
+check('男性取完整英文描述',
+  hintFor({ gender: 'male', selected: { pose: { pose: samplePose } } }) === samplePose.en,
+  hintFor({ gender: 'male', selected: { pose: { pose: samplePose } } }));
+check('女性仍然只取中文要点',
+  hintFor({ gender: 'female', selected: { pose: { pose: samplePose } } }) === '站立｜单手高举；');
+check('男性没有 pose.en 时退回中文', hintFor({ gender: 'male', selected: { pose: { pose: { zh: '坐姿｜后仰坐' } } } }) === '坐姿｜后仰坐');
+check('前端不会把纯英文要点砍掉最后一个词',
+  hintFor({ gender: 'male', selected: { pose: { pose: { en: 'legs apart, weight on one hip' } } } }) === 'legs apart, weight on one hip');
 
 console.log('\n[5e] 姿势库排序：全身站立优先');
 // 现象：点开姿势库第一页全是坐姿（上游按编号排，P001 是「仰反弓坐姿」），站姿被埋到几十页后

@@ -51,10 +51,16 @@ export const DEFAULT_MODEL = '@cf/black-forest-labs/flux-2-klein-9b';
  */
 export function clipPoseHint(s) {
   const t = String(s || '').replace(/\s+/g, ' ').trim();
-  // 中英交界处如果还留着没结束的英文尾，直接砍掉：宁可少一句描述，也不给模型半句指令
-  const cut = t.replace(/\s*[A-Za-z][A-Za-z',\-\s]*$/, '').trim();
+  // 中英交界处如果还留着没结束的英文尾，直接砍掉：宁可少一句描述，也不给模型半句指令。
+  // 只对含中文的要点生效——纯英文要点（男性库改用 pose.en）若走这条规则，
+  // 末尾的最后一个单词会被当成「截断残句」一并砍掉。
+  const cut = /[\u4e00-\u9fa5]/.test(t) ? t.replace(/\s*[A-Za-z][A-Za-z',\-\s]*$/, '').trim() : t;
   const head = cut || t;
-  return head.length > 200 ? `${head.slice(0, 200)}…` : head;
+  if (head.length <= 200) return head;
+  // 超长按词边界截，别把单词劈两半
+  const slice = head.slice(0, 200);
+  const at = slice.lastIndexOf(' ');
+  return `${(at > 150 ? slice.slice(0, at) : slice).trim()}…`;
 }
 
 /**
@@ -114,25 +120,29 @@ export function buildPrompt({
       : 'The person is an adult woman: female facial structure, female body proportions.';
 
   // 姿势参考图是女性素体线稿：轮廓里的胸部曲线、腰胯比例会跟「成年男性」打架。
-  // 实测这两条提示互斥时，模型最常见的处理方式是直接忽略姿势、输出一张正面站姿——
-  // 也就是「姿势不生效」。所以要分两段写清楚：轮廓可以无视，骨架必须照搬。
+  //
+  // 男性分支重写过一次，原因是旧版把「忽略」说了四遍（ignore / do NOT carry / never /
+  // do not replace），而「照搬」只有一句，模型权衡下来干脆整张图都不用了——选了
+  // 「单手高举」却输出双手垂在身侧的正面站姿。现在改成**先照搬、后换身体**：
+  // 逐肢体点名（举起的胳膊不能放下、抬起的膝盖不能放平），「女性轮廓」只在最后
+  // 用一句话交代一次。措辞从「别站直」这类否定句换成「举起的胳膊仍然举着」这类
+  // 正向描述——否定句里出现的动作词（standing / walking）本身就会被模型当成候选姿态。
   const poseRef =
     gender === 'male'
-      ? 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY. It is drawn on a female artist mannequin: ' +
-        'ignore that mannequin\'s female body shape (its bust curve, waist-to-hip ratio and overall silhouette) ' +
-        'entirely, and do NOT carry any feminine body shape over to the man. Keep only its skeleton: ' +
-        'which limb is where, joint angles, weight distribution, head direction, cropped view and camera height. ' +
-        'The man in the final image must be posed exactly like that skeleton, with a male body. ' +
-        'Do not replace the pose with a standing or walking pose.'
+      ? 'Reference image 3 is the source of the pose: keep the same skeleton — which limb is where, ' +
+        'every joint angle, the weight-bearing leg, the head direction, the crop and the camera height — ' +
+        'and take it limb by limb: a raised arm stays raised above the head, an arm held out stays held ' +
+        'out, a bent or lifted knee stays bent, a hand on the floor stays on the floor. Give that ' +
+        'skeleton a male body (flat chest, male shoulder width, male waist-to-hip) and drop only the ' +
+        'mannequin\'s female body surface, its bust and hip curve. The skeleton is copied; the body is male.'
       : 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
         'placement, leg crossing, hand positions and viewpoint exactly.';
-  // 姿态要点的措辞分性别：男性版多一句「只取骨架」——参考图是女性素体线稿，
-  // 轮廓和「成年男性」冲突时模型会连姿势一起丢掉；女性版只做「确认」，多说反而添乱
+  // 姿态要点的措辞分性别：男性版多一句「照搬到男性身上」——参考图是女性素体线稿，
+  // 轮廓和「成年男性」冲突时模型会连姿势一起丢掉；女性版只做「确认」，多说反而添乱。
   const hint = clipPoseHint(poseHint);
   const hintLine = hint
     ? gender === 'male'
-      ? `The intended pose in words — the reference is a female artist mannequin, so take only its ` +
-        `skeleton and camera from these words, never its bust or waist-hip contour: ${hint}.`
+      ? `Image 3's pose, written out (apply this same limb configuration to the man): ${hint}.`
       : `The intended pose in words (use it to confirm image 3, never to override the outfit or the face): ${hint}.`
     : '';
 

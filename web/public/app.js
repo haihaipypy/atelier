@@ -102,19 +102,26 @@ function upstreamMsg(status, json, raw, endpoint, refs) {
 /**
  * 送出给模型的姿态要点（只做清洗，不带性别说明）。
  *
- * 图库里的要点只存 60 个字符，中英混排时英文会被截在半句（…leaning back with the figur）。
- * 半句英文塞进提示词是纯干扰：模型读到一句没说完的指令，加上「图3是女线稿 + 要男模」
- * 这层冲突，最常见的处理就是丢掉姿势、输出一张正面站姿——「选了姿势却不生效」。
- * 所以这里只留中文那段（它本来就是骨架描述），英文尾整段丢掉。
+ * 两个库的要点字段不一样，取错字段等于没有要点：
+ * - 女性库（上游姿势站）只有 pose.zh，而且只存了 60 个字符，中英混排时英文被截在半句
+ *   （…leaning back with the figur）。半句英文塞进提示词是纯干扰，整段丢掉只留中文。
+ * - 男性库（Shisei）的 pose.zh 是同一个 60 字符截断的产物，清洗完只剩「站立｜单手高举；」
+ *   这种小标题，等于什么都没说；pose.en 才是完整的一句（中位 92 字符），直接用它。
+ *   句子里出现 her/she 是正常的——它描述的就是图3 那个女性素体的姿势。
  *
- * 性别相关的「只取骨架」措辞放在 shared/generate.js 里，按 gender 拼一次就够了；
+ * 性别相关的「照搬到男性身上」措辞放在 shared/generate.js 里，按 gender 拼一次就够了；
  * 之前前端也加一句、后端也加一句，同一句话在提示词里出现两次，模型反而更乱。
  */
 function poseHintFor() {
-  const raw = state.selected.pose?.pose?.zh || '';
+  const pose = state.selected.pose?.pose || {};
+  const raw = String((state.gender === 'male' ? pose.en || pose.zh : pose.zh) || '')
+    .replace(/\s+/g, ' ')
+    .trim();
   if (!raw) return '';
-  const zh = String(raw).replace(/\s*[A-Za-z][A-Za-z',\-\s]*$/, '').trim();
-  return zh || String(raw).trim();
+  // 纯英文要点不能走「砍英文尾」那条规则，否则最后一个单词会被当成残句一起砍掉
+  if (!/[\u4e00-\u9fa5]/.test(raw)) return raw;
+  const zh = raw.replace(/\s*[A-Za-z][A-Za-z',\-\s]*$/, '').trim();
+  return zh || raw;
 }
 
 /**
@@ -180,7 +187,9 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
   return base
     + `站姿以图3为准：不要并腿，不要把手贴在身侧，不要正对镜头收肩跨。`
     + (state.gender === 'male'
-      ? '注意图3是女性素体线稿：只取它的骨架与机位，不要把它胸部与腰胯轮廓搬到男性身上，也不要替换成站姿。'
+      // 男性版把「照搬」写在前面：旧版这里是一句「不要替换成站姿」，否定句里的
+      // 「站姿」反而成了模型可以挑的候选动作，实测就是这一句最容易被它选中
+      ? '注意图3是女性素体线稿：骨架与机位照搬（举起的胳膊仍然举着，抬起的膝盖仍然抬起），只把胸部与腰胯换成男性轮廓。'
       : '')
     + '输出一张真实感强的人物照，光影自然。';
 }
