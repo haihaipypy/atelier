@@ -164,6 +164,54 @@ check('页面上有提示条', /此库是女性素体线稿/.test(appSrc) && /id
   await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8'),
 ));
 
+console.log('\n[5c] 上半身姿势的取景');
+// 现象：选「上半身」姿势（线稿只到腰胯），生成图却是一张全身站姿，衣服穿得整整齐齐。
+// 原因：提示词里写死 full-body shot，而姿势图只有半身——两者冲突时模型丢掉姿势、退回全身站姿。
+const pUpper = buildPrompt({ gender: 'female', poseFraming: 'upper' });
+const pFull = buildPrompt({ gender: 'female', poseFraming: 'full' });
+check('上半身：明确裁到腰胯以上', /waist-up shot only/i.test(pUpper), pUpper.slice(0, 300));
+check('上半身：禁止拉回全身', /Do not pull back to a full-body shot/i.test(pUpper));
+check('上半身：不出现 full-body 取景描述', !/FRAMING: full-body/i.test(pUpper));
+check('上半身：风格行也改中景', /waist-up portrait/.test(pUpper) && !/full-body shot,/.test(pUpper));
+check('全身：仍要求完整入画', /FRAMING: full-body shot from head to feet/i.test(pFull));
+check('全身：不出现半身裁切说明', !/waist-up/i.test(pFull));
+check('取景参数非法值回落为全身', /FRAMING: full-body/i.test(buildPrompt({ poseFraming: '  xxx ' })));
+
+// 前端要真的把取景带上，并把上半身姿势切到 1:1 中景画幅
+check('前端把取景带进 /api/generate', /poseFraming: framingOfSelection\(\)/.test(appSrc));
+check('直连通道也带取景', /poseFraming,\s*\}\)/.test(appSrc));
+check('上半身姿势识别基于 series / 分类', /series === 'upper'/.test(appSrc) && /includes\('上半身'\)/.test(appSrc));
+check('上半身姿势改 1:1 画幅', /function fixFraming[\s\S]{0,200}1024, 1024/.test(appSrc));
+check('横向画幅抬成竖幅', /if \(w > h\) return \[960, 1280\]/.test(appSrc));
+
+// 路由层透传：漏传时后端拿到的永远是 full，取景修正形同虚设
+const upperPrompt = await (
+  await handleRequest(new Request('https://x.dev/api/prompt?style=photorealistic&poseFraming=upper'), {}, {})
+).json();
+check('/api/prompt 认 poseFraming', /waist-up shot only/i.test(upperPrompt.prompt || ''));
+
+console.log('\n[5d] 姿势库排序');
+// 现象：点开姿势库第一页全是坐姿（上游按编号排，P001 是「仰反弓坐姿」），站姿被埋在几十页后。
+const sortSrc = appSrc.slice(appSrc.indexOf('function poseRank('), appSrc.indexOf('function renderGrid('));
+const { sortPoses, poseRank } = new Function(`${sortSrc}; return { sortPoses, poseRank };`)();
+for (const [label, file] of [['女性', 'pose.json'], ['男性', 'pose-male.json']]) {
+  const items = JSON.parse(await readFile(path.join(ROOT, 'web/public/data', file), 'utf8')).items;
+  const sorted = sortPoses(items);
+  const head = sorted.slice(0, 12);
+  check(`${label}：首页全是全身站立`, head.every((it) => poseRank(it) === 0),
+    head.map((it) => it.title).join(' / '));
+  check(`${label}：排序不改条目数`, sorted.length === items.length);
+  check(`${label}：排序结果无重复`, new Set(sorted.map((x) => x.id)).size === items.length);
+  const firstUpper = sorted.findIndex((it) => poseRank(it) === 3);
+  const anyUpper = items.some((it) => poseRank(it) === 3);
+  check(`${label}：上半身排在最后`, !anyUpper || sorted.slice(firstUpper).every((it) => poseRank(it) === 3));
+  // 稳定性：同档内保持原序号，方便按编号找图
+  const stably = sorted.filter((it) => poseRank(it) === 0).map((it) => it.code);
+  const original = items.filter((it) => poseRank(it) === 0).map((it) => it.code);
+  check(`${label}：站姿内部不打乱编号`, stably.join() === original.join());
+}
+check('只有姿势库走重排', /state\.tab === 'pose' \? sortPoses\(list\) : list/.test(appSrc));
+
 console.log('\n[6] Cloudflare multipart');
 const { form, modelId } = buildCloudflareForm({ images: imgs, prompt: p, modelId: '@cf/black-forest-labs/flux-2-klein-9b' });
 const fields = [...form.keys()];

@@ -239,11 +239,16 @@ async function main() {
   const malePoses = usablePoses.flatMap((it) =>
     poseViews.filter((v) => it.views?.[v]).map((v) => poseItem(it, v)),
   );
-  // upper 系列只画到腰部，配「全身照」会得到一张半身图；分类名改成能看懂的样式
+  // upper 系列只画到腰部，配「全身照」会得到一张半身图；分类名改成能看懂的样式。
+  // 姿态要点要保留「头 / 手 / 臂」这类骨架信息，只去掉原文里的「her chest」——
+  // 整段丢掉会让提示词只剩标题，模型没有可跟的文字，姿势更容易失效。
   for (const it of malePoses) {
     if (it.series !== 'upper') continue;
+    const desc = neutralDesc(String(it.pose.en || it.pose.zh).split('；').pop())
+      .replace(/\bthe figure's chest\b/gi, 'the chest')
+      .replace(/\bthe figure chest\b/gi, 'the chest');
     it.cats = ['上半身'];
-    it.pose.zh = `上半身｜${it.title}；${neutralDesc(String(it.pose.zh).split('；').slice(1).join('；'))}`.trim();
+    it.pose.zh = `上半身｜${it.title}${desc ? `；${desc}` : ''}`;
   }
 
   if (!noImages) {

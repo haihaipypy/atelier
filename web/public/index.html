@@ -60,6 +60,11 @@
     <p class="lib-note" id="libNote" hidden></p>
     <div class="lib-tools">
       <input type="search" id="search" placeholder="搜编号、颜色、品类…（空格分隔 = 同时满足）" autocomplete="off" />
+      <select id="framingFilter" aria-label="取景筛选" hidden>
+        <option value="">全部</option>
+        <option value="full">全身</option>
+        <option value="upper">上半身</option>
+      </select>
       <select id="catFilter" aria-label="分类筛选"><option value="">全部分类</option></select>
     </div>
     <div class="grid" id="grid" role="listbox" aria-label="素材列表"></div>

@@ -15,12 +15,25 @@ const PAGE = 60;
 const MAX_SIDE = 480;      // 输入参考图最长边（< 512 满足 FLUX.2 约束）
 const REF_QUALITY = 0.9;   // JPEG 质量：480px 下约 50KB/张，肉眼无损
 
+/**
+ * 按取景修正画幅，返回 [宽, 高]。
+ *
+ * 只改被参考图逼出来的部分，用户选的画幅能保留就保留：
+ * - 上半身：横图或竖图都会留出大片空白诱使模型「补全」全身，统一改成 1024² 中景；
+ * - 全身：4:3 这类横图会把脚裁掉，抬成竖幅肖像。
+ */
+function fixFraming([w, h], framing) {
+  if (framing === 'upper') return [1024, 1024];
+  if (w > h) return [960, 1280];
+  return [w, h];
+}
+
 const state = {
   tab: 'outfit',
   gender: 'female',          // female | male：决定素材库与整套配色
   data: { outfit: null, face: null, pose: null },
   selected: { outfit: null, face: null, pose: null },
-  q: '', cat: '', page: 1, lbItem: null, lbBig: null,
+  q: '', cat: '', framing: '', page: 1, lbItem: null, lbBig: null,
   config: { ready: false, demo: true, engine: null, engines: [], model: null },
   custom: { configured: false },
   engine: 'cloudflare',
@@ -111,16 +124,33 @@ function poseHintFor(gender) {
 }
 
 /**
+ * 姿势参考图的取景。
+ *
+ * 「上半身」姿势（Shisei upper 系列）线稿只画到腰胯，而被替换掉的是一条 full-body
+ * 长袍——提示词里写着全身、图里却是半身，两者打架时模型会丢掉姿势、退回全身站姿。
+ * 所以取景要跟着所选姿势走，并显式传给后端。
+ */
+function poseFramingOf(it) {
+  if (!it) return 'full';
+  if (it.series === 'upper') return 'upper';
+  return (it.cats || []).includes('上半身') ? 'upper' : 'full';
+}
+
+const framingOfSelection = () => poseFramingOf(state.selected.pose);
+
+/**
  * 直连模式下提示词要自己拼：/api/prompt 只是读模板，走本站域名不会被任何服务商拦截。
  * 失败时用一段等价的内置描述兜底，保证「不填提示词也能出图」。
  */
 async function buildPromptOnServer() {
   const poseHint = poseHintFor(state.gender);
+  const poseFraming = framingOfSelection();
   const q = new URLSearchParams({
     style: $('#style').value || 'photorealistic',
     extra: $('#extra').value.trim(),
     gender: state.gender,
     poseHint,
+    poseFraming,
   });
   try {
     const r = await fetch(`/api/prompt?${q}`);
@@ -138,7 +168,9 @@ async function buildPromptOnServer() {
     + (state.gender === 'male'
       ? '注意图3是女性素体线稿：只取它的骨架与机位，不要把它胸部与腰胯轮廓搬到男性身上，也不要替换成站姿。'
       : '')
-    + '输出一张真实感强的全身人物照，光影自然。';
+    + (poseFraming === 'upper'
+      ? '画面只取上半身（裤腰/裙腰以上），不要画成全身站姿，保留图3的姿势与机位。'
+      : '输出一张真实感强的全身人物照，光影自然。');
 }
 
 /**
@@ -511,6 +543,13 @@ function renderTabsState() {
             : '样例';
   $('#libMeta').textContent = d ? `${d.count ?? d.items?.length ?? 0} 条 · ${mode}${d.generatedAt ? ' · ' + new Date(d.generatedAt).toLocaleDateString('zh-CN') : ''}` : '';
 
+  // 取景下拉只对姿势库有意义；服装/脸没有「上半身」这一说
+  const fr = $('#framingFilter');
+  if (fr) {
+    fr.hidden = !(state.tab === 'pose' && state.gender === 'male');
+    fr.value = state.framing;
+  }
+
   // 男性版的姿势库借的是女性素体线稿：这件事不说清楚，用户会以为选错了库，
   // 或者以为「姿势没生效」是 bug（实际是女性轮廓和男性提示词互相打架，模型丢了姿势）
   const note = state.tab === 'pose' && state.gender === 'male'
@@ -529,12 +568,46 @@ function filtered() {
   const d = state.data[state.tab];
   if (!d?.items) return [];
   const terms = state.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  return d.items.filter((it) => {
+  const list = d.items.filter((it) => {
     if (state.cat && !(it.cats || []).includes(state.cat)) return false;
+    if (state.framing && poseFramingOf(it) !== state.framing) return false;
     if (!terms.length) return true;
     const hay = [it.id, it.title, ...(it.cats || []), ...(it.tags || [])].join(' ').toLowerCase();
     return terms.every((t) => hay.includes(t));
   });
+  // 姿势库默认按「全身站立 → 全身其他 → 上半身」排，用户一进库先看到最常用的全身姿态；
+  // 搜索和分类筛选是在这份顺序里再做过滤，顺序保持不变
+  return state.tab === 'pose' ? sortPoses(list) : list;
+}
+
+/**
+ * 姿势排序权重：数字越小越靠前。
+ *
+ * 上游索引本身是按编号排的，坐姿 P001 打头，站姿被埋在几十页之后——用户点开姿势库
+ * 第一眼看到的全是坐卧。这里按「取景 + 动作」重排：
+ *   0 全身站立（默认最常用：换装看全貌、全身照最稳）
+ *   1 全身·其他动作（走、跳、转、跑）
+ *   2 全身·坐/蹲/跪/躺等非站姿
+ *   3 上半身（半身构图，画幅也跟着改成中景）
+ * 同档内保持原顺序（Array.prototype.sort 在 ES2019 起是稳定排序），不会打乱编号。
+ */
+function poseRank(it) {
+  const cats = it.cats || [];
+  const upper = it.series === 'upper' || cats.includes('上半身');
+  if (upper) return 3;
+  const standing = cats.includes('站立');
+  if (!standing) return 2;
+  // 「站立」里也混着走、跳、转头这类动态，静态站桩优先
+  const text = `${it.title || ''} ${(it.tags || []).join(' ')} ${it.pose?.en || ''}`;
+  const moving = /走|步|跳|跃|跑|奔|迈|旋转|转身|walk|step|run|jump|leap|spin|turn/i.test(text);
+  return moving ? 1 : 0;
+}
+
+function sortPoses(list) {
+  return list
+    .map((it, i) => ({ it, i, r: poseRank(it) }))
+    .sort((a, b) => a.r - b.r || a.i - b.i)
+    .map((x) => x.it);
 }
 
 function renderGrid() {
@@ -706,10 +779,13 @@ function updateSlotThumb(kind) {
   const filled = SLOTS.filter((k) => state.selected[k]).length;
   $('#genBtn').disabled = !canGenerate();
   $('#hint').classList.remove('error');
+  const upper = framingOfSelection() === 'upper';
   $('#hint').textContent =
     filled < 3
       ? `还差 ${3 - filled} 项：${SLOTS.filter((k) => !state.selected[k]).map((k) => SLOT_NAME[k]).join('、')}`
-      : '三项已就绪，点「生成合成图」。';
+      : upper
+        ? '三项已就绪（上半身姿势：画幅会自动切成 1:1 中景），点「生成合成图」。'
+        : '三项已就绪，点「生成合成图」。';
 }
 
 function updateSlots() {
@@ -798,7 +874,7 @@ const RATIO_MAP = { '3:4': [960, 1280], '1:1': [1024, 1024], '9:16': [720, 1280]
 async function generate() {
   if (state.busy) return;
   const ratio = $('#ratio').value;
-  const [width, height] = RATIO_MAP[ratio] || [1024, 1024];
+  const [rx, ry] = RATIO_MAP[ratio] || [1024, 1024];
   setBusy(true, '正在准备参考图…');
   try {
     // 三张并行处理：串行等待时每张都要单独跨域往返，累计很容易触发超时
@@ -811,13 +887,25 @@ async function generate() {
         const first = s.origin === 'upload' ? s.thumb : s.thumb || s.full;
         const fallback = s.full && s.full !== first ? s.full : null;
         try {
-          return (await toReference(first)).dataUrl;
+          return await toReference(first);
         } catch (e) {
           if (!fallback) throw e;
-          return (await toReference(fallback)).dataUrl;
+          return await toReference(fallback);
         }
       }),
     );
+
+    // 取景跟着姿势走：上半身线稿（约 3:4）硬塞进整张画布，只会留出大片空白让人「站」进去，
+    // 这正是选了姿势却退回全身站姿的成因之一。上半身姿势统一改成 1:1 中景；
+    // 全身姿势若选了横向画幅会把脚裁掉，抬成竖幅肖像。
+    const framing = framingOfSelection();
+    const [width, height] = fixFraming([rx, ry], framing);
+    if (width !== rx || height !== ry) {
+      const why = framing === 'upper'
+        ? '上半身姿势：画幅自动切为 1:1 中景，避免被拉成全身'
+        : '横向画幅装不下全身，已改为竖幅肖像';
+      $('#hint').textContent = `${why}（${width}×${height}）。`;
+    }
 
     const engineReady =
       state.engine === 'custom' ? customChannelReady() : !!state.config.engines?.includes('cloudflare');
@@ -848,6 +936,7 @@ async function generate() {
         prompt: $('#promptOverride').value.trim(),
         // 姿势参考图是女性素体线稿，光给图模型经常直接退回站姿；把「大约什么动作」也写成文字
         poseHint: poseHintFor(state.gender),
+        poseFraming: framingOfSelection(),
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
       };
@@ -931,6 +1020,11 @@ function bindUI() {
   });
   $('#catFilter').addEventListener('change', (e) => {
     state.cat = e.target.value;
+    state.page = 1;
+    renderGrid();
+  });
+  $('#framingFilter').addEventListener('change', (e) => {
+    state.framing = e.target.value;
     state.page = 1;
     renderGrid();
   });

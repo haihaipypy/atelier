@@ -50,25 +50,64 @@ export function clipPoseHint(s) {
 }
 
 /**
+ * 姿势参考图的取景范围。
+ *
+ * 「上半身」姿势（Shisei 的 upper 系列）线稿只画到腰胯，但提示词里默认写着
+ * full-body shot——图文互相打架时模型会直接丢掉姿势，退回一张全身站姿。
+ * 所以取景必须跟着姿势走：线稿裁到哪里，成图就框到哪里。
+ */
+export const POSE_FRAMINGS = ['full', 'upper'];
+export const normalizeFraming = (v) => (v === 'upper' ? 'upper' : 'full');
+
+/**
  * 构造合成指令。要点：
  * - 明确每张参考图的职责（角色分工是 prompt 结构里最关键的一环）
  * - 明确「必须保留什么」「必须替换什么」，避免模型照抄服装图的空白人体
  * - 姿势线稿要显式说明「只取骨架与角度，不要线稿风格」
+ * - 取景（全身/上半身）要显式写死，不能靠模型看图猜
  *
  * @param {object} p
  * @param {string} [p.poseHint] 用户所选姿势的姿态要点（来自图库条目），
  *        用来把「大约什么姿势」写成文字。参考图给的是画面，文字补的是语义：
  *        两者一起给，模型在这类多图合成里才更容易听懂。
+ * @param {'full'|'upper'} [p.poseFraming] 姿势参考图的取景，决定成图是全身还是半身
  */
-export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'female', poseHint = '' } = {}) {
-  const styleLine = {
-    photorealistic:
-      'Photorealistic editorial fashion photography, realistic skin texture, natural light, ' +
-      'clean seamless studio background, full-body shot, 85mm lens, sharp focus.',
-    anime:
-      'High-quality anime illustration, clean cel shading with soft gradients, ' +
-      'full-body character illustration, simple gradient background.',
-  }[style] || 'Photorealistic editorial photography.';
+export function buildPrompt({
+  style = 'photorealistic',
+  extra = '',
+  gender = 'female',
+  poseHint = '',
+  poseFraming = 'full',
+} = {}) {
+  const framing = normalizeFraming(poseFraming);
+  // 画幅是竖图（3:4 / 9:16）时，把「上半身」写进去容易渲成半身立在整张画布里，
+  // 所以同时给出明确的取景线：头顶留一点空，下缘裁在大腿中部以上。
+  const framingLine =
+    framing === 'upper'
+      ? 'FRAMING: medium close-up / waist-up shot only. The pose reference is cropped at the ' +
+        'waist, so the result must be cropped the same way: head and upper body fill the frame, ' +
+        'the bottom edge cuts off around the upper thighs at the latest, legs and feet are ' +
+        'NOT visible. Do not pull back to a full-body shot and do not change the pose just ' +
+        'because the body is cropped.'
+      : 'FRAMING: full-body shot from head to feet, with the person fully inside the frame.';
+
+  const styleLine = framing === 'upper'
+    ? {
+      photorealistic:
+        'Photorealistic editorial fashion photography, realistic skin texture, natural light, ' +
+        'clean seamless studio background, waist-up portrait, 85mm lens, sharp focus.',
+      anime:
+        'High-quality anime illustration, clean cel shading with soft gradients, ' +
+        'waist-up character illustration, simple gradient background.',
+    }[style] || 'Photorealistic editorial photography.'
+    : {
+      photorealistic:
+        'Photorealistic editorial fashion photography, realistic skin texture, natural light, ' +
+        'clean seamless studio background, full-body shot, 85mm lens, sharp focus.',
+      anime:
+        'High-quality anime illustration, clean cel shading with soft gradients, ' +
+        'full-body character illustration, simple gradient background.',
+    }[style] || 'Photorealistic editorial photography.';
 
   // 男性版的参考图没有男性特征（中性人台 + 女性素体人偶），必须显式说明，
   // 否则模型会按默认女性渲染，或者干脆丢掉姿势、退回站姿
@@ -100,6 +139,7 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
     'Reference image 2 defines the FACE ONLY: use this exact face identity, facial features, ' +
       'hairstyle and hair color for the person.',
     poseRef,
+    framingLine,
     'Ignore the line-art style, the blank featureless head and the simplified proportions of ' +
       'reference image 3 — the result must be a finished rendered image.',
     'The person is dressed in the outfit from image 1, has the face from image 2, and holds the ' +
@@ -274,7 +314,7 @@ export function buildCloudflareForm({ images, prompt, modelId, width = 1024, hei
  * @param {object}   p.env     Worker 的 env（读 AI binding 与 FLUX_MODEL）
  * @param {Function} p.aiRun   env.AI.run 的绑定版本（丢失 this 会报错，必须 bind）
  */
-export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, gender, poseHint }) {
+export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, gender, poseHint, poseFraming }) {
   assertThreeImages(images);
 
   if (typeof aiRun !== 'function') {
@@ -283,7 +323,7 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
     });
   }
 
-  const finalPrompt = prompt || buildPrompt({ style, gender, poseHint });
+  const finalPrompt = prompt || buildPrompt({ style, gender, poseHint, poseFraming });
   // 优先级：请求里显式指定（白名单校验）→ 环境变量 → 默认
   const allowed = new Set(Object.values(MODELS).map((m) => m.modelId));
   const wanted = model || env.FLUX_MODEL || DEFAULT_MODEL;
