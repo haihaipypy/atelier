@@ -529,12 +529,35 @@ function filtered() {
   const d = state.data[state.tab];
   if (!d?.items) return [];
   const terms = state.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  return d.items.filter((it) => {
+  const list = d.items.filter((it) => {
     if (state.cat && !(it.cats || []).includes(state.cat)) return false;
     if (!terms.length) return true;
     const hay = [it.id, it.title, ...(it.cats || []), ...(it.tags || [])].join(' ').toLowerCase();
     return terms.every((t) => hay.includes(t));
   });
+  // 姿势库默认把全身站立排到最前：上游按编号排，坐姿 P001 打头，站姿被埋在几十页之后
+  return state.tab === 'pose' ? sortPoses(list) : list;
+}
+
+/**
+ * 姿势排序权重：数字越小越靠前。
+ *   0 全身站立        1 全身动态（走跑跳转身）
+ *   2 全身其他动作    3 上半身
+ * 同档保持原编号顺序（ES2019 起 sort 稳定），搜索与分类筛选在会话内做过滤、不改顺序。
+ */
+function poseRank(it) {
+  const cats = it.cats || [];
+  if (it.series === 'upper' || cats.includes('上半身')) return 3;
+  if (!cats.includes('站立')) return 2;
+  const text = `${it.title || ''} ${(it.tags || []).join(' ')} ${it.pose?.en || ''}`;
+  return /走|步|跳|跃|跑|奔|迈|旋转|转身|walk|step|run|jump|leap|spin|turn/i.test(text) ? 1 : 0;
+}
+
+function sortPoses(list) {
+  return list
+    .map((it, i) => ({ it, i, r: poseRank(it) }))
+    .sort((a, b) => a.r - b.r || a.i - b.i)
+    .map((x) => x.it);
 }
 
 function renderGrid() {

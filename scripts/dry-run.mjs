@@ -164,6 +164,29 @@ check('页面上有提示条', /此库是女性素体线稿/.test(appSrc) && /id
   await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8'),
 ));
 
+console.log('\n[5e] 姿势库排序：全身站立优先');
+// 现象：点开姿势库第一页全是坐姿（上游按编号排，P001 是「仰反弓坐姿」），站姿被埋到几十页后
+const appSrc2 = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+const sortSrc = appSrc2.slice(appSrc2.indexOf('function poseRank('), appSrc2.indexOf('function renderGrid('));
+const { sortPoses, poseRank } = new Function(`${sortSrc}; return { sortPoses, poseRank };`)();
+for (const [label, file] of [['女性', 'pose.json'], ['男性', 'pose-male.json']]) {
+  const items = JSON.parse(await readFile(path.join(ROOT, 'web/public/data', file), 'utf8')).items;
+  const sorted = sortPoses(items);
+  const head = sorted.slice(0, 12);
+  check(`${label}：首页前 12 条全是全身站立`, head.every((it) => poseRank(it) === 0), head.map((it) => it.title).join(' / '));
+  check(`${label}：条目数不变`, sorted.length === items.length);
+  check(`${label}：无重复`, new Set(sorted.map((x) => x.id)).size === items.length);
+  const firstOther = sorted.findIndex((it) => poseRank(it) !== 0);
+  check(`${label}：站姿之后不再回插站姿`, sorted.slice(firstOther).every((it) => poseRank(it) !== 0));
+  const stably = sorted.filter((it) => poseRank(it) === 0).map((it) => it.id);
+  const origin = items.filter((it) => poseRank(it) === 0).map((it) => it.id);
+  check(`${label}：同档不打乱原顺序`, stably.join() === origin.join());
+}
+check('只有姿势库重排', /state\.tab === 'pose' \? sortPoses\(list\) : list/.test(appSrc2));
+// 排序只在展示层做，不动 data/*.json：数据文件里坐姿仍排在前面
+const poseRaw = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose.json'), 'utf8')).items;
+check('数据文件保持原顺序', poseRank(poseRaw[0]) !== 0, poseRaw[0].title);
+
 console.log('\n[6] Cloudflare multipart');
 const { form, modelId } = buildCloudflareForm({ images: imgs, prompt: p, modelId: '@cf/black-forest-labs/flux-2-klein-9b' });
 const fields = [...form.keys()];
