@@ -253,6 +253,37 @@ check('用户改过画幅就不再自动切', /if \(state\.ratioTouched\) return
 check('半身标记送进中转通道', /halfBody,\n\s*model:/.test(appUpper));
 check('半身标记送进 /api/prompt', /halfBody: halfBody \? '1' : '0'/.test(appUpper));
 
+console.log('\n[5g] 腿部服装被丢掉的回归');
+// 现象：坐姿姿势是对的，裙子上半身也对，只有腿光着——图1 的黑丝袜和短靴都没了。
+// 根因是防站姿的那句「图1 的腿位置一律不要」连腿上的衣物一起否掉了，
+// 而图3 的腿又是裸露的素体线稿，模型照抄裸腿。
+const pSit = buildPrompt({ gender: 'female', poseHint: '坐姿', frame: [960, 1280] });
+check('明说图3 是裸体素体', /Image 3 is an unclothed mannequin/.test(pSit));
+check('裸腿线稿不等于裸腿成品', /bare legs are not a styling choice/.test(pSit));
+check('点名腿袜与鞋类', /tights, stockings, socks, boots, shoes/.test(pSit));
+check('弯曲交叉的腿同样要穿', /bent and crossed legs included/.test(pSit));
+check('图1 没有腿袜就不许瞎加', /If image 1 shows no legwear, the legs stay bare/.test(pSit));
+check('图1 衣物覆盖范围含腿脚', /clothing still applies to the whole body, legs and feet included/.test(pSit));
+// 只限定腿脚，不能扩成「全身都盖住」——否则露肩、露背会被模型补布料
+check('没有要求全身覆盖', !/covered where image 1 is covered/.test(pSit));
+check('保留露肩与剪裁自由', !/cover the shoulders|no exposed skin/i.test(pSit));
+
+// 这条约束对每种姿势都要在（它们共用同一段），但不能改变各自的取景分支
+for (const [label, opt] of [
+  ['全身站姿', { gender: 'female', poseHint: '站立', frame: [960, 1280] }],
+  ['半身', { gender: 'female', halfBody: true, frame: [1024, 1024] }],
+  ['男性', { gender: 'male', poseHint: '坐姿', frame: [960, 1280] }],
+]) {
+  const p = buildPrompt(opt);
+  check(`${label}：同样带腿部服装约束`, /Image 3 is an unclothed mannequin/.test(p));
+}
+// 半身不该被这条带偏：它仍然禁止凭空补腿，与「要穿丝袜」不冲突（丝袜只在腿可见时生效）
+const pUp = buildPrompt({ gender: 'female', halfBody: true, frame: [1024, 1024] });
+check('半身仍禁止补腿，与腿袜约束并存', /Do not invent legs, feet, shoes/.test(pUp) && /tights, stockings/.test(pUp));
+check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
+// 提示词长度要控制：T5 有效窗口 512 token，涨太多会把前面的职责分工挤出去
+check('提示词仍在合理长度内', pSit.length < 2200, `${pSit.length} 字符`);
+
 console.log('\n[5e] 姿势库排序：全身站立优先');
 // 现象：点开姿势库第一页全是坐姿（上游按编号排，P001 是「仰反弓坐姿」），站姿被埋到几十页后
 const appSrc2 = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');

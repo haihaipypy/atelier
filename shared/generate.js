@@ -170,7 +170,14 @@ export function buildPrompt({
     'Reference image 1 defines the OUTFIT ONLY: copy its garments, colors, fabric, patterns, ' +
       'accessories and footwear exactly as shown. Ignore whatever body is inside it — do not render ' +
       'a mannequin and do not leave the torso hollow. Its pose means nothing: take NO body posture, ' +
-      'leg position or camera from image 1, even when image 1 shows a person standing straight.',
+      'leg position or camera from image 1, even when image 1 shows a person standing straight. ' +
+      'Its clothing still applies to the whole body, legs and feet included.',
+    // 腿部服装单独说一遍，但只限定腿脚：坐姿、蹲姿、躺姿的姿势线稿腿是裸露的素体，
+    // 而「图1 的姿态一律不要」这句很容易连带把腿上的东西一起否掉——丝袜、靴子就没了。
+    // 不写成「全身都按图1 覆盖」，否则露肩、露背这类剪裁会被模型补上布料。
+    'Image 3 is an unclothed mannequin, so its bare legs are not a styling choice: put on the legwear ' +
+      'and footwear from image 1 — tights, stockings, socks, boots, shoes — on the final pose, bent ' +
+      'and crossed legs included. If image 1 shows no legwear, the legs stay bare.',
     'Reference image 2 defines the FACE ONLY: use this exact face identity, facial features, ' +
       'hairstyle and hair color for the person.',
     poseRef,

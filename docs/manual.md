@@ -556,6 +556,32 @@ and do not drop the arms flat against the sides, unless image 3 itself shows exa
 
 > 画幅只做**默认**切换：只要你手动改过画幅，之后就不再替你动。
 
+### 腿上的服装为什么会被丢掉
+
+坐姿、蹲姿、躺姿这类姿势有个共同的坑：姿势完全正确、裙子上半身也对，
+唯独**腿是光的**——图 1 里的黑丝袜、长袜、短靴集体消失。
+
+这是两条约束打起来的结果，而且两条单独看都对：
+
+1. 姿势线稿（图 3）画的是**裸体素体**，腿本来就是光的；
+2. 为了防「服装图里的站姿污染姿势」，提示词写了一句「图 1 的姿态一律不要，连腿的位置也不要」。
+
+第二句本意是只否掉姿态，但模型把它理解成**整条腿都不要参考图 1**——连腿上的衣服一起否掉。
+于是它照抄图 3 的裸腿，丝袜和靴子就没了。
+
+现在的写法是把腿脚单独拎出来，并且只限定腿脚：
+
+```
+Image 3 is an unclothed mannequin, so its bare legs are not a styling choice: put on the legwear
+and footwear from image 1 — tights, stockings, socks, boots, shoes — on the final pose, bent
+and crossed legs included. If image 1 shows no legwear, the legs stay bare.
+```
+
+最后半句很重要：图 1 本来就是光腿时（短裙配凉鞋、泳装），不能凭空加上丝袜。
+
+> 这条约束**故意不写成「全身都按图 1 覆盖」**。那样写，露肩、露背、单肩这类剪裁会被模型
+> 好心补上布料——修好腿的同时毁掉领口。所以覆盖范围只提到腿脚，上身交给图 1 的原始剪裁。
+
 ### 使用边界
 
 - **上游三家（服装/脸型/姿势）**：不存储、不再分发图片，只保存元数据索引
