@@ -489,11 +489,3 @@ a { color: inherit; }
   font-style: normal; font-size: 9px; padding: 0 3px; margin-right: 3px;
   border-radius: 3px; background: rgba(255,255,255,.26); color: #fff;
 }
-
-/* 失败诊断：只在直连出错后出现，别占常驻版面 */
-.diag-btn {
-  margin: 8px 20px 0; padding: 8px 10px; border-radius: 10px;
-  border: 1px dashed var(--line); background: transparent; color: var(--ink-3);
-  font: inherit; font-size: 12.5px; cursor: pointer;
-}
-.diag-btn:hover { border-color: var(--sel); color: var(--sel); }

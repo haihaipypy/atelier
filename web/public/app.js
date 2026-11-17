@@ -15,25 +15,12 @@ const PAGE = 60;
 const MAX_SIDE = 480;      // 输入参考图最长边（< 512 满足 FLUX.2 约束）
 const REF_QUALITY = 0.9;   // JPEG 质量：480px 下约 50KB/张，肉眼无损
 
-/**
- * 按取景修正画幅，返回 [宽, 高]。
- *
- * 只改被参考图逼出来的部分，用户选的画幅能保留就保留：
- * - 上半身：横图或竖图都会留出大片空白诱使模型「补全」全身，统一改成 1024² 中景；
- * - 全身：4:3 这类横图会把脚裁掉，抬成竖幅肖像。
- */
-function fixFraming([w, h], framing) {
-  if (framing === 'upper') return [1024, 1024];
-  if (w > h) return [960, 1280];
-  return [w, h];
-}
-
 const state = {
   tab: 'outfit',
   gender: 'female',          // female | male：决定素材库与整套配色
   data: { outfit: null, face: null, pose: null },
   selected: { outfit: null, face: null, pose: null },
-  q: '', cat: '', framing: '', page: 1, lbItem: null, lbBig: null,
+  q: '', cat: '', page: 1, lbItem: null, lbBig: null,
   config: { ready: false, demo: true, engine: null, engines: [], model: null },
   custom: { configured: false },
   engine: 'cloudflare',
@@ -82,54 +69,6 @@ function normBase(raw) {
 
 const endpointOf = (baseUrl) => `${normBase(baseUrl)}/images/generations`;
 
-/**
- * 自定义模型的尺寸写法。
- *
- * Workers AI 吃精确像素（960×1280），但 Agnes 这一系只认「档位 + 比例」：
- * size 填 "2K"、"ratio" 填 "3:4"。像素值塞进去要么被拒，要么被服务端悄悄标准化，
- * 出来是意料之外的比例。所以这里两样都给，用户可在「额外参数」里覆盖。
- * size:auto = 交给服务端按档位推断，比我们自己猜像素稳。
- */
-const CUSTOM_SIZE = { '1:1': '1:1', '3:4': '3:4', '9:16': '9:16', '4:3': '4:3' };
-function customSizeFor(ratio) {
-  return { size: 'auto', ratio: CUSTOM_SIZE[ratio] || '3:4' };
-}
-
-/**
- * 参考图的三种送法，各家 OpenAI 兼容网关不一样，只能让用户选。
- *
- * 实测踩坑：默认送 extra_body.image（Agnes 用这个），换一家服务后直接报
- * 「extra_body.image 必须包含图片值」——它把 image 当成必填字符串，收到数组就判空。
- * 这类报错原文很误导（明明传了图），所以这里把三种主流写法做成选项，
- * 并在报错时提示「换一种送法」，而不是让用户自己猜。
- */
-const IMAGE_MODES = ['extra_body', 'array', 'singular'];
-const IMAGE_MODE_LABEL = {
-  extra_body: 'extra_body.image（OpenAI 扩展，Agnes 等）',
-  array: 'image: [url…]（顶层数组）',
-  singular: 'image: "url"（顶层单张，兼容最广）',
-};
-
-/** 把参考图塞进请求体，返回新的 body（不改原对象） */
-function attachImages(body, images, mode) {
-  const list = (images || []).filter(Boolean);
-  if (!list.length) return body;
-  if (mode === 'array') return { ...body, image: list };
-  if (mode === 'singular') {
-    const first = list[0];
-    const rest = list.slice(1);
-    return {
-      ...body,
-      image: first,
-      extra_body: { ...(body.extra_body || {}), ...(rest.length ? { image: rest } : {}) },
-    };
-  }
-  return { ...body, extra_body: { ...(body.extra_body || {}), image: list } };
-}
-
-const imageModeOf = (cfg) =>
-  IMAGE_MODES.includes(cfg?.imageMode) ? cfg.imageMode : 'extra_body';
-
 /** 上游 4xx/5xx 的提示文案（与后端保持一致，前端直连时自己拼） */
 function upstreamMsg(status, json, raw, endpoint) {
   const upstream = String(json?.error?.message || json?.message || raw || '')
@@ -172,33 +111,16 @@ function poseHintFor(gender) {
 }
 
 /**
- * 姿势参考图的取景。
- *
- * 「上半身」姿势（Shisei upper 系列）线稿只画到腰胯，而被替换掉的是一条 full-body
- * 长袍——提示词里写着全身、图里却是半身，两者打架时模型会丢掉姿势、退回全身站姿。
- * 所以取景要跟着所选姿势走，并显式传给后端。
- */
-function poseFramingOf(it) {
-  if (!it) return 'full';
-  if (it.series === 'upper') return 'upper';
-  return (it.cats || []).includes('上半身') ? 'upper' : 'full';
-}
-
-const framingOfSelection = () => poseFramingOf(state.selected.pose);
-
-/**
  * 直连模式下提示词要自己拼：/api/prompt 只是读模板，走本站域名不会被任何服务商拦截。
  * 失败时用一段等价的内置描述兜底，保证「不填提示词也能出图」。
  */
 async function buildPromptOnServer() {
   const poseHint = poseHintFor(state.gender);
-  const poseFraming = framingOfSelection();
   const q = new URLSearchParams({
     style: $('#style').value || 'photorealistic',
     extra: $('#extra').value.trim(),
     gender: state.gender,
     poseHint,
-    poseFraming,
   });
   try {
     const r = await fetch(`/api/prompt?${q}`);
@@ -216,9 +138,7 @@ async function buildPromptOnServer() {
     + (state.gender === 'male'
       ? '注意图3是女性素体线稿：只取它的骨架与机位，不要把它胸部与腰胯轮廓搬到男性身上，也不要替换成站姿。'
       : '')
-    + (poseFraming === 'upper'
-      ? '画面只取上半身（裤腰/裙腰以上），不要画成全身站姿，保留图3的姿势与机位。'
-      : '输出一张真实感强的全身人物照，光影自然。');
+    + '输出一张真实感强的全身人物照，光影自然。';
 }
 
 /**
@@ -226,7 +146,7 @@ async function buildPromptOnServer() {
  * 之所以需要它：不少模型服务商会整段屏蔽云厂商出口 IP（Cloudflare 首当其冲），
  * 服务端中转会直接被 403。代价是要求对方允许跨域（CORS），否则浏览器会拦下。
  */
-async function generateDirect({ images, prompt, size, ratio }) {
+async function generateDirect({ images, prompt, size }) {
   const cfg = readLocalCfg();
   if (!cfg?.baseUrl || !cfg?.apiKey || !cfg?.model) throw new Error('直连模式还没有在本机保存配置');
   const endpoint = endpointOf(cfg.baseUrl);
@@ -239,18 +159,9 @@ async function generateDirect({ images, prompt, size, ratio }) {
       throw new Error('额外参数不是合法 JSON');
     }
   }
-  let body = { model: cfg.model, prompt, n: 1, size };
-  if (ratio) body.ratio = ratio;
-  // 额外参数放最后：用户显式写了的 size / ratio 说了算
-  body = { ...body, ...extra };
-  body = attachImages(body, images, imageModeOf(cfg));
-  // 顶层已有图时再把同样的图塞进 extra_body，等于把数组又发了一遍——上游会判成「缺图」
+  const body = { model: cfg.model, prompt, n: 1, size, ...extra };
+  if (images?.length) body.extra_body = { ...(body.extra_body || {}), image: images };
   body.extra_body = { ...(body.extra_body || {}), response_format: 'b64_json' };
-  if (!body.extra_body.image && !body.image) delete body.extra_body.image;
-
-  // 记下实际发出去的请求体（图片稍后截断）：上游只说「image 必须包含图片值」时，
-  // 光看界面判断不了是没带上、还是字段位置不对，得看真身。
-  state.lastReq = { endpoint, body, mode: imageModeOf(cfg) };
 
   const started = Date.now();
   let res;
@@ -275,21 +186,7 @@ async function generateDirect({ images, prompt, size, ratio }) {
   } catch {
     /* 非 JSON 交给下面报错 */
   }
-  if (!res.ok) {
-    const msg = upstreamMsg(res.status, json, raw, endpoint);
-    state.lastReq.status = res.status;
-    state.lastReq.error = String(json?.error?.message || json?.message || raw || '').slice(0, 400);
-    const up = String(json?.error?.message || json?.message || raw || '');
-    // 「image 必须包含图片值」这类原文最容易误导：图其实传了，只是这家不认这种送法。
-    // 直接把「换一种参考图送法」写进报错，省掉用户翻文档猜。
-    const imageish = /image/i.test(up) && /(必须|不能为空|required|empty|missing|invalid)/i.test(up);
-    throw new Error(
-      imageish
-        ? `${msg}\n参考图其实已经带了（${images?.length || 0} 张），是这家服务不认「${IMAGE_MODE_LABEL[imageModeOf(cfg)]}」这种送法。`
-          + '点「修改自定义模型」，把「参考图送法」换成另一种再试：通常先试「image 单张」，其次「顶层数组」。'
-        : msg,
-    );
-  }
+  if (!res.ok) throw new Error(upstreamMsg(res.status, json, raw, endpoint));
 
   const item = json?.data?.[0] || json?.images?.[0] || json?.output?.[0] || null;
   const b64 = item?.b64_json || item?.base64 || (typeof item === 'string' ? null : null);
@@ -488,9 +385,6 @@ function paintModelPanel() {
   if (src?.baseUrl && !$('#cfgBaseUrl').value) $('#cfgBaseUrl').value = src.baseUrl;
   if (src?.model && !$('#cfgModel').value) $('#cfgModel').value = src.model;
   if (isBrowser && local?.extraJson && !$('#cfgExtra').value) $('#cfgExtra').value = local.extraJson;
-  // 参考图送法是本机偏好（服务端那套不走这个字段），每次打开抽屉都按已存的回填
-  const im = $('#cfgImageMode');
-  if (im && local && !im.dataset.touched) im.value = imageModeOf(local);
 }
 
 function renderEngineBadge() {
@@ -617,13 +511,6 @@ function renderTabsState() {
             : '样例';
   $('#libMeta').textContent = d ? `${d.count ?? d.items?.length ?? 0} 条 · ${mode}${d.generatedAt ? ' · ' + new Date(d.generatedAt).toLocaleDateString('zh-CN') : ''}` : '';
 
-  // 取景下拉只对姿势库有意义；服装/脸没有「上半身」这一说
-  const fr = $('#framingFilter');
-  if (fr) {
-    fr.hidden = !(state.tab === 'pose' && state.gender === 'male');
-    fr.value = state.framing;
-  }
-
   // 男性版的姿势库借的是女性素体线稿：这件事不说清楚，用户会以为选错了库，
   // 或者以为「姿势没生效」是 bug（实际是女性轮廓和男性提示词互相打架，模型丢了姿势）
   const note = state.tab === 'pose' && state.gender === 'male'
@@ -642,46 +529,12 @@ function filtered() {
   const d = state.data[state.tab];
   if (!d?.items) return [];
   const terms = state.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const list = d.items.filter((it) => {
+  return d.items.filter((it) => {
     if (state.cat && !(it.cats || []).includes(state.cat)) return false;
-    if (state.framing && poseFramingOf(it) !== state.framing) return false;
     if (!terms.length) return true;
     const hay = [it.id, it.title, ...(it.cats || []), ...(it.tags || [])].join(' ').toLowerCase();
     return terms.every((t) => hay.includes(t));
   });
-  // 姿势库默认按「全身站立 → 全身其他 → 上半身」排，用户一进库先看到最常用的全身姿态；
-  // 搜索和分类筛选是在这份顺序里再做过滤，顺序保持不变
-  return state.tab === 'pose' ? sortPoses(list) : list;
-}
-
-/**
- * 姿势排序权重：数字越小越靠前。
- *
- * 上游索引本身是按编号排的，坐姿 P001 打头，站姿被埋在几十页之后——用户点开姿势库
- * 第一眼看到的全是坐卧。这里按「取景 + 动作」重排：
- *   0 全身站立（默认最常用：换装看全貌、全身照最稳）
- *   1 全身·其他动作（走、跳、转、跑）
- *   2 全身·坐/蹲/跪/躺等非站姿
- *   3 上半身（半身构图，画幅也跟着改成中景）
- * 同档内保持原顺序（Array.prototype.sort 在 ES2019 起是稳定排序），不会打乱编号。
- */
-function poseRank(it) {
-  const cats = it.cats || [];
-  const upper = it.series === 'upper' || cats.includes('上半身');
-  if (upper) return 3;
-  const standing = cats.includes('站立');
-  if (!standing) return 2;
-  // 「站立」里也混着走、跳、转头这类动态，静态站桩优先
-  const text = `${it.title || ''} ${(it.tags || []).join(' ')} ${it.pose?.en || ''}`;
-  const moving = /走|步|跳|跃|跑|奔|迈|旋转|转身|walk|step|run|jump|leap|spin|turn/i.test(text);
-  return moving ? 1 : 0;
-}
-
-function sortPoses(list) {
-  return list
-    .map((it, i) => ({ it, i, r: poseRank(it) }))
-    .sort((a, b) => a.r - b.r || a.i - b.i)
-    .map((x) => x.it);
 }
 
 function renderGrid() {
@@ -853,13 +706,10 @@ function updateSlotThumb(kind) {
   const filled = SLOTS.filter((k) => state.selected[k]).length;
   $('#genBtn').disabled = !canGenerate();
   $('#hint').classList.remove('error');
-  const upper = framingOfSelection() === 'upper';
   $('#hint').textContent =
     filled < 3
       ? `还差 ${3 - filled} 项：${SLOTS.filter((k) => !state.selected[k]).map((k) => SLOT_NAME[k]).join('、')}`
-      : upper
-        ? '三项已就绪（上半身姿势：画幅会自动切成 1:1 中景），点「生成合成图」。'
-        : '三项已就绪，点「生成合成图」。';
+      : '三项已就绪，点「生成合成图」。';
 }
 
 function updateSlots() {
@@ -879,7 +729,7 @@ function prefetchReference(it) {
 
 /** 任意图片来源 → 统一尺寸的 PNG dataURL（兜底 JPEG，避免 PNG 过大）。
  *  上游图片一律走本站 /api/proxy，避免跨域图读进 canvas 时偶发卡死。 */
-async function toReference(src, fmt = 'jpeg') {
+async function toReference(src) {
   const img = await loadImage(proxied(src));
   const scale = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
   const w = Math.max(64, Math.round(img.width * scale));
@@ -897,9 +747,6 @@ async function toReference(src, fmt = 'jpeg') {
   //   1. canvas 的 PNG 是 RGBA（带 alpha 通道），部分推理后端遇到会直接抛 3043；
   //   2. 480px 照片 PNG 约 400–700KB，JPEG 只要 40–70KB，三张一起能让请求体小一个量级，
   //      而请求体过大同样是 3043 的常见诱因。
-  // 自定义网关用 PNG：Agnes 的图生图示例清一色是 data:image/png;base64，
-  // JPEG data URI 在个别网关会被判成「图片无效」。Workers AI 仍走 JPEG（体积小、避开 3043）。
-  if (fmt === 'png') return { dataUrl: canvas.toDataURL('image/png'), w, h };
   return { dataUrl: canvas.toDataURL('image/jpeg', REF_QUALITY), w, h };
 }
 
@@ -951,12 +798,9 @@ const RATIO_MAP = { '3:4': [960, 1280], '1:1': [1024, 1024], '9:16': [720, 1280]
 async function generate() {
   if (state.busy) return;
   const ratio = $('#ratio').value;
-  const [rx, ry] = RATIO_MAP[ratio] || [1024, 1024];
+  const [width, height] = RATIO_MAP[ratio] || [1024, 1024];
   setBusy(true, '正在准备参考图…');
-  const diagBtn = $('#diagBtn');
-  if (diagBtn) diagBtn.hidden = true;
   try {
-    const refFmt = state.engine === 'custom' ? 'png' : 'jpeg';
     // 三张并行处理：串行等待时每张都要单独跨域往返，累计很容易触发超时
     const images = await Promise.all(
       SLOTS.map(async (k) => {
@@ -966,39 +810,18 @@ async function generate() {
         // 直接用原图会拖来 1MB+ 的 PNG，三张并发容易超时。上传的图没有原图之分，用 thumb。
         const first = s.origin === 'upload' ? s.thumb : s.thumb || s.full;
         const fallback = s.full && s.full !== first ? s.full : null;
-        let ref;
         try {
-          ref = await toReference(first, refFmt);
+          return (await toReference(first)).dataUrl;
         } catch (e) {
           if (!fallback) throw e;
-          ref = await toReference(fallback, refFmt);
+          return (await toReference(fallback)).dataUrl;
         }
-        // 这里必须取字符串：上游只认 data URI 本身，塞 {dataUrl,w,h} 对象过去
-        // 会被判成「image 必须包含图片值」（图其实带了，只是它读不到）。
-        return ref.dataUrl;
       }),
     );
-
-    // 取景跟着姿势走：上半身线稿（约 3:4）硬塞进整张画布，只会留出大片空白让人「站」进去，
-    // 这正是选了姿势却退回全身站姿的成因之一。上半身姿势统一改成 1:1 中景；
-    // 全身姿势若选了横向画幅会把脚裁掉，抬成竖幅肖像。
-    const framing = framingOfSelection();
-    const targetRatio = framing === 'upper' ? '1:1' : ratio === '4:3' ? '3:4' : ratio;
-    const [width, height] = RATIO_MAP[targetRatio] || [1024, 1024];
-
-    if (targetRatio !== ratio) {
-      const why = framing === 'upper'
-        ? '上半身姿势：画幅自动切为 1:1 中景，避免被拉成全身'
-        : '横向画幅装不下全身，已改为竖幅肖像';
-      $('#hint').textContent = `${why}（${targetRatio}）。`;
-    }
 
     const engineReady =
       state.engine === 'custom' ? customChannelReady() : !!state.config.engines?.includes('cloudflare');
     const direct = state.engine === 'custom' && state.relay === 'browser';
-    // 自定义通道同时给像素尺寸与比例：有的网关认 960x1280，有的认「档位 + ratio」，
-    // 两样都给最稳。像素若不合规，多数网关会按 ratio 自己归一。
-    const customSize = { size: `${width}x${height}`, ratio: targetRatio };
     setBusy(
       true,
       direct
@@ -1013,7 +836,7 @@ async function generate() {
       j = await generateDirect({
         images,
         prompt: $('#promptOverride').value.trim() || (await buildPromptOnServer()),
-        ...customSize,
+        size: `${width}x${height}`,
       });
     } else {
       const payload = {
@@ -1025,12 +848,8 @@ async function generate() {
         prompt: $('#promptOverride').value.trim(),
         // 姿势参考图是女性素体线稿，光给图模型经常直接退回站姿；把「大约什么动作」也写成文字
         poseHint: poseHintFor(state.gender),
-        poseFraming: framingOfSelection(),
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
-        // 自定义通道不吃精确像素，单独给「档位 + 比例」；Workers AI 用上面的 width/height
-        size: state.engine === 'custom' ? customSize.size : undefined,
-        ratio: state.engine === 'custom' ? customSize.ratio : undefined,
       };
 
       const r = await fetch('/api/generate', {
@@ -1062,42 +881,9 @@ async function generate() {
   } catch (e) {
     $('#hint').textContent = e.message;
     $('#hint').classList.add('error');
-    // 直连失败时给一个能贴给人的凭据：界面上只能看到一句话，请求体才是实情
-    const btn = $('#diagBtn');
-    if (btn) btn.hidden = !state.lastReq;
   } finally {
     setBusy(false);
   }
-}
-
-/** 把上次请求体里的 base64 图片截断到可读长度，导出成文本供排查 / 反馈 */
-function downloadDiag() {
-  const r = state.lastReq;
-  if (!r) return;
-  const shrink = (img) =>
-    typeof img === 'string' && img.startsWith('data:')
-      ? `${img.slice(0, 48)}…（共 ${Math.round(img.length / 1024)} KB，已截断）`
-      : img;
-  const view = JSON.parse(JSON.stringify(r.body || {}, (k, v) => {
-    if (typeof v === 'string' && v.startsWith('data:')) return shrink(v);
-    return v;
-  }));
-  const lines = [
-    `时间：${new Date().toLocaleString('zh-CN')}`,
-    `请求地址：${r.endpoint}`,
-    `送法：${r.mode}`,
-    `HTTP 状态：${r.status ?? '未记录'}`,
-    `上游原文：${r.error ?? '无'}`,
-    '',
-    '请求体（图片已截断）：',
-    JSON.stringify(view, null, 2),
-  ];
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `atelier-diag-${Date.now()}.txt`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
 }
 
 function setBusy(busy, msg) {
@@ -1145,12 +931,6 @@ function bindUI() {
   });
   $('#catFilter').addEventListener('change', (e) => {
     state.cat = e.target.value;
-    state.page = 1;
-    renderGrid();
-  });
-  $('#diagBtn')?.addEventListener('click', downloadDiag);
-  $('#framingFilter').addEventListener('change', (e) => {
-    state.framing = e.target.value;
     state.page = 1;
     renderGrid();
   });
@@ -1375,7 +1155,6 @@ const readCfg = () => ({
   apiKey: $('#cfgApiKey').value.trim(),
   model: $('#cfgModel').value.trim(),
   sendMode: $('#cfgSendMode').value,
-  imageMode: $('#cfgImageMode').value,
   extraJson: $('#cfgExtra').value.trim(),
 });
 
@@ -1403,7 +1182,6 @@ async function saveCfg() {
       baseUrl,
       apiKey: cfg.apiKey || prev.apiKey || '',
       model: cfg.model,
-      imageMode: cfg.imageMode,
       extraJson: cfg.extraJson,
     };
     if (!baseUrl) return cfgMsg('请填写 Base URL', false);

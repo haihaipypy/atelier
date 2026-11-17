@@ -16,32 +16,6 @@ import { HttpError } from './generate.js';
 
 const KEY = 'profile';
 
-/**
- * 参考图在请求体里的位置。各家 OpenAI 兼容网关写法不一：
- *   extra_body.image: [url…]  —— Agnes 等（**不是**标准字段，但最常见）
- *   image: [url…]             —— 顶层数组
- *   image: "url"              —— 顶层单张，兼容最广
- * 实测踩坑：换一家服务后默认的 extra_body.image 被判成「必须包含图片值」——
- * 图其实传了，只是它不认这个位置。所以做成可选项，报错时提示换一种。
- */
-export const IMAGE_MODES = ['extra_body', 'array', 'singular'];
-
-/** 把参考图塞进请求体（不改原对象） */
-export function attachImages(body, images, mode = 'extra_body') {
-  const list = (images || []).filter(Boolean);
-  if (!list.length) return body;
-  if (mode === 'array') return { ...body, image: list };
-  if (mode === 'singular') {
-    const [first, ...rest] = list;
-    return {
-      ...body,
-      image: first,
-      extra_body: { ...(body.extra_body || {}), ...(rest.length ? { image: rest } : {}) },
-    };
-  }
-  return { ...body, extra_body: { ...(body.extra_body || {}), image: list } };
-}
-
 /** 规范化 baseURL：去掉末尾斜杠，缺 /v1 时补上（常见坑） */
 export function normalizeBaseUrl(raw) {
   let u = String(raw || '').trim();
@@ -75,7 +49,6 @@ export async function readProfile(env = {}) {
     apiKey: env.CUSTOM_API_KEY || stored?.apiKey || '',
     model: env.CUSTOM_MODEL || stored?.model || '',
     sendMode: env.CUSTOM_SEND_MODE || stored?.sendMode || 'auto', // auto | url | b64
-    imageMode: env.CUSTOM_IMAGE_MODE || stored?.imageMode || 'extra_body', // extra_body | array | singular
     extraJson: stored?.extraJson || '',
   };
   const ready = !!(merged.baseUrl && merged.apiKey && merged.model);
@@ -91,7 +64,6 @@ export async function publicProfile(env = {}) {
     model: p.model,
     apiKeyMasked: maskKey(p.apiKey),
     sendMode: p.sendMode,
-    imageMode: p.imageMode,
     source: p.source,
     // 没配 KV 时页面无法保存，只能靠环境变量
     canPersist: !!env.CONFIG?.put,
@@ -102,13 +74,7 @@ export async function saveProfile(env, body = {}) {
   const baseUrl = normalizeBaseUrl(body.baseUrl);
   const apiKey = String(body.apiKey || '').trim();
   const model = String(body.model || '').trim();
-  const prevRaw = env.CONFIG?.get ? await env.CONFIG.get(KEY, 'json').catch(() => null) : null;
   const sendMode = ['auto', 'url', 'b64'].includes(body.sendMode) ? body.sendMode : 'auto';
-  const imageMode = IMAGE_MODES.includes(body.imageMode)
-    ? body.imageMode
-    : IMAGE_MODES.includes(prevRaw?.imageMode)
-      ? prevRaw.imageMode
-      : 'extra_body';
 
   if (!baseUrl) throw new HttpError(400, '请填写 Base URL');
   if (!model) throw new HttpError(400, '请填写模型名称');
@@ -126,7 +92,6 @@ export async function saveProfile(env, body = {}) {
     apiKey: apiKey || prev?.apiKey || '',
     model,
     sendMode,
-    imageMode,
     extraJson: String(body.extraJson || '').slice(0, 2000),
   };
   if (!profile.apiKey) throw new HttpError(400, '请填写 API Key');
@@ -158,7 +123,7 @@ export async function clearProfile(env) {
  *   b64  —— 参考图走 data URI（最通用，本项目的默认：前端已压缩到 <512）
  *   auto —— 先用 b64，遇到「不支持图生图」类错误再提示用户切换
  */
-export async function generateCustom({ images, prompt, size, ratio, profile, signal }) {
+export async function generateCustom({ images, prompt, size, profile, signal }) {
   if (!profile.ready) throw new HttpError(400, '自定义模型尚未配置完整');
 
   const endpoint = /\/images\/generations$/.test(profile.baseUrl)
@@ -174,23 +139,20 @@ export async function generateCustom({ images, prompt, size, ratio, profile, sig
     }
   }
 
-  // size 可能是像素（960x1280）也可能是档位（2K）。Agnes 这一系用「档位 + 比例」，
-  // 比例必须单独给，否则服务端只能按档位的默认比例出图，和用户选的画幅对不上。
-  let body = {
+  const body = {
     model: profile.model,
     prompt,
     n: 1,
     size,
+    ...extra,
   };
-  if (ratio) body.ratio = ratio;
-  // 额外参数放最后，用户显式写了的 size / ratio 说了算
-  body = { ...body, ...extra };
 
-  // 多图输入：位置按 profile.imageMode 决定（默认 extra_body.image）
-  const withImages = attachImages(body, images, profile.imageMode || 'extra_body');
+  // 多图输入：放进 extra_body.image（与 Agnes / 多数聚合网关一致）
+  if (images?.length) {
+    body.extra_body = { ...(body.extra_body || {}), image: images };
+  }
   // 明确要 base64，省掉二次下载
-  withImages.extra_body = { ...(withImages.extra_body || {}), response_format: 'b64_json' };
-  body = withImages;
+  body.extra_body = { ...(body.extra_body || {}), response_format: 'b64_json' };
 
   const started = Date.now();
   let res;

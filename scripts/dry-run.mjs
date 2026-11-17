@@ -18,7 +18,6 @@ import {
   saveProfile,
   publicProfile,
   generateCustom,
-  attachImages,
 } from '../shared/custom-model.js';
 import { createServer } from 'node:http';
 
@@ -164,66 +163,6 @@ check('男性姿势库带「借用女性素体」标注', /poseGender/.test(pose
 check('页面上有提示条', /此库是女性素体线稿/.test(appSrc) && /id="libNote"/.test(
   await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8'),
 ));
-
-console.log('\n[5c] 上半身姿势的取景');
-// 现象：选「上半身」姿势（线稿只到腰胯），生成图却是一张全身站姿，衣服穿得整整齐齐。
-// 原因：提示词里写死 full-body shot，而姿势图只有半身——两者冲突时模型丢掉姿势、退回全身站姿。
-const pUpper = buildPrompt({ gender: 'female', poseFraming: 'upper' });
-const pFull = buildPrompt({ gender: 'female', poseFraming: 'full' });
-check('上半身：明确裁到腰胯以上', /waist-up shot only/i.test(pUpper), pUpper.slice(0, 300));
-check('上半身：禁止拉回全身', /Do not pull back to a full-body shot/i.test(pUpper));
-check('上半身：不出现 full-body 取景描述', !/FRAMING: full-body/i.test(pUpper));
-check('上半身：风格行也改中景', /waist-up portrait/.test(pUpper) && !/full-body shot,/.test(pUpper));
-// 只写「禁止改动」会把模型逼进死胡同：线稿只有上半身，它交不出带腿的成品，于是退回全身站姿。
-// 必须给出可执行的出口——允许自然补全看不见的部分。
-check('上半身：允许自然补全下半身', /Reframing allowed/.test(pUpper) && /lower body from the waist/.test(pUpper));
-check('上半身：补全时动作不许变', /hand positions, arm angles, head direction, camera height and upper-body framing stay the same/.test(pUpper));
-check('上半身：不再宣称图3定义全身姿势', !/defines the POSE AND CAMERA ANGLE ONLY/.test(pUpper));
-check('全身：不给补全许可', !/Reframing allowed/.test(pFull));
-check('全身：仍要求完整入画', /FRAMING: full-body shot from head to feet/i.test(pFull));
-check('全身：不出现半身裁切说明', !/waist-up/i.test(pFull));
-check('取景参数非法值回落为全身', /FRAMING: full-body/i.test(buildPrompt({ poseFraming: '  xxx ' })));
-
-// 前端要真的把取景带上，并把上半身姿势切到 1:1 中景画幅
-check('前端把取景带进 /api/generate', /poseFraming: framingOfSelection\(\)/.test(appSrc));
-check('直连通道也带取景', /poseFraming,\s*\}\)/.test(appSrc));
-check('上半身姿势识别基于 series / 分类', /series === 'upper'/.test(appSrc) && /includes\('上半身'\)/.test(appSrc));
-check('上半身姿势改 1:1 画幅', /framing === 'upper' \? '1:1'/.test(appSrc));
-check('横向画幅抬成竖幅', /ratio === '4:3' \? '3:4'/.test(appSrc));
-// 自定义模型只认「档位 + 比例」（Agnes 的 size:"2K" + ratio:"3:4"），像素值会被拒或悄悄标准化
-check('自定义通道给 size 档位', /size: 'auto'/.test(appSrc));
-check('自定义通道单给 ratio', /ratio: CUSTOM_SIZE\[ratio\] \|\| '3:4'/.test(appSrc));
-check('直连请求带 ratio', /if \(ratio\) body\.ratio = ratio/.test(appSrc));
-check('额外参数优先级高于自动尺寸', /body = \{ \.\.\.body, \.\.\.extra \}/.test(appSrc) && /body = \{ \.\.\.body, \.\.\.extra \}/.test(
-  await readFile(path.join(ROOT, 'shared/custom-model.js'), 'utf8')));
-
-// 路由层透传：漏传时后端拿到的永远是 full，取景修正形同虚设
-const upperPrompt = await (
-  await handleRequest(new Request('https://x.dev/api/prompt?style=photorealistic&poseFraming=upper'), {}, {})
-).json();
-check('/api/prompt 认 poseFraming', /waist-up shot only/i.test(upperPrompt.prompt || ''));
-
-console.log('\n[5d] 姿势库排序');
-// 现象：点开姿势库第一页全是坐姿（上游按编号排，P001 是「仰反弓坐姿」），站姿被埋在几十页后。
-const sortSrc = appSrc.slice(appSrc.indexOf('function poseRank('), appSrc.indexOf('function renderGrid('));
-const { sortPoses, poseRank } = new Function(`${sortSrc}; return { sortPoses, poseRank };`)();
-for (const [label, file] of [['女性', 'pose.json'], ['男性', 'pose-male.json']]) {
-  const items = JSON.parse(await readFile(path.join(ROOT, 'web/public/data', file), 'utf8')).items;
-  const sorted = sortPoses(items);
-  const head = sorted.slice(0, 12);
-  check(`${label}：首页全是全身站立`, head.every((it) => poseRank(it) === 0),
-    head.map((it) => it.title).join(' / '));
-  check(`${label}：排序不改条目数`, sorted.length === items.length);
-  check(`${label}：排序结果无重复`, new Set(sorted.map((x) => x.id)).size === items.length);
-  const firstUpper = sorted.findIndex((it) => poseRank(it) === 3);
-  const anyUpper = items.some((it) => poseRank(it) === 3);
-  check(`${label}：上半身排在最后`, !anyUpper || sorted.slice(firstUpper).every((it) => poseRank(it) === 3));
-  // 稳定性：同档内保持原序号，方便按编号找图
-  const stably = sorted.filter((it) => poseRank(it) === 0).map((it) => it.code);
-  const original = items.filter((it) => poseRank(it) === 0).map((it) => it.code);
-  check(`${label}：站姿内部不打乱编号`, stably.join() === original.join());
-}
-check('只有姿势库走重排', /state\.tab === 'pose' \? sortPoses\(list\) : list/.test(appSrc));
 
 console.log('\n[6] Cloudflare multipart');
 const { form, modelId } = buildCloudflareForm({ images: imgs, prompt: p, modelId: '@cf/black-forest-labs/flux-2-klein-9b' });
@@ -402,50 +341,6 @@ try {
 } finally {
   await srv.close();
 }
-
-console.log('\n[15b] 参考图送法（Agnes 之外的网关）');
-// 现象：换一家服务后报「extra_body.image 必须包含图片值」，但图明明传了 3 张。
-// 原因：它不认 extra_body.image 这个位置，把 image 当顶层必填字符串。
-const bodyExtra = attachImages({ model: 'm', prompt: 'p' }, ['a', 'b', 'c'], 'extra_body');
-const bodyArray = attachImages({ model: 'm', prompt: 'p' }, ['a', 'b', 'c'], 'array');
-const bodySingle = attachImages({ model: 'm', prompt: 'p' }, ['a', 'b', 'c'], 'singular');
-check('默认 extra_body.image 是数组', JSON.stringify(bodyExtra.extra_body.image) === '["a","b","c"]');
-check('array 模式放顶层 image 数组', JSON.stringify(bodyArray.image) === '["a","b","c"]' && !bodyArray.extra_body);
-check('singular 模式首图走顶层字符串', bodySingle.image === 'a' && typeof bodySingle.image === 'string');
-check('singular 模式其余图不丢', JSON.stringify(bodySingle.extra_body.image) === '["b","c"]');
-check('无参考图时不塞 image 字段', !('image' in attachImages({ model: 'm' }, [], 'singular')));
-
-const srvMode = await startFakeImageServer();
-try {
-  const base = { baseUrl: `http://127.0.0.1:${srvMode.port}/v1`, apiKey: 'k', model: 'm', ready: true };
-  await generateCustom({ images: imgs, prompt: 'p', size: '1024x1024', profile: { ...base, imageMode: 'singular' } });
-  check('服务端按 imageMode=singular 发送', typeof srvMode.lastBody?.image === 'string' && srvMode.lastBody.image.startsWith('data:image/'));
-  await generateCustom({ images: imgs, prompt: 'p', size: '1024x1024', profile: { ...base, imageMode: 'array' } });
-  check('服务端按 imageMode=array 发送', Array.isArray(srvMode.lastBody?.image) && srvMode.lastBody.image.length === 3);
-  check('response_format 仍在 extra_body', srvMode.lastBody?.extra_body?.response_format === 'b64_json');
-  await generateCustom({ images: imgs, prompt: 'p', size: '1024x1024', profile: base });
-  check('未指定时回落 extra_body.image', Array.isArray(srvMode.lastBody?.extra_body?.image));
-} finally {
-  await srvMode.close();
-}
-
-// 前端直连用的是同一套拼装逻辑：两边不一致时，直连能过、中转报错（或反过来）
-const frontModeSrc = appSrc.slice(appSrc.indexOf('const IMAGE_MODES'), appSrc.indexOf('const imageModeOf'));
-check('前端送法选项与服务端一致', ['extra_body', 'array', 'singular'].every((m) => frontModeSrc.includes(`'${m}'`)));
-check('前端拼装与服务端同构', /if \(mode === 'array'\) return \{ \.\.\.body, image: list \}/.test(appSrc));
-check('抽屉提供送法下拉', /id="cfgImageMode"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
-check('缺图类报错提示换送法', /imageish[\s\S]{0,300}换成另一种再试/.test(appSrc));
-
-// 排查工具：上游只说「image 必须包含图片值」时，界面看不出请求体到底长什么样
-check('记下实际请求体', /state\.lastReq = \{ endpoint, body, mode/.test(appSrc));
-// 真凶：toReference 返回 {dataUrl,w,h}，参考图数组里塞的是对象而不是 data URI 字符串，
-// 上游读不到图 → 「image 必须包含图片值」。断言这条路径取的是字符串。
-check('参考图取 dataUrl 字符串', /return ref\.dataUrl;/.test(appSrc) && !/return await toReference\(/.test(appSrc));
-check('自定义通道参考图用 PNG', /state\.engine === 'custom' \? 'png' : 'jpeg'/.test(appSrc));
-check('Workers AI 仍用 JPEG', /toDataURL\('image\/jpeg', REF_QUALITY\)/.test(appSrc));
-check('失败后可下载诊断', /function downloadDiag/.test(appSrc) && /id="diagBtn"/.test(
-  await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
-check('诊断导出会截断图片', /已截断/.test(appSrc));
 
 console.log('\n[16] 自定义模型：错误分类');
 const srv2 = await startFakeImageServer({ fail: 401 });

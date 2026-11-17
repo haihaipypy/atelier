@@ -60,11 +60,6 @@
     <p class="lib-note" id="libNote" hidden></p>
     <div class="lib-tools">
       <input type="search" id="search" placeholder="搜编号、颜色、品类…（空格分隔 = 同时满足）" autocomplete="off" />
-      <select id="framingFilter" aria-label="取景筛选" hidden>
-        <option value="">全部</option>
-        <option value="full">全身</option>
-        <option value="upper">上半身</option>
-      </select>
       <select id="catFilter" aria-label="分类筛选"><option value="">全部分类</option></select>
     </div>
     <div class="grid" id="grid" role="listbox" aria-label="素材列表"></div>
@@ -162,7 +157,6 @@
       </div>
     </div>
     <div class="result-meta" id="resultMeta"></div>
-    <button class="diag-btn" id="diagBtn" hidden>下载诊断（这次实际发出去的请求）</button>
   </aside>
 </main>
 
@@ -197,14 +191,6 @@
     </label>
     <label>模型名称
       <input id="cfgModel" placeholder="例如 agnes-image-2.5-flash、gpt-image-1" spellcheck="false" />
-    </label>
-    <label>参考图在请求体里的位置
-      <select id="cfgImageMode">
-        <option value="extra_body" selected>extra_body.image: [图…]（Agnes 等 OpenAI 扩展）</option>
-        <option value="array">image: [图…]（顶层数组）</option>
-        <option value="singular">image: "图"（顶层单张，兼容最广）</option>
-      </select>
-      <small>报「extra_body.image 必须包含图片值」时换一种：先试「顶层单张」，再试「顶层数组」。</small>
     </label>
     <label>参考图传递方式
       <select id="cfgSendMode">
