@@ -248,6 +248,10 @@ async function generateDirect({ images, prompt, size, ratio }) {
   body.extra_body = { ...(body.extra_body || {}), response_format: 'b64_json' };
   if (!body.extra_body.image && !body.image) delete body.extra_body.image;
 
+  // 记下实际发出去的请求体（图片稍后截断）：上游只说「image 必须包含图片值」时，
+  // 光看界面判断不了是没带上、还是字段位置不对，得看真身。
+  state.lastReq = { endpoint, body, mode: imageModeOf(cfg) };
+
   const started = Date.now();
   let res;
   try {
@@ -273,6 +277,8 @@ async function generateDirect({ images, prompt, size, ratio }) {
   }
   if (!res.ok) {
     const msg = upstreamMsg(res.status, json, raw, endpoint);
+    state.lastReq.status = res.status;
+    state.lastReq.error = String(json?.error?.message || json?.message || raw || '').slice(0, 400);
     const up = String(json?.error?.message || json?.message || raw || '');
     // 「image 必须包含图片值」这类原文最容易误导：图其实传了，只是这家不认这种送法。
     // 直接把「换一种参考图送法」写进报错，省掉用户翻文档猜。
@@ -944,6 +950,8 @@ async function generate() {
   const ratio = $('#ratio').value;
   const [rx, ry] = RATIO_MAP[ratio] || [1024, 1024];
   setBusy(true, '正在准备参考图…');
+  const diagBtn = $('#diagBtn');
+  if (diagBtn) diagBtn.hidden = true;
   try {
     // 三张并行处理：串行等待时每张都要单独跨域往返，累计很容易触发超时
     const images = await Promise.all(
@@ -1046,9 +1054,42 @@ async function generate() {
   } catch (e) {
     $('#hint').textContent = e.message;
     $('#hint').classList.add('error');
+    // 直连失败时给一个能贴给人的凭据：界面上只能看到一句话，请求体才是实情
+    const btn = $('#diagBtn');
+    if (btn) btn.hidden = !state.lastReq;
   } finally {
     setBusy(false);
   }
+}
+
+/** 把上次请求体里的 base64 图片截断到可读长度，导出成文本供排查 / 反馈 */
+function downloadDiag() {
+  const r = state.lastReq;
+  if (!r) return;
+  const shrink = (img) =>
+    typeof img === 'string' && img.startsWith('data:')
+      ? `${img.slice(0, 48)}…（共 ${Math.round(img.length / 1024)} KB，已截断）`
+      : img;
+  const view = JSON.parse(JSON.stringify(r.body || {}, (k, v) => {
+    if (typeof v === 'string' && v.startsWith('data:')) return shrink(v);
+    return v;
+  }));
+  const lines = [
+    `时间：${new Date().toLocaleString('zh-CN')}`,
+    `请求地址：${r.endpoint}`,
+    `送法：${r.mode}`,
+    `HTTP 状态：${r.status ?? '未记录'}`,
+    `上游原文：${r.error ?? '无'}`,
+    '',
+    '请求体（图片已截断）：',
+    JSON.stringify(view, null, 2),
+  ];
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `atelier-diag-${Date.now()}.txt`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
 }
 
 function setBusy(busy, msg) {
@@ -1099,6 +1140,7 @@ function bindUI() {
     state.page = 1;
     renderGrid();
   });
+  $('#diagBtn')?.addEventListener('click', downloadDiag);
   $('#framingFilter').addEventListener('change', (e) => {
     state.framing = e.target.value;
     state.page = 1;

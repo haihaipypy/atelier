@@ -436,6 +436,12 @@ check('前端拼装与服务端同构', /if \(mode === 'array'\) return \{ \.\.\
 check('抽屉提供送法下拉', /id="cfgImageMode"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
 check('缺图类报错提示换送法', /imageish[\s\S]{0,300}换成另一种再试/.test(appSrc));
 
+// 排查工具：上游只说「image 必须包含图片值」时，界面看不出请求体到底长什么样
+check('记下实际请求体', /state\.lastReq = \{ endpoint, body, mode/.test(appSrc));
+check('失败后可下载诊断', /function downloadDiag/.test(appSrc) && /id="diagBtn"/.test(
+  await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
+check('诊断导出会截断图片', /已截断/.test(appSrc));
+
 console.log('\n[16] 自定义模型：错误分类');
 const srv2 = await startFakeImageServer({ fail: 401 });
 try {
