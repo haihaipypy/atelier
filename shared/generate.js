@@ -41,12 +41,20 @@ export const MODELS = {
 export const DEFAULT_MODEL = '@cf/black-forest-labs/flux-2-klein-9b';
 
 /**
- * 姿态要点清洗：前端从图库条目里带一段「坐在地面、单膝竖起、双手撑地」这类要点。
+ * 姿态要点清洗：前端从图库条目里带一段「坐姿｜后仰坐・单膝竖起；sitting on the floor…」这类要点。
+ *
  * 截断到 200 字符是为了不喧宾夺主——多图合成里文字太长会盖掉「图1只给衣服」的约束。
+ *
+ * 「英文收尾」必须整句丢弃：图库的要点只存前 60 个字符，中英混排时英文大概率被
+ * 截在半句（…leaning back with the figur），半句话塞进提示词会和「照图3」打架，
+ * 模型只好丢掉姿势、回到正面站姿——这正是「姿势不生效」最隐蔽的一个来源。
  */
 export function clipPoseHint(s) {
   const t = String(s || '').replace(/\s+/g, ' ').trim();
-  return t.length > 200 ? `${t.slice(0, 200)}…` : t;
+  // 中英交界处如果还留着没结束的英文尾，直接砍掉：宁可少一句描述，也不给模型半句指令
+  const cut = t.replace(/\s*[A-Za-z][A-Za-z',\-\s]*$/, '').trim();
+  const head = cut || t;
+  return head.length > 200 ? `${head.slice(0, 200)}…` : head;
 }
 
 /**
@@ -90,6 +98,15 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
         'Do not replace the pose with a standing or walking pose.'
       : 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
         'placement, leg crossing, hand positions and viewpoint exactly.';
+  // 姿态要点的措辞分性别：男性版多一句「只取骨架」——参考图是女性素体线稿，
+  // 轮廓和「成年男性」冲突时模型会连姿势一起丢掉；女性版只做「确认」，多说反而添乱
+  const hint = clipPoseHint(poseHint);
+  const hintLine = hint
+    ? gender === 'male'
+      ? `The intended pose in words — the reference is a female artist mannequin, so take only its ` +
+        `skeleton and camera from these words, never its bust or waist-hip contour: ${hint}.`
+      : `The intended pose in words (use it to confirm image 3, never to override the outfit or the face): ${hint}.`
+    : '';
 
   const parts = [
     'Compose ONE single new image of one person, using the three reference images below.',
@@ -105,9 +122,7 @@ export function buildPrompt({ style = 'photorealistic', extra = '', gender = 'fe
     'The person is dressed in the outfit from image 1, has the face from image 2, and holds the ' +
       'pose from image 3. Keep anatomy correct and proportions natural in the new pose.',
     // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
-    poseHint
-      ? `The intended pose in words (use it to confirm image 3, never to override the outfit or the face): ${poseHint}.`
-      : '',
+    hintLine,
     styleLine,
     extra,
   ];

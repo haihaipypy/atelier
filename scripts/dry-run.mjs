@@ -148,15 +148,38 @@ check('男性版指出线稿是女性素体', /female artist mannequin/.test(pMa
 check('男性版要求忽略胸部与腰胯轮廓', /bust curve|waist-to-hip ratio/.test(pMale));
 check('男性版禁止退回站姿', /Do not replace the pose with a standing/i.test(pMale));
 check('姿态要点进入提示词', /intended pose in words[\s\S]*单膝竖起/.test(pHint), pHint.slice(-260));
-check('姿态要点不越权改服装/脸', /never to override the outfit or the face/.test(pHint));
-check('女性版不写这些男性专用说明', !/female artist mannequin/.test(buildPrompt({ gender: 'female' })));
+check('姿态要点不越权改服装/脸', /never to override the outfit or the face/.test(
+  buildPrompt({ gender: 'female', poseHint: '坐姿｜后仰坐・单膝竖起' })));
 check('要点超长会截断', clipPoseHint('x'.repeat(500)).length <= 201);
+
+// 之前男性版给要点额外挂了一句英文括注，前端挂一次、后端又挂一次，同一句话出现两遍；
+// 叠上「线稿女 / 人物男」的冲突，模型反而更容易丢掉姿势。现在只由后端按 gender 拼一次。
+check('男性版只取骨架的说明只出现一次', (pHint.match(/copy only its skeleton|take only its/g) || []).length === 1);
+check('男性版要点不再带重复括注', !/not its bust or waist-hip contour\)/.test(pHint));
+
+// 半句英文是纯干扰：图库要点只存 60 字符，中英混排时英文会被截在 …leaning back with the figur
+const halfEn = '坐姿｜后仰坐・单膝竖起；sitting on the floor leaning back with the figur';
+check('被截断的英文尾会被丢掉', !/figur\b/.test(clipPoseHint(halfEn)), clipPoseHint(halfEn));
+check('丢尾后中文要点还在', /单膝竖起/.test(clipPoseHint(halfEn)));
+const zhs = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose.json'), 'utf8')).items
+  .map((it) => it.pose?.zh).filter(Boolean);
+check('现有姿势要点清洗后无半英文尾', zhs.every((s) => !/[A-Za-z]{3,}$/.test(clipPoseHint(s))),
+  zhs.map((s) => clipPoseHint(s)).find((s) => /[A-Za-z]{3,}$/.test(s)) || '全部干净');
+
+// 关键：这些改动不能污染女性版——女性提示词里不能出现男性专用措辞
+const pFemale = buildPrompt({ gender: 'female', poseHint: '坐姿｜后仰坐・单膝竖起' });
+const pFemalePlain = buildPrompt({ gender: 'female' });
+check('女性版不写这些男性专用说明', !/female artist mannequin/.test(pFemale));
+check('女性版不提骨架/轮廓那套', !/skeleton|bust|waist-to-hip|adult man/.test(pFemale));
+check('女性版要点只作确认，不改成命令', /use it to confirm image 3/.test(pFemale));
+check('女性版主体约束与不填要点时一致', pFemale.replace(/ The intended pose in words[^.]*\./, '') === pFemalePlain);
 
 // 前端要真的把要点带上：漏传时后端拼不出那句「intended pose in words」
 const appSrc = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
-check('前端把姿态要点带进 /api/generate', /poseHint: poseHintFor\(state\.gender\)/.test(appSrc));
-check('直连通道也带姿态要点', /const poseHint = poseHintFor\(state\.gender\);/.test(appSrc));
-check('男性版要点附带「只取骨架」说明', /copy only its skeleton and camera/.test(appSrc));
+check('前端把姿态要点带进 /api/generate', /poseHint: poseHintFor\(\)/.test(appSrc));
+check('直连通道也带姿态要点', /const poseHint = poseHintFor\(\);/.test(appSrc));
+check('要点不再带性别说明（避免重复）', !/copy only its skeleton and camera/.test(appSrc));
+check('前端也会丢掉被截断的英文尾', /replace\(\/\\s\*\[A-Za-z\]/.test(appSrc));
 check('姿势卡片悬停能看到要点', /it\.pose\?\.zh/.test(appSrc));
 const poseMaleJson = await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8');
 check('男性姿势库带「借用女性素体」标注', /poseGender/.test(poseMaleJson) && /女性素体/.test(poseMaleJson));

@@ -95,19 +95,21 @@ function upstreamMsg(status, json, raw, endpoint) {
 }
 
 /**
- * 送出给模型的姿态要点。
+ * 送出给模型的姿态要点（只做清洗，不带性别说明）。
  *
- * 男性版用的是女性素体线稿（Shisei 没出男版姿势），线稿上的胸部曲线、腰胯比例
- * 会和「成年男性」打架。两者冲突时模型最常见的处理是**直接丢掉姿势**、输出一张
- * 正面站姿——也就是「选了姿势却不生效」。所以这里不删要点，而是明确说：
- * 骨架照搬、轮廓别照搬。
+ * 图库里的要点只存 60 个字符，中英混排时英文会被截在半句（…leaning back with the figur）。
+ * 半句英文塞进提示词是纯干扰：模型读到一句没说完的指令，加上「图3是女线稿 + 要男模」
+ * 这层冲突，最常见的处理就是丢掉姿势、输出一张正面站姿——「选了姿势却不生效」。
+ * 所以这里只留中文那段（它本来就是骨架描述），英文尾整段丢掉。
+ *
+ * 性别相关的「只取骨架」措辞放在 shared/generate.js 里，按 gender 拼一次就够了；
+ * 之前前端也加一句、后端也加一句，同一句话在提示词里出现两次，模型反而更乱。
  */
-function poseHintFor(gender) {
+function poseHintFor() {
   const raw = state.selected.pose?.pose?.zh || '';
   if (!raw) return '';
-  if (gender !== 'male') return raw;
-  return `${raw} (the reference is a female artist mannequin: copy only its skeleton and camera, `
-    + 'not its bust or waist-hip contour)';
+  const zh = String(raw).replace(/\s*[A-Za-z][A-Za-z',\-\s]*$/, '').trim();
+  return zh || String(raw).trim();
 }
 
 /**
@@ -115,7 +117,7 @@ function poseHintFor(gender) {
  * 失败时用一段等价的内置描述兜底，保证「不填提示词也能出图」。
  */
 async function buildPromptOnServer() {
-  const poseHint = poseHintFor(state.gender);
+  const poseHint = poseHintFor();
   const q = new URLSearchParams({
     style: $('#style').value || 'photorealistic',
     extra: $('#extra').value.trim(),
@@ -870,7 +872,7 @@ async function generate() {
         extra: $('#extra').value.trim(),
         prompt: $('#promptOverride').value.trim(),
         // 姿势参考图是女性素体线稿，光给图模型经常直接退回站姿；把「大约什么动作」也写成文字
-        poseHint: poseHintFor(state.gender),
+        poseHint: poseHintFor(),
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
       };
