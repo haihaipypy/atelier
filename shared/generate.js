@@ -136,10 +136,11 @@ export function buildPrompt({
   // 对任何姿势都成立，不偏袒某一类，所以男女共用。
   // （女性版的失败案子是「图3 双手在脑后、成品双手垂在身侧」——模型把手放下了，
   //   不是抬错位置，是整段忽略，点名字之后才有东西可抓。）
+  // 肢体例子从这一段搬到了 stanceGuard（那里本来就有一句「手放哪儿就留在哪儿」）。
+  // 两处都写等于同一件事说了两遍，白白吃掉 120 字符——而 T5 只认前 512 token。
   const poseRef =
     'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
-    'placement, leg crossing, hand positions and viewpoint exactly, limb by limb — a raised arm ' +
-    'stays raised high, a bent elbow keeps its exact angle, a hand at the head stays at the head.';
+    'placement, leg crossing, hand positions and viewpoint exactly, limb by limb.';
   // 姿态要点只对女性版注入，男性版**一个字都不注入**。
   //
   // 两个库的要点现在都优先取 pose.en（前端负责），即完整英文句——之前女性注入的是
@@ -198,8 +199,8 @@ export function buildPrompt({
     : 'The stance must follow image 3, not a default catalogue pose. Do not straighten the legs, ' +
       'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
       'and do not drop the arms flat against the sides, unless image 3 itself shows exactly that. ' +
-      'Wherever image 3 puts the hands — behind the head, on the hips, on the cheeks, raised ' +
-      'overhead — both hands stay there with the same elbow angle.';
+      'Whatever image 3 does with the arms — raised overhead, bent at the elbow, hands clasped ' +
+      'behind the head — stays exactly that way.';
 
   // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
   // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
@@ -210,31 +211,39 @@ export function buildPrompt({
       'that position — do not lift him onto a chair or a stool, and do not stand him up.'
     : '';
 
+  // 腿部服装要单独说一遍，而且必须点明**类型与长度**。
+  //
+  // 起因：图1 是「蕾丝吊带 + 棕色阔腿长裤」，图3 是举手叉腰的站姿线稿，成品上半身全对，
+  // 下半身却变成棕色百褶短裙 + 露腿 + 高跟鞋。原句只列了 tights / stockings / socks /
+  // boots / shoes —— 全在脚上，没有一件是裤子。模型按字面理解成「腿上只有袜子和鞋」，
+  // 于是自己拿上衣的颜色配了一条短裙，顺手把腿摆成细长交叉的模特站姿。
+  //
+  // 所以清单里加进裤子/裙子/短裤，再补一句「类型和长度都照搬，长裤不能变短裤或短裙」，
+  // 并用「两条裤腿分开」把「裤子」和「裙摆」在语义上隔开——只说 wide-leg 时，
+  // 模型很容易理解成宽摆的裙子。
   const legwearLine = gender === 'male'
-    ? 'Image 3 is an unclothed mannequin, so its bare legs are not a styling choice: put on the ' +
-      'legwear and footwear from image 1 — trousers, jeans, chinos, socks, boots, shoes — on the ' +
-      'final pose, bent and crossed legs included. If image 1 has no legwear at all, the legs stay ' +
-      'bare as image 1 shows.'
-    : 'Image 3 is an unclothed mannequin, so its bare legs are not a styling choice: put on the legwear ' +
-      'and footwear from image 1 — tights, stockings, socks, boots, shoes — on the final pose, bent ' +
-      'and crossed legs included. If image 1 shows no legwear, the legs stay bare.';
+    ? 'Image 3 is an unclothed mannequin: its bare legs are not a styling choice. Seated or ' +
+      'standing, dress them from image 1 — trousers, jeans, chinos, shorts, socks, boots, shoes — ' +
+      'same type, same length: a full-length trouser stays full length, two separate legs, never ' +
+      'shorts. Legs keep the stance of image 3, feet as far apart as drawn. No legwear in image 1 ' +
+      'means bare legs; no footwear means plain flat shoes.'
+    : 'Image 3 is an unclothed mannequin: its bare legs are not a styling choice. Seated or ' +
+      'standing, dress them from image 1 — trousers, jeans, wide-leg pants, skirt, shorts, tights, ' +
+      'stockings, socks, boots, shoes — same type, same length: a full-length trouser stays full ' +
+      'length, two separate legs, never shorts or a skirt. Legs keep the stance of image 3, feet as ' +
+      'far apart as drawn. No legwear in image 1 means bare legs; no footwear means plain flat shoes.';
 
   const parts = [
-    'Compose ONE single new image of one person, using the three reference images below.',
+    'Compose one new image of one person from the three reference images below.',
     subject,
     'Reference image 1 defines the OUTFIT ONLY: copy its garments, colors, fabric, patterns, ' +
       'accessories and footwear exactly as shown. Ignore whatever body is inside it — do not render ' +
       'a mannequin and do not leave the torso hollow. Its pose means nothing: take NO body posture, ' +
-      'leg position or camera from image 1, even when image 1 shows a person standing straight. ' +
-      'Its clothing still applies to the whole body, legs and feet included.',
-    // 腿部服装单独说一遍，但只限定腿脚：坐姿、蹲姿、躺姿的姿势线稿腿是裸露的素体，
-    // 而「图1 的姿态一律不要」这句很容易连带把腿上的东西一起否掉——丝袜、靴子就没了。
-    // 不写成「全身都按图1 覆盖」，否则露肩、露背这类剪裁会被模型补上布料。
-    // 男性版必须点名裤子：原句列的是 tights / stockings / socks，配一句「图1 没有腿袜就光腿」，
-    // 男性套装是长裤，按字面理解就是「没有腿袜 → 光腿」，坐姿容易直接出一条光腿。
+      'leg position or camera from image 1, even when image 1 shows a person standing straight.',
+    // 腿脚服装由下面这段单独交代，所以这里不再写「衣服覆盖全身」——那句话既与「姿态一律不要」
+    // 挨在一起容易互相抵消，又和 legwearLine 重复。
     legwearLine,
-    'Reference image 2 defines the FACE ONLY: use this exact face identity, facial features, ' +
-      'hairstyle and hair color for the person.',
+    'Reference image 2 defines the FACE ONLY: use its exact face identity, hairstyle and hair color.',
     poseRef,
     // 两句合一：line-art 那句本来就属于「图3 只给姿势」，末尾的 anatomy 要求也是同一个意思。
     // 分开写多花 100 字符，而 T5 的有效窗口只到 512 token，省下的字数要留给末尾的站姿反例。
