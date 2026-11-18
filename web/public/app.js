@@ -345,6 +345,31 @@ const LOCAL_SLOTS = ['pose', 'face', 'outfit'];
 const AGNES_2K = {
   '3:4': '1728x2304', '1:1': '2048x2048', '9:16': '1472x2624', '4:3': '2304x1728',
 };
+
+/**
+ * 2026-11-18 用户在本地用 agnes-image-2.5-flash 一次跑通的完整提示词（约 1600 字符）。
+ *
+ * 网站内置模板最长的「本地对齐」也只有它的零头：POSE 段只有一句 pose.en，脸和服装
+ * 都是「照抄图 N」这种抽象指令。而本地这版是有人看过三张图之后，把图里看到的动作、
+ * 五官发型、每一件衣服逐件写出来的 —— 这才是两边效果的真正差距。
+ *
+ * 之所以做成「一键填入自定义 Prompt」而不是改内置模板：自定义 Prompt 本来就是最高
+ * 优先级、完全覆盖内置模板，不动生成逻辑就不会给另外两个模式引入任何回归；而且用户
+ * 换素材后能直接编辑这段文字，比写死在代码里灵活。
+ *
+ * 注意编号写死为 1=姿势 / 2=脸 / 3=服装，与本地对齐模式的送图顺序一致。所以填入时
+ * 会自动把模式切到「本地对齐」，否则在「详细/极简」下（图1=服装）编号就全反了。
+ */
+const LOCAL_FULL_TEMPLATE = `Combine the three reference images into ONE photorealistic full-body studio portrait of a single young woman, head-to-toe framing, centered, feet fully visible.
+
+POSE (from reference image 1, the line-art figure): reproduce that exact pose — standing upright, both arms raised with hands clasped behind the head, elbows opened outward, so the whole length of both arms is clearly visible from shoulder to wrist, chest lifted, legs straight and slightly apart, toes pointing forward, weight evenly balanced. Same body proportions and the same camera angle. Reference image 1 is the absolute authority for body posture, limb placement, head tilt, body orientation and camera angle; reproduce it exactly.
+
+FACE and HAIR (from reference image 2): the same young East Asian woman — long layered ash-blonde / light-brown hair falling past the shoulders with wispy curtain bangs, warm light-brown eyes, subtle rosy blush, glossy pink lips in a gentle closed-mouth smile, fair smooth skin, delicate features. Take ONLY the facial identity and hairstyle from this image and ignore its frontal angle and flat lighting. Keep the facial identity recognizable.
+
+OUTFIT (from reference image 3): mustard-gold velvet long-sleeve mini dress with a ruched gathered body, sweetheart neckline with a thin drawstring bow at the center chest, flared bell-shaped cuffs on the sleeves, drawstring ruching gathered at the hips; cream ribbed thigh-high stockings with a small satin bow at the top of each leg; brown suede chunky platform ankle boots; a thin gold chain necklace; a small brown leather shoulder bag hanging from a strap on her right shoulder. Copy every garment head to toe exactly as shown — same type, same length, same colors, fabric texture and accessories. The bare legs of the line-art mannequin are not a styling choice.
+
+STYLE: clean light-gray seamless studio backdrop, soft even frontal beauty lighting with a subtle floor shadow, crisp focus on the face, realistic natural skin texture, high fabric detail, professional fashion lookbook photography, vertical composition, no text, no watermark, no extra props.`;
+
 const el = (tag, attrs = {}, ...kids) => {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -1446,7 +1471,12 @@ function closeLightbox() {
 }
 
 function setDefaultPrompt() {
-  $('#promptOverride').placeholder = '留空使用内置模板：图1=服装，图2=脸，图3=姿势。';
+  // 送图顺序随模式变：本地对齐是 姿势→脸→服装，另外两个是 服装→脸→姿势。
+  // 写死「图1=服装」会让默认模式下的用户照着错的编号写自定义 Prompt。
+  const order = isLocal()
+    ? '图1=姿势，图2=脸，图3=服装'
+    : '图1=服装，图2=脸，图3=姿势';
+  $('#promptOverride').placeholder = `留空使用内置模板：${order}。`;
 }
 
 boot().catch((e) => {
@@ -1710,3 +1740,15 @@ $('#cfgSave')?.addEventListener('click', saveCfg);
 $('#cfgTest')?.addEventListener('click', testCfg);
 $('#cfgClear')?.addEventListener('click', clearCfg);
 $('#probeBtn')?.addEventListener('click', probeOnce);
+$('#promptMode')?.addEventListener('change', setDefaultPrompt);
+$('#fillLocalTpl')?.addEventListener('click', () => {
+  // 模板里的编号写死 1=姿势 / 2=脸 / 3=服装，必须配合「本地对齐」的送图顺序；
+  // 顺手把模式切过去，避免用户填完又选了「详细/极简」导致三段描述全对错图。
+  const mode = $('#promptMode');
+  if (mode) mode.value = 'local';
+  $('#promptOverride').value = LOCAL_FULL_TEMPLATE;
+  setDefaultPrompt();
+  const hint = $('#hint');
+  hint.classList.remove('error');
+  hint.textContent = '已填入本地同款完整提示词，并切到「本地对齐」模式。它会完全覆盖内置模板；换素材后请按自己的三张图修改描述。';
+});

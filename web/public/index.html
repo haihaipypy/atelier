@@ -143,6 +143,10 @@
         </label>
         <label class="wide">自定义 Prompt（留空则用内置模板）
           <textarea id="promptOverride" rows="3" spellcheck="false"></textarea>
+          <small>填了就完全覆盖内置模板。
+            <button type="button" class="inline-btn" id="fillLocalTpl">填入本地同款完整提示词</button>
+            —— 会切到「本地对齐」模式（图1=姿势 / 图2=脸 / 图3=服装），换素材后请按自己的三张图改描述。
+          </small>
         </label>
       </div>
     </details>

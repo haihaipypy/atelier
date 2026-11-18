@@ -661,7 +661,31 @@ check('结果区展示本次实际送出的参考图',
   && /本次送出的参考图/.test(appLocSrc));
 check('参考图诊断标出两种顺序', /const names = isLocal\(\) \? \['姿势', '脸', '服装'\] : \['服装', '脸', '姿势'\]/.test(appLocSrc));
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.9', /tag: '2026\.11\.18\.9'/.test(versionSrc));
+check('版本号已递增到 2026.11.18.10', /tag: '2026\.11\.18\.10'/.test(versionSrc));
+
+console.log('\n[8a4] 本地同款完整提示词：不动内置生成逻辑的对齐手段');
+// 上一轮留的下一步是「把动作描述写成一整段（本地那种）」。最安全的做法不是继续改
+// buildPrompt，而是把本地跑通的那段 1600 字符原文做成一键模板填进「自定义 Prompt」——
+// 它本来就是最高优先级、完全覆盖内置模板，另外两个模式因此零回归。
+check('页面有一键填入模板按钮', /id="fillLocalTpl"/.test(htmlLoc));
+check('模板含 POSE / FACE / OUTFIT / STYLE 四段',
+  ['POSE (from reference image 1', 'FACE and HAIR (from reference image 2',
+    'OUTFIT (from reference image 3', 'STYLE: clean light-gray'].every((s) => appLocSrc.includes(s)));
+check('模板逐字写出具体动作，不是抽象权威句',
+  /both arms raised with hands clasped behind the head, elbows opened outward/.test(appLocSrc));
+check('模板逐件写出服装细节',
+  /mustard-gold velvet long-sleeve mini dress/.test(appLocSrc) && /thigh-high stockings/.test(appLocSrc));
+check('模板长度接近本地案例（>1200 字符）',
+  (() => { const m = /const LOCAL_FULL_TEMPLATE = `([\s\S]*?)`;/.exec(appLocSrc); return !!m && m[1].length > 1200; })());
+check('填入模板时自动切到本地对齐（编号才对得上）',
+  /if \(mode\) mode\.value = 'local';/.test(appLocSrc));
+check('填入模板会写进自定义 Prompt', /\$\('#promptOverride'\)\.value = LOCAL_FULL_TEMPLATE;/.test(appLocSrc));
+check('自定义 Prompt 占位文案按模式给出正确图序',
+  /isLocal\(\)\s*\n\s*\? '图1=姿势，图2=脸，图3=服装'/.test(appLocSrc)
+  && /: '图1=服装，图2=脸，图3=姿势'/.test(appLocSrc));
+check('切换模式会刷新占位文案', /\$\('#promptMode'\)\?\.addEventListener\('change', setDefaultPrompt\)/.test(appLocSrc));
+check('自定义 Prompt 直传不经 clipHint 截断',
+  /prompt: body\.prompt\s*\|\|/.test(routerLocSrc) && !/prompt:\s*clipHint\(body\.prompt\)/.test(routerLocSrc));
 
 console.log('\n[8b] 诊断探针：不带图也能调模型');
 // 3043 分不清是「模型不支持多图」「某张图太大/格式不认」还是「上游挂了」。

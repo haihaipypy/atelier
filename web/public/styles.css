@@ -547,6 +547,14 @@ a { color: inherit; }
   color: var(--ink-3); word-break: break-word;
 }
 
+/* 高级设置里「填入本地同款完整提示词」这种内联小按钮 */
+.inline-btn {
+  display: inline; margin: 0; padding: 0 3px; border: 0; background: none;
+  font: inherit; font-size: 11px; line-height: inherit;
+  color: var(--sel); text-decoration: underline; cursor: pointer;
+}
+.inline-btn:hover { color: var(--accent); }
+
 /* 提示词模式：和生成按钮同一栏，方便两张图来回切着对比 */
 .prompt-mode-row {
   display: flex; align-items: center; gap: 8px;
