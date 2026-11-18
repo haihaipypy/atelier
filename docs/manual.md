@@ -804,6 +804,39 @@ elbows opened outward, chest lifted, legs straight and slightly apart…`。三�
 与之逐字相同、未被 `clipPoseHint` 截断，`size` 为 `1728x2304`、`local: true`，
 三张参考图诊断正常渲染，无 JS 报错。仍然没有真实 API key，出图效果需线上确认。
 
+#### `v2026.11.18.11`：腿部断裂、珍珠项链，与「元指令里没有画面内容」
+
+用户把「本次送出的参考图」截图发来了：姿势线稿 **768×1024 排第 1、清晰可读**，
+脸 384×480、服装 320×480，三张全对 —— **「图片传递有问题」至此彻底排除**。
+但成品比上一版更糟：双臂下垂、**裙子下摆到过膝袜之间整段空白、袜子浮空**、
+脖子多出一条图里没有的珍珠项链、身体正对镜头。
+
+他同时贴了「本次实际提示词」，POSE 段走的是 `poseHint` 为空的兜底分支。逐句看下来：
+
+| 句子 | 问题 |
+|---|---|
+| `The bare legs of the line-art mannequin are not a styling choice.` | 既是否定句、又点名 `bare legs` / `mannequin`。本意是「别把线稿的光腿当成不穿袜子」，模型却把注意力引到「腿」这块区域，而服装图里假人的腿恰好是空白 |
+| `copy every garment head to toe exactly as shown` | 纯元指令，模型连服装图里假人的空白腿一起照抄 |
+| `… same type, same length, … and accessories` | 只说「照抄配饰」，没写是什么配饰，于是脑补出珍珠项链 |
+| 整段 POSE / FACE / OUTFIT | 全是「照抄图 N / 绝对权威 / 只取」这类**关系描述**，没有一个具体画面名词 |
+
+本地版每段写的都是「是什么」：`cream ribbed thigh-high stockings with a small satin bow`、
+`thin gold chain necklace`、`brown suede chunky platform ankle boots` —— 有了这些具体名词，
+模型才知道那截留白是袜子、该画成连贯的腿、项链该是细金链。**元指令留出的空白，
+模型只会拿参考图的瑕疵和自己的先验去填。**
+
+这一版改了三处：
+
+1. **删掉 `bare legs / mannequin` 那句否定尾巴**，换成正面的
+   `Render the person as one continuous, anatomically connected body from head to feet …
+   the torso, hips, legs and feet are all present and connected.` 不依赖具体素材，对所有素材成立。
+2. **把「用本地同款完整提示词」按钮从折叠的高级设置移到生成按钮下面**。上一版做了模板，
+   但用户这次的提示词里一个具体画面词都没有，说明入口藏太深、没被用到。
+3. 生成后若既没填「姿势要点」也没用模板，状态栏直接指向那个按钮，不再只提示「上传线稿」。
+
+**这一版能修掉的**是腿部断裂这类由提示词自己制造的问题；**姿势动作本身**仍需要具体描述
+（点模板或填「姿势要点」）—— 网站没有看图写字的能力，这一条绕不过去。
+
 #### 模型需要我们用文字描述姿势吗
 
 先澄清两件事：

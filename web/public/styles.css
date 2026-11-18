@@ -547,13 +547,12 @@ a { color: inherit; }
   color: var(--ink-3); word-break: break-word;
 }
 
-/* 高级设置里「填入本地同款完整提示词」这种内联小按钮 */
-.inline-btn {
-  display: inline; margin: 0; padding: 0 3px; border: 0; background: none;
-  font: inherit; font-size: 11px; line-height: inherit;
-  color: var(--sel); text-decoration: underline; cursor: pointer;
+/* 「用本地同款完整提示词」：比诊断探针醒目，但不抢主按钮 */
+.tpl-cta {
+  align-self: flex-start; font-size: 12px; color: var(--sel);
+  padding: 4px 9px; border: 1px dashed var(--sel); border-radius: 8px;
 }
-.inline-btn:hover { color: var(--accent); }
+.tpl-cta:hover { background: color-mix(in oklab, var(--sel) 10%, transparent); }
 
 /* 提示词模式：和生成按钮同一栏，方便两张图来回切着对比 */
 .prompt-mode-row {

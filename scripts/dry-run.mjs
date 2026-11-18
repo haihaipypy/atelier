@@ -661,7 +661,7 @@ check('结果区展示本次实际送出的参考图',
   && /本次送出的参考图/.test(appLocSrc));
 check('参考图诊断标出两种顺序', /const names = isLocal\(\) \? \['姿势', '脸', '服装'\] : \['服装', '脸', '姿势'\]/.test(appLocSrc));
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.10', /tag: '2026\.11\.18\.10'/.test(versionSrc));
+check('版本号已递增到 2026.11.18.11', /tag: '2026\.11\.18\.11'/.test(versionSrc));
 
 console.log('\n[8a4] 本地同款完整提示词：不动内置生成逻辑的对齐手段');
 // 上一轮留的下一步是「把动作描述写成一整段（本地那种）」。最安全的做法不是继续改
@@ -686,6 +686,28 @@ check('自定义 Prompt 占位文案按模式给出正确图序',
 check('切换模式会刷新占位文案', /\$\('#promptMode'\)\?\.addEventListener\('change', setDefaultPrompt\)/.test(appLocSrc));
 check('自定义 Prompt 直传不经 clipHint 截断',
   /prompt: body\.prompt\s*\|\|/.test(routerLocSrc) && !/prompt:\s*clipHint\(body\.prompt\)/.test(routerLocSrc));
+
+console.log('\n[8a5] 第三轮：腿部断裂与「元指令里没有画面内容」');
+// 用户把「本次送出的参考图」截图发来：姿势线稿 768×1024 排第 1、清晰可读，
+// 三张图完全正确 —— 「图片传递有问题」至此彻底排除。但成品更糟了：双臂下垂、
+// 裙子下摆到过膝袜之间整段空白、袜子浮空，还多出一条图里没有的珍珠项链。
+// 他贴出的实际提示词里 POSE 段走的是「poseHint 为空」的兜底分支：通篇
+// 「照抄图 N / 绝对权威 / 只取」这类元指令，没有任何具体画面名词。模型只能
+// 照着参考图拼贴，连服装图里假人的空白腿和自己脑补的配饰一起抄了进来。
+const pLoc3 = buildPrompt({ local: true, gender: 'female' });
+check('服装段删掉 bare legs / mannequin 那句否定尾巴',
+  !/bare legs|mannequin|not a styling choice/i.test(pLoc3), pLoc3.slice(-320));
+check('服装段改为正面声明连贯人体',
+  /continuous, anatomically connected body from head to feet/.test(pLoc3)
+  && /torso, hips, legs and feet are all present and connected/.test(pLoc3));
+check('整段提示词仍无任何否定句', !/do not|must not|never |are not/i.test(pLoc3));
+check('完整模板入口移到生成按钮旁（不再藏在折叠的高级设置里）',
+  /class="text-btn tpl-cta" id="fillLocalTpl"/.test(htmlLoc)
+  && !/class="inline-btn" id="fillLocalTpl"/.test(htmlLoc));
+check('高级设置说明指向新入口', /生成按钮下方的「用本地同款完整提示词」可一键填入示例/.test(htmlLoc));
+check('生成后引导指向显眼按钮', /点上方「用本地同款完整提示词」再生成一次/.test(appLocSrc));
+check('引导只在既没填姿势要点、也没用模板时出现',
+  /if \(!\$\('#promptOverride'\)\?\.value\.trim\(\) && !\$\('#poseHint'\)\?\.value\.trim\(\)\)/.test(appLocSrc));
 
 console.log('\n[8b] 诊断探针：不带图也能调模型');
 // 3043 分不清是「模型不支持多图」「某张图太大/格式不认」还是「上游挂了」。

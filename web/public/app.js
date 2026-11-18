@@ -1146,10 +1146,11 @@ async function generate() {
     hint.textContent = j.demo
       ? '演示模式完成：这是布局预览图，绑定 Workers AI 后会输出融合后的成品。'
       : `已生成，耗时 ${((j.ms ?? 0) / 1000).toFixed(1)}s。可换素材再生成一次做对比。`;
-    // 自定义线稿没有图库的 pose.en，等于完全没有文字动作锚点；本地跑通的那版
-    // 恰恰是把动作逐字写出来的。出图后补一句引导，别让用户对着站姿反复试。
-    if (state.selected.pose?.origin === 'upload' && !$('#poseHint')?.value.trim()) {
-      hint.textContent += ' 自定义线稿建议到「高级设置 → 姿势要点」补一句英文动作描述，姿势会稳很多。';
+    // 这次若既没填「姿势要点」、也没用完整模板，提示词里就一个具体画面词都没有 ——
+    // 全是「照抄图 N / 绝对权威」这类元指令，空白会被模型用「服装展示照」先验填上：
+    // 正面站直、双臂下垂，甚至把服装图里假人的空白腿一起抄进来。出图后直接指入口。
+    if (!$('#promptOverride')?.value.trim() && !$('#poseHint')?.value.trim()) {
+      hint.textContent += ' 这次提示词没有任何具体动作/服装描述，建议点上方「用本地同款完整提示词」再生成一次。';
     }
   } catch (e) {
     $('#hint').textContent = e.message;

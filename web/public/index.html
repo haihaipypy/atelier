@@ -143,10 +143,7 @@
         </label>
         <label class="wide">自定义 Prompt（留空则用内置模板）
           <textarea id="promptOverride" rows="3" spellcheck="false"></textarea>
-          <small>填了就完全覆盖内置模板。
-            <button type="button" class="inline-btn" id="fillLocalTpl">填入本地同款完整提示词</button>
-            —— 会切到「本地对齐」模式（图1=姿势 / 图2=脸 / 图3=服装），换素材后请按自己的三张图改描述。
-          </small>
+          <small>填了就完全覆盖内置模板。生成按钮下方的「用本地同款完整提示词」可一键填入示例（会自动切到「本地对齐」模式）；换素材后请按自己的三张图改描述，或清空这里改用内置模板。</small>
         </label>
       </div>
     </details>
@@ -163,6 +160,13 @@
           <option value="minimal">极简（只说三张图是什么）</option>
         </select>
       </label>
+      <!-- 本地跑通的那版提示词把动作/五官/每件衣服逐字写出来了，而内置模板全是
+           「照抄图 N」这类元指令。放在这里而不是折叠的高级设置里，是因为用户反复
+           反馈姿势不生效时，最容易漏掉的就是「没有具体画面描述」这件事。 -->
+      <button type="button" class="text-btn tpl-cta" id="fillLocalTpl"
+        title="填入本地用 agnes-image-2.5-flash 一次跑通的完整提示词（约 2000 字符）：逐字描述动作、五官发型和每一件衣服，并自动切到「本地对齐」模式。换素材后请自行修改。">
+        用本地同款完整提示词（推荐）
+      </button>
       <p class="hint" id="hint">从左侧选齐 服装 / 脸 / 姿势 三个素材后即可生成。</p>
       <!-- 诊断探针：不要素材，只发提示词 + 画幅。报 3043 时用它分辨「模型/上游的问题」
            还是「多图输入的问题」——探针过 → 问题在图，探针挂 → 跟图无关。 -->

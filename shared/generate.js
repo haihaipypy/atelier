@@ -129,10 +129,18 @@ export function buildPrompt({
       'FACE and HAIR (reference image 2): take ONLY the facial identity and hairstyle from it — '
       + 'ignore its frontal angle and flat lighting.',
     );
+    // 2026-11-18 第三轮复查：原来收尾那句 `The bare legs of the line-art mannequin are
+    // not a styling choice` 既是否定句、又点名了 "bare legs" / "mannequin"。用户这一版
+    // 的成品里，裙子下摆到过膝袜之间整段空白、袜子浮空，还多出一条图里没有的珍珠项链
+    // —— 模型把服装图里假人的空白腿和自由发挥的配饰一起抄了进来。元指令（照抄 / 绝对
+    // 权威）没有画面内容可锚，模型只能照着参考图的瑕疵拼贴。
+    // 处理：删掉那句带否定和具体名词的旧尾巴，改成正面声明「整个人体是连贯的、衣服穿
+    // 在这具身体上」。这句不依赖任何具体素材，对全部素材都成立。
     lines.push(
       'OUTFIT (reference image 3): copy every garment head to toe exactly as shown — same type, '
-      + 'same length, same colors, fabric, pattern and accessories. The bare legs of the line-art '
-      + 'mannequin are not a styling choice.',
+      + 'same length, same colors, fabric, pattern and accessories. Render the person as one '
+      + 'continuous, anatomically connected body from head to feet, with every garment worn on '
+      + 'that body; the torso, hips, legs and feet are all present and connected.',
     );
     if (gender === 'male') lines.push('The person is an adult man with a male body, keeping the pose of image 1.');
     if (halfBody) lines.push('FRAMING: crop like image 1 at mid-thigh; do not invent legs or a full-length stance, and keep both hands visible.');
