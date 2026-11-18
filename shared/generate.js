@@ -132,9 +132,10 @@ export function buildPrompt({
   //   ② 把需要照抄的部位逐项点名（手落点、重心、双脚间距、脚尖方向）——不点名，
   //      模型就用「服装展示照」的先验补成并腿站直，线稿上的站姿根本进不了画面；
   //   ③ 一个否定词都不留（T5 会把 don't drop the arms 读成 drop the arms）。
-  const poseChecklist = 'which arm is raised and how that elbow bends, where each hand touches '
-    + '(head, hip, waist, thigh or knee), the shoulder tilt, the hip shift, the spacing between '
-    + 'the feet, the toe direction and the weight-bearing leg';
+  // 清单只留「一句描述写不下的东西」：手落点 / 双脚间距 / 脚尖方向 / 重心。
+  // 肘怎么弯、肩胯怎么摆，描述里已经写了，不必再说第二遍——提示词长度是有预算的。
+  const poseChecklist = 'where each hand rests, how far apart the feet are, which way the toes '
+    + 'point and which leg carries the weight';
 
   lines.push(
     'POSE — HIGHEST PRIORITY (reference image 1): copy this exact pose;'

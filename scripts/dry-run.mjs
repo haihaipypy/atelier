@@ -288,8 +288,8 @@ check('动作以命令式给出（copy this exact pose; its signature feature �
 // 新增：姿势段必须逐项点名「要照抄哪些部位」。不点名时模型只照文字画手，
 // 腿和脚沿用「服装展示照」的并腿站直——这正是 P020 成品双腿并拢的来源。
 check('姿势段逐项点名要照抄的部位（手落点 / 重心 / 双脚间距 / 脚尖方向）',
-  /where each hand touches/.test(pPoseS) && /spacing between the feet/.test(pPoseS)
-  && /toe direction/.test(pPoseS) && /weight-bearing leg/.test(pPoseS));
+  /where each hand rests/.test(pPoseS) && /how far apart the feet are/.test(pPoseS)
+  && /which way the toes point/.test(pPoseS) && /which leg carries the weight/.test(pPoseS));
 check('姿势段要求双手双脚都落在图1 的位置',
   /Both hands and both feet land exactly where the line-art figure has them/.test(pPoseS));
 check('姿势要点用插入语表达「只是其中一部分」', /is one part of it/.test(pPoseS));
