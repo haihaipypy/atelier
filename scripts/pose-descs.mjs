@@ -13,7 +13,7 @@
  */
 export const FEMALE = {
   // ── 坐地面（full_single 系列）──
-  P001: 'sitting on the floor leaning her upper body back, one knee raised and bent with that foot flat on the floor, the other leg stretched forward, one hand planted on the floor behind her and the other resting on her raised knee',
+  P001: 'sitting on the floor with her seat on the ground and her upper body leaning back, her left knee raised with the shin dropped so that foot rests on the floor close to her body, her right leg on the floor with the knee up and that foot further forward toward the camera, one hand planted flat on the floor behind her and the other hand resting on top of her raised knee, her head lowered to look down and away, her body angled three-quarters away from the camera',
   P002: 'sitting on the floor with one hand planted on the floor behind her, both legs stretched forward together at a slight angle with the knees softly bent, and her other hand lying on her own thigh',
   P003: 'sitting on the floor with both hands planted on the floor behind her, fingers pointing back, her chest open and pushed forward, both legs stretched forward together with the knees softly bent',
   P004: 'sitting on the floor with both knees pulled up and folded over to her left side, hugging her shins with both arms',
@@ -79,7 +79,7 @@ export const FEMALE = {
   P029: 'standing with one hand lifted to the side of her head holding her hair and the other on her waist, one foot placed in front of the other across a wide stance',
   P030: 'standing up on her toes with both arms raised diagonally overhead in a V shape and both hands open, both feet apart',
   // ── 女性库 SP-*（旧编号，标题与线稿已逐个核对）──
-  'SP-P001': 'sitting on the floor leaning back with one knee raised and bent and that foot flat on the floor, the other leg stretched forward, one hand planted behind her and the other near her raised knee',
+  'SP-P001': 'sitting on the floor with her seat on the ground and her upper body leaning back, her left knee raised with the shin dropped so that foot rests on the floor close to her body, her right leg on the floor with the knee up and that foot further forward, one hand planted flat on the floor behind her and the other resting on her raised knee, her head lowered to look down, her body angled three-quarters away from the camera',
   'SP-P002': 'lying on her back on the floor with one hand tucked behind her head and the other resting on her belly',
   'SP-P003': 'lying on her side on the floor with one hand raised to her head and the other planted on the floor in front of her, both knees bent',
   'SP-P004': 'sitting cross-legged on the floor with both hands resting one on each knee and her back straight',
@@ -149,16 +149,16 @@ export const FEMALE = {
   // ── 上半身库（线稿只到胸部，所以只写手势）──
   U001: 'both hands brought to the center of her chest making a small heart shape with the fingers touching and the thumbs meeting, both elbows opened out',
   U002: 'both arms raised above her head with the hands meeting overhead to form a heart shape, both elbows opened wide',
-  U003: 'one hand lifted beside her cheek pinching a small finger-heart between the thumb and index finger, her other hand on her waist',
+  U003: 'one hand lifted beside her cheek with the thumb and index finger nearly touching in a small pinch, her other arm hanging down at her side',
   U004: 'both hands raised under her chin making two V peace signs with the fingertips pointing up',
-  U005: 'one hand raised beside her head in a V peace sign with the back of the hand facing the camera, that arm bent at a sharp angle, her other hand on her waist',
+  U005: 'one hand raised beside her cheek in a V peace sign with the back of the hand facing the camera and that arm bent at a sharp angle, her other arm hanging down at her side',
   U006: 'both fists pressed one against each cheek with both elbows tucked in to her sides',
   U007: 'both hands raised beside the top of her head with the palms facing forward like bunny ears, both elbows opened out',
   U008: 'one hand lifted beside her ear with the fingers curled forward like a cat paw, her other hand in a loose fist in front of her chest',
   U009: 'both hands raised in front of her, one on each side, with the fingers spread and curled like claws and the palms facing the camera',
-  U010: 'one index finger held upright in front of her lips with the palm facing inward, her other hand on her waist',
-  U011: 'her head tilted to one side and one hand held beside her temple making a V sign with two fingers, her other hand on her waist',
-  U012: 'one hand held open and flat in front of her face with the palm up as if offering a blown kiss, her other hand resting on her chest',
+  U010: 'one index finger held upright in front of her lips with the palm inward and the other fingers folded, her other arm hanging down at her side',
+  U011: 'her head tilted to one side and one hand held beside her temple making a V sign with two fingers, her other arm hanging down at her side',
+  U012: 'one hand held open and flat in front of her face with the palm up as if offering a blown kiss, her other arm hanging down at her side',
   U013: 'both hands opened under her chin with the palms up and the fingers spread apart, like a flower resting under her face',
   U014: 'one index finger poking her own cheek, her other arm folded across her body holding that arm',
   U015: 'both hands folded together in front of her mouth with her sleeves covering the backs of her hands, both elbows tucked down and in',
@@ -167,10 +167,10 @@ export const FEMALE = {
   U018: 'both hands raised in front of her face with the thumbs and index fingers squared off to form a rectangular frame, one hand horizontal and the other vertical',
   U019: 'one hand lifted beside her ear tucking her hair behind it, her other hand raised in front of her chest',
   U020: 'both palms cupping her cheeks from the sides with both elbows pointing down',
-  U021: 'one hand raised to her forehead in a salute, her other hand on her waist',
+  U021: 'one hand raised to her forehead in a salute with the fingers flat, her other arm hanging down at her side',
   U022: 'one hand reaching forward with the index finger pointing straight at the camera, her other arm drawn back behind her',
-  U023: 'one hand lifted to her mouth with the palm inward, her other arm raised diagonally upward with the fingers spread',
-  U024: 'one hand in front of her chest pinching a small finger-heart, her other hand pressed to her own chest',
+  U023: 'one hand lifted to her mouth with the palm inward, her other arm raised diagonally upward overhead with the fingers spread',
+  U024: 'one hand held in front of her chest with the thumb and index finger nearly touching in a small pinch, her other hand pressed flat to her own chest',
   U025: 'both hands raised in front of her face with the palms open and the fingers spread apart, peeking at the camera through the gaps between them',
 };
 

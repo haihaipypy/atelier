@@ -64,6 +64,47 @@ export function clipPoseHint(s) {
 }
 
 /**
+ * 从一条完整描述里抽出「这一条独有的部位」——腿怎么放、手落在哪、头朝哪。
+ *
+ * 为什么要有这一步（2026-11-18 晚 P001 实测）：描述写到 200+ 字符后，提示词总长超出
+ * T5 的有效窗口，被截掉的恰好是最后那几个部位词。P001 描述里排在后面的
+ * 「两条腿分别怎么放」「一只手撑在身后地上」「头低着看下方」全在截断点之后，
+ * 模型只读到「坐在地上 + 上身向后」，于是画成端正跪坐、双手交叠、正视镜头。
+ *
+ * 骨架不重写句子，只挑片段：按逗号切开，取含 leg/knee/thigh、hand、head 的片段，
+ * 每条压到 56 字符以内（按词边界砍），整句控制在 ~120 字符。
+ * 它排在长描述前面，被截断时丢掉的是插入语里的长描述，而不是部位。
+ */
+export function describePoseBones(text) {
+  const s = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!s) return '';
+  const chunks = s
+    .split(/,\s*|;\s*/)
+    .map((x) => x.trim().replace(/^(and|so that|with her|with|her|the|one)\s+/i, ''))
+    .filter(Boolean);
+  const pick = (re, max, n) => {
+    const hit = chunks.filter((c) => re.test(c) && !/^(sitting|standing|kneeling|squatting|lying)/i.test(c));
+    return hit.slice(0, max).map((c) => cutWords(c, n));
+  };
+  const legs = pick(/\b(leg|legs|knee|knees|thigh|thighs|shin|foot|feet|heel|heels)\b/i, 2, 56);
+  const hands = pick(/\bhands?\b/i, 2, 52);
+  const head = pick(/\bhead (lowered|turned|tilted|propped|lifted|bowed|raised)\b/i, 1, 46);
+  const out = [];
+  if (legs.length) out.push(`legs ${legs.join(' and ')}`);
+  if (hands.length) out.push(`hands ${hands.join(' and ')}`);
+  if (head.length) out.push(`head ${head[0]}`);
+  return out.join(', ');
+}
+
+/** 按词边界截到 n 字符以内 */
+function cutWords(s, n) {
+  if (s.length <= n) return s;
+  const slice = s.slice(0, n);
+  const at = slice.lastIndexOf(' ');
+  return (at > n * 0.6 ? slice.slice(0, at) : slice).trim();
+}
+
+/**
  * 构造合成指令。要点：
  * - 明确每张参考图的职责（角色分工是 prompt 结构里最关键的一环）
  * - 明确「必须保留什么」「必须替换什么」，避免模型照抄服装图的空白人体
@@ -114,7 +155,9 @@ export function buildPrompt({
   // 所以要点用破折号夹成插入语，并逐项点名要照抄的部位（见下面 POSE 段）。
   // ────────────────────────────────────────────────────────────────────────────
   const lines = [
-    'Photorealistic full-body fashion portrait of one person, head-to-toe, centered, feet fully visible.',
+    halfBody
+      ? 'Photorealistic fashion portrait of one person, framed from the head down to mid-thigh, centered on the body.'
+      : 'Photorealistic full-body fashion portrait of one person, head-to-toe, centered, feet fully visible.',
     'Three reference images are given in this order: 1 = pose line-art, 2 = face, 3 = outfit.',
   ];
 
@@ -137,20 +180,50 @@ export function buildPrompt({
   const poseChecklist = 'where each hand rests, how far apart the feet are, which way the toes '
     + 'point and which leg carries the weight';
 
+  // 2026-11-18 晚第三条（P001 实测）：描述太长会被 T5 截断，而截断点恰好落在关键部位上
+  // （「sitting on the floor…」之后的双腿、手、头全被切掉），成品就退回默认的「跪坐、正视」。
+  // 所以提示词里不再整句复述描述，而是用一句固定的骨架 + 只塞**这一条独有的部位**：
+  // 腿怎么放、手落在哪、头朝哪。骨架固定 = 每次只看几个词，长描述也不会把预算吃光。
+  // 上半身库的描述本来就是「只写手势」的短句，再抽一次骨架只会把句子砍成残句
+  // （实测抽出 'hands both arms raised above her head with the hands'）。
+  const poseBones = poseText && !halfBody ? describePoseBones(poseText) : '';
+
   lines.push(
-    'POSE — HIGHEST PRIORITY (reference image 1): copy this exact pose;'
-    // 用破折号把要点夹成插入语：让它读起来是「特征之一」，而不是整段姿势的定义
+    'POSE — HIGHEST PRIORITY (reference image 1): copy this exact pose.'
+    + (poseBones ? ` The line-art figure has ${poseBones}; the portrait matches it exactly.` : '')
     + (poseText
-      ? ` its signature feature — ${poseText} — is one part of it, and the rest of the body also comes from image 1: `
-      : ' the whole body comes from image 1: ')
-    + `${poseChecklist}.`
-    + ' Both hands and both feet land exactly where the line-art figure has them.'
+      // 半身时收「this crop」：裁到大腿中部，说 rest of the body 会把画面往全身推
+      ? halfBody
+        ? ` Its signature feature — ${poseText} — is one part of the pose, and the rest of the gesture also comes from image 1.`
+        : ` Its signature feature — ${poseText} — is one part of the pose, and the rest of the body also comes from image 1.`
+      : ` The whole body comes from image 1: ${poseChecklist}.`)
+    + (halfBody
+      ? ' Every hand gesture from image 1 is reproduced and clearly readable.'
+      : ' Both hands and both feet land exactly where the line-art figure has them.')
     + ' Reference image 1 is the absolute authority for body posture and camera angle.',
   );
 
+  // ── 地面姿势的落脚点 ──
+  // 2026-11-18 晚第二个坑（用户实测 P001「仰反弓坐姿·单膝立起」）：线稿是坐在地上
+  // （屁股着地、一手撑在身后的地上、一条腿伸向镜头），成品却是「端正跪坐、双手交叠放在膝上、
+  // 正视镜头」——像坐在一把看不见的椅子上。
+  // 不是描述写错：描述里明明有 sitting on the floor。是**整条提示词没有一句说人在地面上**，
+  // 而画面里腿、手、地面都不存在，模型就挑了最省事的那种「坐」。
+  // 所以只要姿势是地面姿势，就单独加一段正面陈述（不加否定词：没有椅子/凳子 会被读成椅子）。
+  // 朝向不在这里写——三个机位是三个角度，硬写 three-quarter 会跟线稿打架。
+  const GROUND = /^(sitting|sitting back|kneeling|squatting|lying|half lying|reclining)\b/i;
+  const groundPose = GROUND.test(poseText);
+  if (groundPose) {
+    lines.push(
+      'GROUND CONTACT — she is on the floor: her weight rests on the ground.',
+    );
+  }
+
   lines.push(
     'FACE and HAIR (reference image 2): take only the facial identity and hairstyle from it, and '
-    + 'turn that head the way image 1 turns it.',
+    + (groundPose
+      ? 'turn that head and eyes the way image 1 turns them. '
+      : 'turn that head the way image 1 turns it. '),
   );
 
   // 服装段收尾那句是「整个人体连贯」的正面声明。
@@ -160,9 +233,14 @@ export function buildPrompt({
   // 换成正面声明后对全部素材都成立。
   lines.push(
     'OUTFIT (reference image 3): copy every garment head to toe exactly as shown — same type, '
-    + 'same length, same colors, fabric, pattern and accessories. Render one continuous, '
-    + 'anatomically connected body from head to feet, every garment worn on it; the torso, hips, '
-    + 'legs and feet are all present and connected.',
+    + 'same length, same colors, fabric, pattern and accessories. '
+    + (halfBody
+      // 半身裁到大腿中部：把「腿脚都连着」换成「裁切处也是这具身体」，否则一句
+      // head-to-feet 的完整声明会把画面往全身推，和 FRAMING 段打架
+      ? 'Render her as one continuous body inside the crop, with the garment worn on it and the '
+        + 'skirt continuing to the bottom edge of the frame.'
+      : 'Render one continuous, anatomically connected body from head to feet, every garment worn '
+        + 'on it; the torso, hips, legs and feet are all present and connected.'),
   );
 
   if (gender === 'male') lines.push('The person is an adult man with a male body, keeping the pose of image 1.');
@@ -181,8 +259,7 @@ export function buildPrompt({
         : 'FRAMING — image 1 is an upper-body reference that stops below the chest: render a medium '
           + 'close-up cropped at mid-thigh, exactly like the crop of image 1, and fill the frame with '
           + 'the upper body instead of zooming out. Do not invent legs, feet, shoes or a standing '
-          + 'full-length stance. The arms, hands and head are fully visible in this crop, so every '
-          + 'hand gesture from image 1 must be reproduced and clearly readable.',
+          + 'full-length stance. The arms, hands and head are fully visible in this crop.',
     );
   }
 

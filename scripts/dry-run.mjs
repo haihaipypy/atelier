@@ -212,7 +212,7 @@ const pEnPose = buildPrompt({
 // 原因是前者把 X 说成了姿势的完整定义——P020 的 X 里写着「另一只手垂在身侧」，
 // 成品就真的垂在身侧、双腿并拢，而线稿是叉腰 + 双脚分开。
 check('姿势段给出具体动作（命令式 + 破折号插入语，不说满）',
-  /copy this exact pose; its signature feature — standing in a wide stance with legs apart, both hands on her hips — is one part of it/.test(pEnPose),
+  /copy this exact pose\. .*Its signature feature — standing in a wide stance with legs apart, both hands on her hips — is one part of the pose/.test(pEnPose),
   pEnPose.slice(0, 400));
 check('中文要点原样进提示词（不生成中英混杂的 She is …）', /坐姿｜后仰坐・单膝竖起/.test(pFemale));
 check('姿势段声明图1 是绝对权威', /absolute authority for body posture and camera angle/.test(pFemale));
@@ -283,16 +283,23 @@ const appSrcPose = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
 const segOf = (t, a, b) => t.slice(t.indexOf(a), t.indexOf(b));
 check('POSE / FACE / OUTFIT 段里不出现景别词',
   !/full-body|head-to-toe|85mm/i.test(segOf(pPoseS, 'POSE — HIGHEST PRIORITY', 'STYLE:')));
-check('动作以命令式给出（copy this exact pose; its signature feature — …）',
-  /copy this exact pose; its signature feature — standing with both hands on her hips — is one part of it/.test(pPoseS));
+check('动作以命令式给出（copy this exact pose. … its signature feature — …）',
+  /copy this exact pose\. .*Its signature feature — standing with both hands on her hips — is one part of the pose/.test(pPoseS));
 // 新增：姿势段必须逐项点名「要照抄哪些部位」。不点名时模型只照文字画手，
 // 腿和脚沿用「服装展示照」的并腿站直——这正是 P020 成品双腿并拢的来源。
-check('姿势段逐项点名要照抄的部位（手落点 / 重心 / 双脚间距 / 脚尖方向）',
-  /where each hand rests/.test(pPoseS) && /how far apart the feet are/.test(pPoseS)
-  && /which way the toes point/.test(pPoseS) && /which leg carries the weight/.test(pPoseS));
+// 2026-11-18 晚第三版：POSE 段结构是「copy this exact pose. + 骨架句(legs/hands/head) +
+// signature feature 插入语 + 一句收尾」。清单只在**没有描述**时才展开成四项，
+// 有描述时由骨架句点名，所以这里分别验两种。
+const pNoHint = buildPrompt({ gender: 'female' });
+check('没有描述时展开完整清单（手落点 / 双脚间距 / 脚尖方向 / 重心）',
+  /where each hand rests/.test(pNoHint) && /how far apart the feet are/.test(pNoHint)
+  && /which way the toes point/.test(pNoHint) && /which leg carries the weight/.test(pNoHint));
+const pBones = buildPrompt({ gender: 'female', poseHint: 'sitting on the floor with her knees folded to one side, one hand planted behind her and the other on her knee, her head lowered' });
+check('有描述时先用骨架句点名部位（legs / hands / head）',
+  /The line-art figure has legs .*hands .*head /.test(pBones), pBones.slice(0, 260));
 check('姿势段要求双手双脚都落在图1 的位置',
   /Both hands and both feet land exactly where the line-art figure has them/.test(pPoseS));
-check('姿势要点用插入语表达「只是其中一部分」', /is one part of it/.test(pPoseS));
+check('姿势要点用插入语表达「只是其中一部分」', /is one part of the pose/.test(pPoseS));
 check('不写「站姿反例」这类否定句', !/do not|never |avoid /i.test(pPoseS),
   (pPoseS.match(/[^.]*(do not|never |avoid )[^.]*/i) || [''])[0]);
 check('风格段仍描述质感与光线', /natural skin texture/.test(pPoseS) && /editorial fashion photography/.test(pPoseS));
@@ -303,7 +310,7 @@ check('男性版姿势段同构（只多一句换身体）',
 const fbStart = appSrcPose.indexOf('const who = state.gender');
 const fbSrc = appSrcPose.slice(fbStart, fbStart + 1200);
 check('兜底文案带具体动作（同样是插入语，不说满）',
-  /whose signature feature — \$\{poseHint\} — is one part of it/.test(fbSrc)
+  /whose signature feature — \$\{poseHint\} — is one part/.test(fbSrc)
   && /spacing between the feet/.test(fbSrc));
 check('兜底文案不含否定约束', !/不要并腿|不要正对镜头/.test(fbSrc));
 
@@ -315,7 +322,7 @@ const pUpper = buildPrompt({ gender: 'female', halfBody: true, frame: [1024, 102
 const pFull = buildPrompt({ gender: 'female', poseHint: 'standing with both hands on her hips', frame: [960, 1280] });
 check('半身要求按图1 裁到大腿中部', /cropped at mid-thigh/.test(pUpper));
 check('半身禁止凭空补腿脚鞋', /Do not invent legs, feet, shoes/.test(pUpper));
-check('半身要求手势可辨认', /every hand gesture from image 1 must be reproduced and clearly readable/.test(pUpper));
+check('半身要求手势可辨认', /Every hand gesture from image 1 is reproduced and clearly readable/.test(pUpper));
 check('半身要求手与头都在画面内', /The arms, hands and head are fully visible in this crop/.test(pUpper));
 check('半身不再写「方图/竖图」这类画幅描述', !/canvas is (square|taller)/.test(pUpper));
 check('全身不出现半身取景段', !/FRAMING/.test(pFull));
@@ -336,8 +343,12 @@ for (const [label, o] of [
   ['男性', { gender: 'male' }],
 ]) {
   const sec = pOutfit(buildPrompt(o));
-  check(`${label}：声明人体连贯（腿脚都在、都连着）`,
-    /torso, hips, legs and feet are all present and connected/.test(sec), sec.slice(0, 160));
+  // 半身裁到大腿中部，写「腿脚都连着」会把画面往全身推，和 FRAMING 打架，
+  // 所以半身用「同一具身体 + 裙摆延续到画面底边」，全身仍用完整声明。
+  check(`${label}：声明人体连贯`,
+    label === '半身'
+      ? /one continuous body inside the crop/.test(sec) && !/from head to feet/.test(sec)
+      : /torso, hips, legs and feet are all present and connected/.test(sec), sec.slice(0, 160));
   check(`${label}：不再出现 bare legs / mannequin`,
     !/bare legs|mannequin|styling choice/i.test(sec));
   check(`${label}：不再枚举裤装（清单=选项菜单）`,
@@ -437,7 +448,7 @@ const pUniq = buildPrompt({
 check('传 minimal/local 也不再改变提示词（参数已移除）',
   buildPrompt({ gender: 'female', poseHint: 'x y', minimal: true }) === buildPrompt({ gender: 'female', poseHint: 'x y' })
   && buildPrompt({ gender: 'female', poseHint: 'x y', local: true }) === buildPrompt({ gender: 'female', poseHint: 'x y' }));
-check('提示词带具体动作锚点', /its signature feature — standing in a wide stance with legs apart, both hands on her hips/.test(pUniq));
+check('提示词带具体动作锚点', /Its signature feature — standing in a wide stance with legs apart, both hands on her hips — is one part of the pose/.test(pUniq));
 check('补充描述原样收到末尾（权重最高）', /soft afternoon light$/.test(pUniq.trim()));
 check('提示词长度可控（T5 有效窗口 512 token，留 15% 余量）', pUniq.length < 1520, `${pUniq.length} 字符`);
 
@@ -548,6 +559,31 @@ check('女性库描述里没有「另一只手自然垂在身侧」这类臆测'
   !poseData.items.some((it) => /other arm relaxed|arm hanging relaxed|one arm relaxed at her side/i.test(it.pose.en)),
   poseData.items.filter((it) => /other arm relaxed|arm hanging relaxed|one arm relaxed at her side/i.test(it.pose.en)).map((it) => it.id).slice(0, 3).join(','));
 
+// 2026-11-18 晚第二个坑：坐 / 跪 / 蹲 / 躺 的姿势，成品总是「端正跪坐、正视镜头」——
+// 描述里明明写了 sitting on the floor，但整条提示词没有一句说人在地面上，
+// 画面里腿和地面又都不存在，模型就挑了最省事的「坐」。
+const pGround = buildPrompt({
+  gender: 'female',
+  poseHint: 'sitting on the floor with her knees folded to one side, one hand planted behind her and the other on her knee',
+});
+check('地面姿势带 GROUND CONTACT 段（地面承重、身体低）',
+  /GROUND CONTACT — she is on the floor/.test(pGround) && /her weight rests on the ground/.test(pGround));
+check('站姿不带 GROUND CONTACT 段', !/GROUND CONTACT/.test(buildPrompt({ gender: 'female', poseHint: 'standing with both hands on her hips' })));
+check('地面姿势的视线跟随图1（不写「看向镜头」）',
+  /turn that head and eyes the way image 1 turns them/.test(pGround));
+// 描述写长了会被 T5 截断，截掉的正好是排在后面的部位——所以先用一句骨架点名 legs/hands/head
+check('长描述先用骨架句点名部位（legs / hands / head）',
+  /The line-art figure has legs .*hands .*head /i.test(buildPrompt({
+    gender: 'female',
+    poseHint: 'sitting on the floor with her seat on the ground, her left knee raised and her right leg out to the side, one hand planted flat behind her and the other on her knee, her head lowered',
+  })));
+// 半身：线稿只到胸部，不能自称 head-to-toe，也不能要求「双脚落在图1 的位置」
+const pHalf = buildPrompt({ gender: 'female', poseHint: 'both arms raised above her head forming a heart', halfBody: true });
+check('半身开头不写 head-to-toe / feet fully visible',
+  !/head-to-toe|feet fully visible/.test(pHalf.split('Three reference images')[0]));
+check('半身不要求「双脚落在图1 的位置」', !/Both hands and both feet land/.test(pHalf));
+check('半身不抽骨架（描述本来就是手势短句）', !/The line-art figure has/.test(pHalf));
+
 console.log('\n[8a3] 图片传递与两条通道一致（不依赖模式）');
 const htmlLoc = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
 check('中转通道采用前端给的 2K size', /const size = .*body\.size/.test(routerLocSrc) && /\?\s*body\.size/.test(routerLocSrc));
@@ -565,7 +601,7 @@ check('上传的自定义线稿也能取到高清 full',
   /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appUniq));
 
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.15', /tag: '2026\.11\.18\.15'/.test(versionSrc));
+check('版本号已递增到 2026.11.18.16', /tag: '2026\.11\.18\.16'/.test(versionSrc));
 
 console.log('\n[8a6] 回归修复：让 agnes 的请求体与本地脚本一致');
 // 用户实测：同一个模型、同一组素材，本地 agnes-image 脚本一次成型，网站却各种问题；
