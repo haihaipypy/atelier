@@ -80,20 +80,44 @@ export function describePoseBones(text) {
   if (!s) return '';
   const chunks = s
     .split(/,\s*|;\s*/)
-    .map((x) => x.trim().replace(/^(and|so that|with her|with|her|the|one)\s+/i, ''))
+    .map((x) => x.trim())
     .filter(Boolean);
-  const pick = (re, max, n) => {
-    const hit = chunks.filter((c) => re.test(c) && !/^(sitting|standing|kneeling|squatting|lying)/i.test(c));
-    return hit.slice(0, max).map((c) => cutWords(c, n));
+  // 拼装规则（2026-11-18 晚第三次修）：上一版直接 `legs her left knee raised with the shin
+  // dropped so that and her right leg …` —— 截断把片段砍在半句上（"so that" 悬空），
+  // 补 her 又把 "head lowered" 拼成 "head head lowered"。所以：
+  // 1) 片段只做「尾词完整」的截断，砍完若以 and/with/so that/the 之类收尾就继续往前退；
+  // 2) 每个部位槽最多两条，长度按剩余预算分配，宁可短也不能拼出病句；
+  // 3) 补主语时先看片段本身有没有主语（her/one hand/the hand），有就不再补。
+  const strip = (c) => c
+    .replace(/^(and|so that|with)\s+/i, '')
+    .replace(/^(her|the|one)\s+/i, '')
+    .trim();
+  // 末尾的介词/连接词一律退掉：单独一个 behind / on / with 收尾看着像被截断的句子，
+  // 退到名词为止（"hand planted flat on the floor behind her" → "…on the floor"）
+  const DANGLING = /\b(and|or|with|so that|that|the|a|an|her|his|its|their|of|to|in|at|for|from|by|on|onto|over|under|behind|beside|near|against|toward|towards|around|along|which|while|so|this|these|those)$/i;
+  /** 按词边界截断，并把悬空的连接词一路退掉 */
+  const clip = (c, n) => {
+    let out = c.length <= n ? c : cutWords(c, n);
+    while (DANGLING.test(out) && /\s/.test(out)) out = out.replace(/\s+\S+$/, '').trim();
+    return out;
   };
-  const legs = pick(/\b(leg|legs|knee|knees|thigh|thighs|shin|foot|feet|heel|heels)\b/i, 2, 56);
-  const hands = pick(/\bhands?\b/i, 2, 52);
-  const head = pick(/\bhead (lowered|turned|tilted|propped|lifted|bowed|raised)\b/i, 1, 46);
+  const join = (arr) => arr.map((c) => (/^(her|his|one|both|two|the)\b/i.test(c) ? c : `her ${c}`));
+  const HEAD_OK = /^head (lowered|turned|tilted|propped|lifted|bowed|raised|dropped)\b/i;
+  const pick = (re, max, n) => chunks
+    .filter((c) => re.test(c) && !/^(sitting|standing|kneeling|squatting|lying|half lying|reclining)\b/i.test(c))
+    .slice(0, max)
+    .map((c) => clip(strip(c), n))
+    // 残片（截完不足 12 字符，或只剩一个词）不如不写
+    .filter((c) => c.length >= 12 && /\s/.test(c));
+  const legs = pick(/\b(leg|legs|knee|knees|thigh|thighs|shin|feet|foot|heel|heels)\b/i, 2, 52);
+  const hands = pick(/\bhands?\b/i, 2, 46);
+  const head = pick(/\bhead (lowered|turned|tilted|propped|lifted|bowed|raised|dropped)\b/i, 1, 42);
   const out = [];
-  if (legs.length) out.push(`legs ${legs.join(' and ')}`);
-  if (hands.length) out.push(`hands ${hands.join(' and ')}`);
-  if (head.length) out.push(`head ${head[0]}`);
-  return out.join(', ');
+  if (legs.length) out.push(`legs ${join(legs).join(', ')}`);
+  if (hands.length) out.push(`hands ${join(hands).join(', ')}`);
+  // head 分支的片段自带 "head lowered…"，不要再补主语
+  if (head.length) out.push(HEAD_OK.test(head[0]) ? head[0] : `head ${head[0]}`);
+  return out.join('; ');
 }
 
 /** 按词边界截到 n 字符以内 */
@@ -190,7 +214,7 @@ export function buildPrompt({
 
   lines.push(
     'POSE — HIGHEST PRIORITY (reference image 1): copy this exact pose.'
-    + (poseBones ? ` The line-art figure has ${poseBones}; the portrait matches it exactly.` : '')
+    + (poseBones ? ` The line-art figure has ${poseBones}, and the portrait matches it exactly.` : '')
     + (poseText
       // 半身时收「this crop」：裁到大腿中部，说 rest of the body 会把画面往全身推
       ? halfBody

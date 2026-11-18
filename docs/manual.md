@@ -1226,6 +1226,33 @@ position — do not lift him onto a chair or a stool, and do not stand him up.
 自检新增 7 条，直接盯着这两个坑：地面段只在坐/跪/蹲/躺时出现、视线句不再写「看镜头」、
 长描述先出骨架句、半身不写 head-to-toe / 不要求双脚落位 / 不抽骨架。
 
+#### `v2026.11.18.17`：骨架句自己成了病句
+
+上一版骨架句是机器拼的，截断截得很难看：
+
+```
+legs her left knee raised with the shin dropped so that and her right leg on the floor with the knee up and that; hands her hand planted flat on the floor behind her and; head head lowered …
+```
+
+三处毛病：`cutWords` 砍完把 `so that` 留在句尾、第二条片段被砍成孤零零的 `and`、
+`head` 分支又补了一次主语变成 `head head`。提示词的语法错到这个程度，模型读到的就不是部位关系而是噪声。
+改了四条规则：
+
+| 规则 | 效果 |
+|---|---|
+| 截断后继续退词，直到不再以连接词/介词收尾（`and / with / so that / on / behind …`） | `…on the floor behind her` → `…on the floor` |
+| 截完不足 12 字符或只剩一个词的片段直接丢掉 | 不再出现悬空的 `and` |
+| 每个部位槽最多两条，腿 52 字符、手 46、头 42，总量压在 ~150 | 骨架句永远排在长描述前面还够短 |
+| 补主语前先看片段有没有主语；`head` 分支自带 `head lowered…` 就不补 | `head head` 消失 |
+
+现在 P001 出来是：
+
+```
+The line-art figure has legs her left knee raised with the shin dropped so that foot, her right leg on the floor with the knee up; hands her hand planted flat on the floor; head lowered to look down and away, and the portrait matches it exactly.
+```
+
+语法通顺、三个部位都在、总长 1942 字符（比上一版少 7）。
+
 ### 使用边界
 
 - **上游三家（服装/脸型/姿势）**：不存储、不再分发图片，只保存元数据索引
