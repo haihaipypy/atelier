@@ -107,6 +107,11 @@ export function buildPrompt({
   // 还有一条踩过坑的经验：**否定句会被读成肯定动作**。
   // do not drop the arms / do not square the body 这类写法，T5 对否定不敏感，
   // 反而把 "drop the arms"、"square the body" 当成要画的内容。所以整段一个否定词都不留。
+  //
+  // 第五条（2026-11-18 晚补）：**动作文字只能说显著特征，不能说满**。
+  // 文字完全压得住线稿——写错一句「另一只手垂在身侧」，成品就真的垂在身侧；
+  // 写「reproduce this exact pose — X」时模型还会把 X 当成姿势的完整定义。
+  // 所以要点用破折号夹成插入语，并逐项点名要照抄的部位（见下面 POSE 段）。
   // ────────────────────────────────────────────────────────────────────────────
   const lines = [
     'Photorealistic full-body fashion portrait of one person, head-to-toe, centered, feet fully visible.',
@@ -119,20 +124,32 @@ export function buildPrompt({
     ? String(poseHint).replace(/\s+/g, ' ').trim().replace(/[.\s]+$/, '')
     : '';
 
+  // 姿势段的三条经验（都是成品教出来的）：
+  //   ① 文字只补「显著特征」，**绝不说满**。写成「reproduce this exact pose — X」时，
+  //      模型把 X 当成整段姿势的完整定义：P020 线稿是「一手扶头 + 一手叉腰 + 双脚分开」，
+  //      而条目文字被写成「…另一只手垂在身侧」，成品就真的垂在身侧、双腿并拢。
+  //      改成「signature feature 只是其中一部分」之后，文字才回到「提示」的位置；
+  //   ② 把需要照抄的部位逐项点名（手落点、重心、双脚间距、脚尖方向）——不点名，
+  //      模型就用「服装展示照」的先验补成并腿站直，线稿上的站姿根本进不了画面；
+  //   ③ 一个否定词都不留（T5 会把 don't drop the arms 读成 drop the arms）。
+  const poseChecklist = 'which arm is raised and how that elbow bends, where each hand touches '
+    + '(head, hip, waist, thigh or knee), the shoulder tilt, the hip shift, the spacing between '
+    + 'the feet, the toe direction and the weight-bearing leg';
+
   lines.push(
-    'POSE — HIGHEST PRIORITY (reference image 1):'
+    'POSE — HIGHEST PRIORITY (reference image 1): copy this exact pose;'
+    // 用破折号把要点夹成插入语：让它读起来是「特征之一」，而不是整段姿势的定义
     + (poseText
-      ? ` reproduce this exact pose — ${poseText}. Follow reference image 1 for the arm and hand `
-        + 'positions, elbow angles, shoulder line, hip rotation, leg placement, head tilt, body '
-        + 'orientation and camera angle.'
-      : ' reproduce the exact body posture, arm and hand positions, elbow angles, shoulder line, '
-        + 'hip rotation, leg placement, head tilt, body orientation and camera angle of the line-art figure.')
+      ? ` its signature feature — ${poseText} — is one part of it, and the rest of the body also comes from image 1: `
+      : ' the whole body comes from image 1: ')
+    + `${poseChecklist}.`
+    + ' Both hands and both feet land exactly where the line-art figure has them.'
     + ' Reference image 1 is the absolute authority for body posture and camera angle.',
   );
 
   lines.push(
-    'FACE and HAIR (reference image 2): take ONLY the facial identity and hairstyle from it — '
-    + 'ignore its frontal angle and flat lighting.',
+    'FACE and HAIR (reference image 2): take only the facial identity and hairstyle from it, and '
+    + 'turn that head the way image 1 turns it.',
   );
 
   // 服装段收尾那句是「整个人体连贯」的正面声明。
@@ -142,9 +159,9 @@ export function buildPrompt({
   // 换成正面声明后对全部素材都成立。
   lines.push(
     'OUTFIT (reference image 3): copy every garment head to toe exactly as shown — same type, '
-    + 'same length, same colors, fabric, pattern and accessories. Render the person as one '
-    + 'continuous, anatomically connected body from head to feet, with every garment worn on '
-    + 'that body; the torso, hips, legs and feet are all present and connected.',
+    + 'same length, same colors, fabric, pattern and accessories. Render one continuous, '
+    + 'anatomically connected body from head to feet, every garment worn on it; the torso, hips, '
+    + 'legs and feet are all present and connected.',
   );
 
   if (gender === 'male') lines.push('The person is an adult man with a male body, keeping the pose of image 1.');
@@ -170,7 +187,8 @@ export function buildPrompt({
 
   lines.push(
     'STYLE: clean seamless studio backdrop, soft even lighting, natural skin texture, sharp '
-    + 'focus, editorial fashion photography, vertical composition, no text, no watermark.',
+    + 'focus, editorial fashion photography, vertical composition, hands and fingers clearly '
+    + 'defined, no text, no watermark.',
   );
   if (style === 'anime') lines.push('Anime illustration style.');
   // 补充描述放最后：这是全文权重最高的位置，用户亲眼看过成品后写的纠正应该落在这里。

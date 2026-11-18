@@ -1119,6 +1119,45 @@ position — do not lift him onto a chair or a stool, and do not stand him up.
 
 半身像不带这句：裁到大腿中部，椅子本来就看不见，字数留给取景说明更值。
 
+#### `v2026.11.18.14`：文字压得住线稿，所以「补写的描述」比不写更危险
+
+现象：补齐 440 条描述后姿势总算是听懂了，但出现一种新的半对——**抬起来的手对了，
+没提到的部位全错**。用户给的例子（P020「站立·单手後頭部」）：
+
+| 项目 | 线稿 | 我们写进提示词的文字 | 成品 |
+|---|---|---|---|
+| 抬起的手 | 手贴后脑，肘横向外张 | `one hand resting on the back of her head` | 肘竖直上举，手被头挡住 |
+| **另一只手** | **叉腰，肘外张** | **`the other arm relaxed at her side`** | **垂在身侧** |
+| 双腿 | 双脚分开、一腿承重、另一只脚尖点地 | 一个字没写 | 并腿站直 |
+
+根因不是模型弱，是**文字与线稿冲突时文字赢**——这一点在男性库上早就验证过（P021 线稿单臂高举，
+上游文字写「一手扶颈侧」，成品就去摸脖子）。这次自己踩了同一个坑：88 条描述是按中文/日文
+**标题**逐条译的，为了让句子读起来完整，每条都顺手补了「另一只手 / 站姿 / 朝向」；
+而标题只描述**一个**显著特征，补出来的部分全是猜的。猜错的那半句，正好把线稿上正确的部分抹掉。
+
+三条修正，代码分别在 `scripts/fill-pose-en.mjs` 与 `shared/generate.js` 的 POSE 段：
+
+1. **描述只译标题，不扩写**。标题只写一只手，就只写这只手；没写腿，就不提怎么站。
+   只有「雙手在腦後」这类物理上必然导致肘外张的动作，才补一句 `elbows out`。
+   例外只有一类：**逐个看过线稿**的条目（P020），按图补全并留注释说明「因为看过图」。
+2. **提示词不说满**。`reproduce this exact pose — X` 会被读成「X 就是这姿势的完整定义」，
+   改成插入语 `copy this exact pose; its signature feature — X — is one part of it`，
+   文字回到「提示」的位置。
+3. **逐项点名要照抄的部位**：`which arm is raised and how that elbow bends, where each hand
+   touches (head, hip, waist, thigh or knee), the shoulder tilt, the hip shift, the spacing
+   between the feet, the toe direction and the weight-bearing leg`，收尾一句
+   `Both hands and both feet land exactly where the line-art figure has them.`
+   不点名时，模型只按文字画手，腿和脚沿用「服装展示照」的先验——并腿站直，线稿的站姿进不了画面。
+
+同时发现**上游文案有同一个错**：shisei 的 `std_P020_front` / `std_P020_diag` 也是
+「一手扶后脑 + 一手叉腰 + 双脚分开」，其 `pose.en` 却写 `the other arm relaxed at her side`。
+所以脚本里加了一张 `OVERRIDES` 校正表（按 id 精确匹配、注释写清看图的结论），
+这是唯一允许改动 SP-* 上游描述的通道。
+
+自检跟着改了三条：新措辞、部位清单、以及「P020 的两套 id 都必须写成叉腰 + 双脚分开」。
+断言里特意按 `^(SP-P020|full_single_P020)` 匹配——三套姿势库的编号是重号的，
+`upper80v2_P020` 其实是「双手捧脸颊」，用 `/P020/` 匹配会误判。
+
 ### 使用边界
 
 - **上游三家（服装/脸型/姿势）**：不存储、不再分发图片，只保存元数据索引

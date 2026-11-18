@@ -176,7 +176,11 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
   }
   const who = state.gender === 'male' ? '成年男性' : '成年女性';
   // 兜底也必须带具体动作：只说「照图1」时，模型会拿服装展示照的先验把空白填上。
-  const action = poseHint ? ` Reproduce this exact pose — ${poseHint}.` : '';
+  // 但**不能说满**——写成「reproduce this exact pose — X」会让模型把 X 当成姿势的完整定义，
+  // 线稿上没被 X 提到的部位（另一只手、双脚间距）就全按先验走。所以用插入语 + 部位清单。
+  const action = ` The pose comes from image 1${
+    poseHint ? `, whose signature feature — ${poseHint} — is one part of it` : ''
+  }: where each hand touches, the hip shift, the spacing between the feet and the weight-bearing leg.`;
   return 'Combine the three reference images into one photorealistic full-body portrait. '
     + 'Image 1 is the pose line-art and is the absolute authority for body posture and camera angle; '
     + 'image 2 gives the face and hair; image 3 gives the outfit.'

@@ -207,8 +207,12 @@ const pEnPose = buildPrompt({
   gender: 'female',
   poseHint: 'standing in a wide stance with legs apart, both hands on her hips',
 });
-check('姿势段给出具体动作（commands 式）',
-  /reproduce this exact pose — standing in a wide stance with legs apart, both hands on her hips\./.test(pEnPose),
+// 措辞在 2026-11-18 晚改过一次：从「reproduce this exact pose — X」改成
+// 「copy this exact pose; its signature feature — X — is one part of it」。
+// 原因是前者把 X 说成了姿势的完整定义——P020 的 X 里写着「另一只手垂在身侧」，
+// 成品就真的垂在身侧、双腿并拢，而线稿是叉腰 + 双脚分开。
+check('姿势段给出具体动作（命令式 + 破折号插入语，不说满）',
+  /copy this exact pose; its signature feature — standing in a wide stance with legs apart, both hands on her hips — is one part of it/.test(pEnPose),
   pEnPose.slice(0, 400));
 check('中文要点原样进提示词（不生成中英混杂的 She is …）', /坐姿｜后仰坐・单膝竖起/.test(pFemale));
 check('姿势段声明图1 是绝对权威', /absolute authority for body posture and camera angle/.test(pFemale));
@@ -279,18 +283,28 @@ const appSrcPose = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
 const segOf = (t, a, b) => t.slice(t.indexOf(a), t.indexOf(b));
 check('POSE / FACE / OUTFIT 段里不出现景别词',
   !/full-body|head-to-toe|85mm/i.test(segOf(pPoseS, 'POSE — HIGHEST PRIORITY', 'STYLE:')));
-check('动作以命令式给出（reproduce this exact pose — …）',
-  /reproduce this exact pose — standing with both hands on her hips\./.test(pPoseS));
+check('动作以命令式给出（copy this exact pose; its signature feature — …）',
+  /copy this exact pose; its signature feature — standing with both hands on her hips — is one part of it/.test(pPoseS));
+// 新增：姿势段必须逐项点名「要照抄哪些部位」。不点名时模型只照文字画手，
+// 腿和脚沿用「服装展示照」的并腿站直——这正是 P020 成品双腿并拢的来源。
+check('姿势段逐项点名要照抄的部位（手落点 / 重心 / 双脚间距 / 脚尖方向）',
+  /where each hand touches/.test(pPoseS) && /spacing between the feet/.test(pPoseS)
+  && /toe direction/.test(pPoseS) && /weight-bearing leg/.test(pPoseS));
+check('姿势段要求双手双脚都落在图1 的位置',
+  /Both hands and both feet land exactly where the line-art figure has them/.test(pPoseS));
+check('姿势要点用插入语表达「只是其中一部分」', /is one part of it/.test(pPoseS));
 check('不写「站姿反例」这类否定句', !/do not|never |avoid /i.test(pPoseS),
   (pPoseS.match(/[^.]*(do not|never |avoid )[^.]*/i) || [''])[0]);
 check('风格段仍描述质感与光线', /natural skin texture/.test(pPoseS) && /editorial fashion photography/.test(pPoseS));
 check('男性版姿势段同构（只多一句换身体）',
-  /reproduce this exact pose — /.test(buildPrompt({ gender: 'male', poseHint: 'x' })) === false
+  /signature feature — /.test(buildPrompt({ gender: 'male', poseHint: 'x' })) === false
   && /The person is an adult man with a male body/.test(buildPrompt({ gender: 'male' })));
 // 直连兜底文案是另一条独立路径（/api/prompt 挂掉时才会用到），同样必须带动作、不写否定
 const fbStart = appSrcPose.indexOf('const who = state.gender');
 const fbSrc = appSrcPose.slice(fbStart, fbStart + 1200);
-check('兜底文案带具体动作', /Reproduce this exact pose — \$\{poseHint\}/.test(fbSrc));
+check('兜底文案带具体动作（同样是插入语，不说满）',
+  /whose signature feature — \$\{poseHint\} — is one part of it/.test(fbSrc)
+  && /spacing between the feet/.test(fbSrc));
 check('兜底文案不含否定约束', !/不要并腿|不要正对镜头/.test(fbSrc));
 
 console.log('\n[5f] 上半身姿势的取景回归');
@@ -344,7 +358,9 @@ check('男性版仍要求照搬图1 的机位与朝向',
   /absolute authority for body posture and camera angle/.test(pM));
 check('男性版只声明一次换身体', (pM.match(/male body/g) || []).length === 1);
 check('男性版不含旧的地面句与家具约束', !/stays on the floor in exactly|chair|stool/i.test(pM));
-check('男性提示词长度未失控', pM.length < 1400, `${pM.length} 字符`);
+// 长度上限在 2026-11-18 晚从 1400 调到 1520：POSE 段新增了「逐项点名照抄部位」的清单。
+// 512 token 的英文大致 1.8k 字符，1520 仍留 15% 余量；再往上加字就该先删旧话，别堆新话。
+check('男性提示词长度未失控', pM.length < 1520, `${pM.length} 字符`);
 check('女性版不含男性专用措辞', !/adult man|male body/i.test(buildPrompt({ gender: 'female' })));
 
 console.log('\n[5e] 姿势库排序：全身站立优先');
@@ -420,9 +436,9 @@ const pUniq = buildPrompt({
 check('传 minimal/local 也不再改变提示词（参数已移除）',
   buildPrompt({ gender: 'female', poseHint: 'x y', minimal: true }) === buildPrompt({ gender: 'female', poseHint: 'x y' })
   && buildPrompt({ gender: 'female', poseHint: 'x y', local: true }) === buildPrompt({ gender: 'female', poseHint: 'x y' }));
-check('提示词带具体动作锚点', /reproduce this exact pose — standing in a wide stance/.test(pUniq));
+check('提示词带具体动作锚点', /its signature feature — standing in a wide stance with legs apart, both hands on her hips/.test(pUniq));
 check('补充描述原样收到末尾（权重最高）', /soft afternoon light$/.test(pUniq.trim()));
-check('提示词长度可控（T5 有效窗口 512 token）', pUniq.length < 1400, `${pUniq.length} 字符`);
+check('提示词长度可控（T5 有效窗口 512 token，留 15% 余量）', pUniq.length < 1520, `${pUniq.length} 字符`);
 
 const htmlUniq = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
 const appUniq = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
@@ -446,6 +462,7 @@ console.log('\n[8a2] 姿势动作描述：440 条曾经是空的');
 // upper80v2_* 125 条，全都是 0%。而「全身站立优先」排序把 full_single 整批推到第一屏，
 // 于是随手点第一个必然没描述，提示词里只剩「reproduce the exact body posture…」这种
 // 类别名，模型拿「服装展示照」的先验补空 → 正面站直、双臂下垂。
+const fillSrc = await readFile(path.join(ROOT, 'scripts/fill-pose-en.mjs'), 'utf8');
 const poseData = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose.json'), 'utf8'));
 const poseMaleData = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8'));
 const blankEn = (arr) => arr.filter((it) => !String(it.pose?.en || '').trim());
@@ -477,9 +494,22 @@ const firstScreen = poseData.items
 check('默认第一屏 60 张全部带动作描述', blankEn(firstScreen).length === 0);
 check('补齐脚本可重复执行（表里没收录的标题会报错退出）',
   /process\.exitCode = 1/.test(await readFile(path.join(ROOT, 'scripts/fill-pose-en.mjs'), 'utf8')));
-check('补齐脚本不覆盖已有的 SP-* 描述',
-  /if \(String\(it\.pose\.en \|\| ''\)\.trim\(\)\) continue;/.test(
-    await readFile(path.join(ROOT, 'scripts/fill-pose-en.mjs'), 'utf8')));
+check('补齐脚本不覆盖已有的 SP-* 描述（只走校正表）',
+  /if \(isUpstream\(it\.id\)\) continue;/.test(fillSrc)
+  && /const isUpstream = \(id\) => \/\^SP-\/\.test/.test(fillSrc)
+  && /const fixed = OVERRIDES\[it\.id\]/.test(fillSrc));
+// 第二版的核心准则：描述只译标题，不替模型猜「另一只手 / 朝向 / 站姿」。
+// 第一版给每条都补了这些，P020 因此写出「另一只手垂在身侧」——线稿明明是叉腰。
+// 只查女性库：男性库的文字来自上游、且不会被注入提示词（见 buildPrompt 的 gender 判断）
+const femaleDesc = poseData.items.map((it) => String(it.pose?.en || ''));
+check('描述里不再有臆测的「另一只手垂在身侧」',
+  !femaleDesc.some((t) => /other arm relaxed at her side/i.test(t)),
+  femaleDesc.find((t) => /other arm relaxed at her side/i.test(t)) || '干净');
+// P020 的 id 命名在三套库里重号（upper80v2_P020 是另一个姿势），所以按前缀精确匹配
+const p020 = poseData.items.filter((it) => /^(SP-P020|full_single_P020)/.test(it.id));
+check('P020（单手扶头）的描述与线稿一致（另一只手在腰上、双脚分开）',
+  p020.every((it) => /other hand on her hip/.test(it.pose.en) && /feet apart/.test(it.pose.en)),
+  p020.map((it) => `${it.id}: ${it.pose.en}`).join(' | '));
 
 console.log('\n[8a3] 图片传递与两条通道一致（不依赖模式）');
 const htmlLoc = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
@@ -498,7 +528,7 @@ check('上传的自定义线稿也能取到高清 full',
   /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appUniq));
 
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.13', /tag: '2026\.11\.18\.13'/.test(versionSrc));
+check('版本号已递增到 2026.11.18.14', /tag: '2026\.11\.18\.14'/.test(versionSrc));
 
 console.log('\n[8a6] 回归修复：让 agnes 的请求体与本地脚本一致');
 // 用户实测：同一个模型、同一组素材，本地 agnes-image 脚本一次成型，网站却各种问题；
