@@ -125,31 +125,36 @@ export function buildPrompt({
         'ignore only the mannequin\'s bust and hip curve, because the pose itself is copied as drawn.'
       : 'The person is an adult woman: female facial structure, female body proportions.';
 
-  // 姿势段：男女共用同一句主干，差别只有男性那句「逐肢体、肘角不变」。
+  // 姿势段：男女共用同一句主干。
   //
   // 这一句是三次返工后收敛出来的写法。要点是**短**：姿势段的长度直接决定它被
   // 当成硬约束还是背景描述。曾经为了「换身体」把骨架、关节、轮廓全塞进来，
   // 结果选了「单手高举」却输出手扶后颈、另一只手插兜的成品——手抬起来了，
   // 但抬到哪儿完全由模型自己决定。
+  //
+  // 结尾那组「逐肢体」例子只管动作本身：举手仍举、肘角不变、手在头上仍在头上。
+  // 对任何姿势都成立，不偏袒某一类，所以男女共用。
+  // （女性版的失败案子是「图3 双手在脑后、成品双手垂在身侧」——模型把手放下了，
+  //   不是抬错位置，是整段忽略，点名字之后才有东西可抓。）
   const poseRef =
-    gender === 'male'
-      ? 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
-        'placement, leg crossing, hand positions and viewpoint exactly, limb by limb — a raised arm ' +
-        'stays raised high, a bent elbow keeps its exact angle, a hand at the head stays at the head.'
-      : 'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
-        'placement, leg crossing, hand positions and viewpoint exactly.';
+    'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
+    'placement, leg crossing, hand positions and viewpoint exactly, limb by limb — a raised arm ' +
+    'stays raised high, a bent elbow keeps its exact angle, a hand at the head stays at the head.';
   // 姿态要点只对女性版注入，男性版**一个字都不注入**。
   //
-  // 这条是实测出来的，不是保守：男性库的文字来自上游（Shisei）的姿态描述，和线稿
-  // 并不是严格一一对应。SP-P021 的线稿是「单臂高举」，上游文字写的却是「一手扶颈侧、
-  // 一手贴大腿」——两者冲突时，模型照的是**文字**：成品真的出现了扶颈 + 贴腿。
-  // 用户看到的是线稿举着手、成品摸着脖子，只能说「姿势还是不对」。
-  // 女性版之所以一直稳，正因为它的条目几乎都没有要点，姿势只能看线稿。
+  // 两个库的要点现在都优先取 pose.en（前端负责），即完整英文句——之前女性注入的是
+  // 清洗后的中文小标题「站立・双手扶颈后」，提示词是英文的，模型读不懂，等于没给。
+  // 男性则相反：文字是完整英文，但来自上游的姿态描述和图3 并不严格对应
+  // （SP-P021 线稿单臂高举、文字写的是扶颈贴腿），模型照的是**文字**，成品出现
+  // 扶颈 + 贴腿，用户只能说「姿势还是不对」。
+  // 所以：女性库的 en 与线稿同源可信 → 注入；男性库的 en 会打架 → 不注入。
   //
-  // 要点仍保留在页面上（卡片标题、悬停提示），那是给人看的；模型只认图 3。
+  // 要点仍保留在页面上（卡片标题、悬停提示），那是给人看的。
   const hint = clipPoseHint(poseHint);
+  // 措辞是「同一姿势的另一种说法」，不是「用来核对图3」——后一种写法把文字降成了检查项，
+  // 模型读完该忽略还是忽略（图3 双手在脑后、成品双手垂在身侧，就是这么来的）。
   const hintLine = hint && gender !== 'male'
-    ? `The intended pose in words (use it to confirm image 3, never to override the outfit or the face): ${hint}.`
+    ? `The pose is also given in words, matching image 3 exactly: ${hint}.`
     : '';
 
   // 上半身姿势是另一套取景规则。
@@ -184,11 +189,17 @@ export function buildPrompt({
 
   // 站姿反例只对全身取景有意义。半身像里「别并腿」既不可见，又会把模型
   // 往「画出腿」上拽——那样正好丢掉手势，与半身的要求相反。
+  //
+  // 反例之后必须补一句正例：只写「别把手贴在身侧」时，模型找的替代方案是「手插兜」
+  // 或「手扶胯」，仍然不是图3 的动作。「手放在哪就留在哪」把自由度收回到线稿上，
+  // 对任何姿势都成立（含本身就是双手贴身的姿势）。
   const stanceGuard = halfBody
     ? ''
     : 'The stance must follow image 3, not a default catalogue pose. Do not straighten the legs, ' +
       'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
-      'and do not drop the arms flat against the sides, unless image 3 itself shows exactly that.';
+      'and do not drop the arms flat against the sides, unless image 3 itself shows exactly that. ' +
+      'Wherever image 3 puts the hands — behind the head, on the hips, on the cheeks, raised ' +
+      'overhead — both hands stay there with the same elbow angle.';
 
   // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
   // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
@@ -225,10 +236,11 @@ export function buildPrompt({
     'Reference image 2 defines the FACE ONLY: use this exact face identity, facial features, ' +
       'hairstyle and hair color for the person.',
     poseRef,
-    'Ignore the line-art style, the blank featureless head and the simplified proportions of ' +
-      'reference image 3 — the result must be a finished rendered image.',
-    'The person is dressed in the outfit from image 1, has the face from image 2, and holds the ' +
-      'pose from image 3. Keep anatomy correct and proportions natural in the new pose.',
+    // 两句合一：line-art 那句本来就属于「图3 只给姿势」，末尾的 anatomy 要求也是同一个意思。
+    // 分开写多花 100 字符，而 T5 的有效窗口只到 512 token，省下的字数要留给末尾的站姿反例。
+    'Ignore the line-art style, blank head and simplified proportions of image 3 — render a ' +
+      'finished image: outfit from 1, face from 2, pose from 3, with correct anatomy and natural ' +
+      'proportions.',
     // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
     hintLine,
     framing,

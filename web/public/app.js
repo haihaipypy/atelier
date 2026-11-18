@@ -102,19 +102,23 @@ function upstreamMsg(status, json, raw, endpoint, refs) {
 /**
  * 送出给模型的姿态要点（只做清洗，不带性别说明）。
  *
- * 两个库的要点字段不一样，取错字段等于没有要点：
- * - 女性库（上游姿势站）只有 pose.zh，而且只存了 60 个字符，中英混排时英文被截在半句
- *   （…leaning back with the figur）。半句英文塞进提示词是纯干扰，整段丢掉只留中文。
- * - 男性库（Shisei）的 pose.zh 是同一个 60 字符截断的产物，清洗完只剩「站立｜单手高举；」
- *   这种小标题，等于什么都没说；pose.en 才是完整的一句（中位 92 字符），直接用它。
+ * 两个库都有 pose.zh 与 pose.en，但两者的可用性完全不同：
+ * - pose.zh 只存了 60 个字符，中英混排时英文被截在半句（…leaning back with the figur），
+ *   清洗完只剩「站立｜站立・双手扶颈后」这种中文小标题。提示词是英文的，模型读不懂中文，
+ *   这一行等于什么都没说——姿势全凭图3，图3 一模糊就滑回正面站直、双手贴身。
+ * - pose.en 是完整一句（中位 99 字符），「standing with both hands raised behind her head,
+ *   resting on the nape of her neck, elbows out」，这才是能生效的动作锚点。
  *   句子里出现 her/she 是正常的——它描述的就是图3 那个女性素体的姿势。
+ *
+ * 所以两个库都优先取 pose.en。女性库里有 440 条「可爱系」没有 en，只有机翻中文小标题，
+ * 那种条目退回中文（等于不给文字），至少不会往英文提示词里灌噪声。
  *
  * 性别相关的「照搬到男性身上」措辞放在 shared/generate.js 里，按 gender 拼一次就够了；
  * 之前前端也加一句、后端也加一句，同一句话在提示词里出现两次，模型反而更乱。
  */
 function poseHintFor() {
   const pose = state.selected.pose?.pose || {};
-  const raw = String((state.gender === 'male' ? pose.en || pose.zh : pose.zh) || '')
+  const raw = String((pose.en || pose.zh) || '')
     .replace(/\s+/g, ' ')
     .trim();
   if (!raw) return '';

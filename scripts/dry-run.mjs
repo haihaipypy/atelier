@@ -149,7 +149,10 @@ const pMaleSit = buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐・�
 const pFemale = buildPrompt({ gender: 'female', poseHint: '坐姿｜后仰坐・单膝竖起' });
 check('男性提示词不再注入姿态要点', !/单膝竖起/.test(pMaleSit), pMaleSit.slice(-300));
 check('女性提示词仍注入姿态要点', /单膝竖起/.test(pFemale));
-check('女性要点仍是确认口吻，不改命令', /use it to confirm image 3/.test(pFemale));
+// 要点措辞：说成「与图3 一致的另一种描述」，而不是「用来核对图3」。
+// 「确认」口吻等于告诉模型这段可以不信——图3 双手在脑后、成品双手垂在身侧就是这么来的。
+check('女性要点写成与图3 同一姿势，不是核对口吻',
+  /The pose is also given in words, matching image 3 exactly/.test(pFemale) && !/use it to confirm/.test(pFemale));
 // 姿势段必须和女性同构：同一句主干，男性只多三个肢体例子
 const poseLine = (p) => p.slice(p.indexOf('Reference image 3 defines the POSE'), p.indexOf('Ignore the line-art'));
 check('男女姿势段同构', /^Reference image 3 defines the POSE AND CAMERA ANGLE ONLY/.test(
@@ -183,7 +186,8 @@ check('现有姿势要点清洗后无半英文尾', zhs.every((s) => !/[A-Za-z]{
 const pFemalePlain = buildPrompt({ gender: 'female' });
 // 注意别用 「male body」做关键词：女性版的 female body proportions 里就含这四个字母
 check('女性版不写男性专用说明', !/female artist mannequin|skeleton|flat chest|adult man:/i.test(pFemale));
-check('女性版主体约束与不填要点时一致', pFemale.replace(/ The intended pose in words[^.]*\./, '') === pFemalePlain);
+check('女性版主体约束与不填要点时一致',
+  pFemale.replace(/ The pose is also given in words[^.]*\./, '') === pFemalePlain);
 check('女性版不提裤子（那是男性套装的腿装）', !/trousers, jeans|chinos/.test(pFemale));
 check('女性版不变地面句', !/stays on the floor in exactly/.test(pFemale));
 
@@ -312,15 +316,16 @@ check('姿势段不再塞换身体的说明', !/bust|waist-to-hip|skeleton/.test
   pM.slice(pM.indexOf('Reference image 3 defines the POSE'), pM.indexOf('Ignore the line-art'))));
 check('男性提示词长度未失控', pM.length < 2700, `${pM.length} 字符`);
 
-// 女性版必须逐字不受影响：出现任何一条男性专用措辞都算污染
+// 女性版不能出现男性专用措辞。姿势段本身是男女共用的同构写法，
+// 「逐肢体点名」不再是男性专属，所以不在排除列表里。
 const pF = buildPrompt({ gender: 'female', poseHint: '站立｜单手高举' });
 for (const [label, re] of [
-  ['逐肢体点名', /raised arm stays raised/],
   ['换男性身体', /give its skeleton a male body/],
   ['地面句', /stays on the floor in exactly/],
   ['裤子清单', /trousers, jeans/],
 ]) check(`女性版不含男性专用措辞：${label}`, !re.test(pF));
-check('女性版仍走原来的确认式要点', /use it to confirm image 3/.test(pF));
+check('女性版也有逐肢体点名（图3 举手就举手）', /a raised arm stays raised high/.test(pF));
+check('女性版要点不再用核对口吻', !/use it to confirm image 3/.test(pF));
 
 // 男性坐姿：线稿全是地面姿势（26 坐 + 16 跪 + 12 蹲 + 13 躺），线稿里没有椅子
 const pSitM = buildPrompt({ gender: 'male', frame: [960, 1280] });
@@ -356,8 +361,15 @@ const samplePose = { zh: '站立｜单手高举；standing with one arm rais', e
 check('男性取完整英文描述',
   hintFor({ gender: 'male', selected: { pose: { pose: samplePose } } }) === samplePose.en,
   hintFor({ gender: 'male', selected: { pose: { pose: samplePose } } }));
-check('女性仍然只取中文要点',
-  hintFor({ gender: 'female', selected: { pose: { pose: samplePose } } }) === '站立｜单手高举；');
+// 女性库也有 pose.en（std 系列 127 条），而且与线稿同源：之前只取 pose.zh，
+// 清洗完剩「站立・双手扶颈后」这种中文小标题，塞进英文提示词模型读不懂，等于没给文字。
+check('女性同样优先取完整英文要点',
+  hintFor({ gender: 'female', selected: { pose: { pose: samplePose } } }) === samplePose.en,
+  hintFor({ gender: 'female', selected: { pose: { pose: samplePose } } }));
+check('女性没有 pose.en 时退回中文要点',
+  hintFor({ gender: 'female', selected: { pose: { pose: { zh: '站立｜站立・双手扶颈后；standing with bo' } } } })
+    === '站立｜站立・双手扶颈后；',
+  hintFor({ gender: 'female', selected: { pose: { pose: { zh: '站立｜站立・双手扶颈后；standing with bo' } } } }));
 check('男性没有 pose.en 时退回中文', hintFor({ gender: 'male', selected: { pose: { pose: { zh: '坐姿｜后仰坐' } } } }) === '坐姿｜后仰坐');
 check('前端不会把纯英文要点砍掉最后一个词',
   hintFor({ gender: 'male', selected: { pose: { pose: { en: 'legs apart, weight on one hip' } } } }) === 'legs apart, weight on one hip');
