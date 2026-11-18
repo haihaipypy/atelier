@@ -320,12 +320,44 @@ async function boot() {
   const savedGender = localStorage.getItem('atelier.gender');
   state.gender = savedGender === 'male' ? 'male' : 'female';
   applyGenderTheme();
+  showBuildTag();
   await loadConfig();
   await Promise.all(SLOTS.map(loadCatalog));
   renderTabs();
   renderGrid();
   bindUI();
   setDefaultPrompt();
+}
+
+/**
+ * 右下角的构建标记。
+ *
+ * 唯一目的：确认线上跑的是哪一版。所以请求必须绕过缓存（cache: 'no-store'），
+ * 服务端也要 no-store —— 否则浏览器给你一张旧响应，tag 永远停在上一版，
+ * 会误判「部署没成功」。
+ *
+ * 悬停显示：这一版改了什么、服务端时间、Cloudflare 机房（有的话）。
+ * 时间在走但 tag 没变 → 请求打到了旧实例；时间也不动 → 中间有缓存。
+ */
+async function showBuildTag() {
+  const el = $('#buildTag');
+  if (!el) return;
+  try {
+    const r = await fetch('/api/version', { cache: 'no-store' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const v = await r.json();
+    el.textContent = `v${v.tag}`;
+    const at = v.now ? new Date(v.now) : null;
+    el.title = [
+      v.note,
+      v.deploy ? `部署 ${String(v.deploy).slice(0, 8)}` : '',
+      v.colo ? `节点 ${v.colo}` : '',
+      at && !Number.isNaN(at.getTime()) ? `服务端时间 ${at.toLocaleString('zh-CN')}` : '',
+    ].filter(Boolean).join('\n');
+    el.hidden = false;
+  } catch {
+    // 取不到就不显示，别在页面上留一个假版本号
+  }
 }
 
 async function loadConfig() {

@@ -111,6 +111,24 @@ check('未配置时 engine 为空', cfg.engine === null);
 check('未配置时 engines 为空数组', Array.isArray(cfg.engines) && cfg.engines.length === 0);
 check('返回可选模型列表', Array.isArray(cfg.models) && cfg.models.length >= 3);
 
+console.log('\n[2b] 构建标记');
+// 页面右下角那行小字。用途是判断「刚推的这版有没有真的跑起来」，
+// 所以 tag 必须随代码走，且接口不能缓存。
+const verRes = await handleRequest(new Request('https://x/api/version'));
+const ver = await verRes.json();
+check('/api/version 可用', verRes.status === 200);
+check('带 tag', /^\d{4}\.\d{2}\.\d{2}\.\d+$/.test(String(ver.tag)), ver.tag);
+check('带说明', typeof ver.note === 'string' && ver.note.length > 4, ver.note);
+check('带服务端时间', !Number.isNaN(Date.parse(ver.now)));
+const verHeaders = verRes.headers.get('cache-control') || '';
+check('不缓存（否则会误判部署没成功）', /no-store/.test(verHeaders), verHeaders);
+check('页面角落有标记位', /id="buildTag"/.test(
+  await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
+const appBuild = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+check('前端主动拉取版本', /fetch\('\/api\/version', \{ cache: 'no-store' \}\)/.test(appBuild));
+check('启动时就显示', /showBuildTag\(\);/.test(appBuild));
+check('取不到就不显示（不留假版本号）', /el\.hidden = false;[\s\S]{0,400}\} catch \{/.test(appBuild));
+
 console.log('\n[3] 演示模式生成');
 const genRes = await handleRequest(
   new Request('https://x/api/generate', {
@@ -188,7 +206,8 @@ const pFemalePlain = buildPrompt({ gender: 'female' });
 check('女性版不写男性专用说明', !/female artist mannequin|skeleton|flat chest|adult man:/i.test(pFemale));
 check('女性版主体约束与不填要点时一致',
   pFemale.replace(/ The pose is also given in words[^.]*\./, '') === pFemalePlain);
-check('女性版不提裤子（那是男性套装的腿装）', !/trousers, jeans|chinos/.test(pFemale));
+check('女性版也提裤子（女性套装里长裤很常见，只排除男性专属的 chinos）',
+  /trousers, jeans, wide-leg pants/.test(pFemale) && !/chinos/.test(pFemale));
 check('女性版不变地面句', !/stays on the floor in exactly/.test(pFemale));
 
 // 前端仍在计算要点（卡片悬停、/api/generate 都用到），只是后端不再把它写进男性提示词
@@ -280,9 +299,15 @@ const pSit = buildPrompt({ gender: 'female', poseHint: '坐姿', frame: [960, 12
 check('明说图3 是裸体素体', /Image 3 is an unclothed mannequin/.test(pSit));
 check('裸腿线稿不等于裸腿成品', /bare legs are not a styling choice/.test(pSit));
 check('点名腿袜与鞋类', /tights, stockings, socks, boots, shoes/.test(pSit));
-check('弯曲交叉的腿同样要穿', /bent and crossed legs included/.test(pSit));
-check('图1 没有腿袜就不许瞎加', /If image 1 shows no legwear, the legs stay bare/.test(pSit));
-check('图1 衣物覆盖范围含腿脚', /clothing still applies to the whole body, legs and feet included/.test(pSit));
+// 「Seated or standing」取代了原来的「bent and crossed legs included」：坐姿、跪姿照样要穿，
+// 但话说得更短，省下的字数留给下面那条更值钱的「类型和长度照搬」。
+check('坐姿跪姿同样要穿', /Seated or standing, dress them/.test(pSit));
+check('图1 没有腿袜就不许瞎加', /No legwear in image 1 means bare legs/.test(pSit));
+// 2026-11 的失败案子：图1 是棕色阔腿长裤，成品变成百褶短裙 + 露腿。
+// 原清单只有 tights / stockings / socks / boots / shoes，全在脚上，没有一件是裤子。
+check('腿部服装点明类型与长度', /same type, same length/.test(pSit));
+check('长裤不许变短裙', /a full-length trouser stays full length, two separate legs, never shorts or a skirt/.test(pSit));
+check('腿的站姿跟着图3，不许并腿', /Legs keep the stance of image 3, feet as far apart as drawn/.test(pSit));
 // 只限定腿脚，不能扩成「全身都盖住」——否则露肩、露背会被模型补布料
 check('没有要求全身覆盖', !/covered where image 1 is covered/.test(pSit));
 check('保留露肩与剪裁自由', !/cover the shoulders|no exposed skin/i.test(pSit));
@@ -301,16 +326,19 @@ const pUp = buildPrompt({ gender: 'female', halfBody: true, frame: [1024, 1024] 
 check('半身仍禁止补腿，与腿袜约束并存', /Do not invent legs, feet, shoes/.test(pUp) && /tights, stockings/.test(pUp));
 check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
 // 提示词长度要控制：T5 有效窗口 512 token，涨太多会把前面的职责分工挤出去
-check('提示词仍在合理长度内', pSit.length < 2200, `${pSit.length} 字符`);
+// 上限从 2200 提到 2250：新增的「类型和长度照搬」一句值这 50 字符——
+// 它挡的是「长裤被改成短裙」这类整体性错误，比省 token 重要得多。
+check('提示词仍在合理长度内', pSit.length < 2250, `${pSit.length} 字符`);
 
 console.log('\n[5h] 男性姿势第三次返工：肢体要逐个点名');
 // 现象：图3 是单臂高举过头，成品却是手扶颈侧、另一手贴大腿。
 // 真因见 [5b]（文字压过线稿），但姿势段本身也退化了：为了「换身体」把骨架、关节、
 // 轮廓全堆进去，「照搬」的信息被摊薄。现在姿势段与女性同构，只多三个肢体例子。
 const pM = buildPrompt({ gender: 'male', poseHint: 'standing with one arm raised high above the head' });
-check('姿势段逐肢体点名：举起的胳膊仍然举着', /a raised arm stays raised high/.test(pM));
-check('姿势段逐肢体点名：肘角保持原样', /a bent elbow keeps its exact angle/.test(pM));
-check('姿势段逐肢体点名：手在头边就留在头边', /a hand at the head stays at the head/.test(pM));
+// 肢体例子从姿势段搬到了 stanceGuard：两处都写等于同一件事说两遍，白吃 120 字符
+check('逐肢体点名：举起的胳膊仍然举着', /raised overhead/.test(pM));
+check('逐肢体点名：肘角保持原样', /bent at the elbow/.test(pM));
+check('逐肢体点名：双手在脑后仍扣在脑后', /hands clasped behind the head/.test(pM));
 check('姿势段仍要求照搬机位与朝向', /viewpoint exactly/.test(pM));
 check('姿势段不再塞换身体的说明', !/bust|waist-to-hip|skeleton/.test(
   pM.slice(pM.indexOf('Reference image 3 defines the POSE'), pM.indexOf('Ignore the line-art'))));
@@ -322,17 +350,18 @@ const pF = buildPrompt({ gender: 'female', poseHint: '站立｜单手高举' });
 for (const [label, re] of [
   ['换男性身体', /give its skeleton a male body/],
   ['地面句', /stays on the floor in exactly/],
-  ['裤子清单', /trousers, jeans/],
+  ['男性裤装清单 chinos', /chinos/],
 ]) check(`女性版不含男性专用措辞：${label}`, !re.test(pF));
-check('女性版也有逐肢体点名（图3 举手就举手）', /a raised arm stays raised high/.test(pF));
+check('女性版也有逐肢体点名（图3 举手就举手）', /raised overhead/.test(pF));
 check('女性版要点不再用核对口吻', !/use it to confirm image 3/.test(pF));
 
 // 男性坐姿：线稿全是地面姿势（26 坐 + 16 跪 + 12 蹲 + 13 躺），线稿里没有椅子
 const pSitM = buildPrompt({ gender: 'male', frame: [960, 1280] });
 check('男性全身强调留在地面', /he stays on the floor in exactly that position/.test(pSitM));
 check('男性不给人加椅子凳子', /do not lift him onto a chair or a stool/.test(pSitM));
-check('男性腿部清单点名裤子', /trousers, jeans, chinos, socks, boots, shoes/.test(pSitM));
+check('男性腿部清单点名裤子', /trousers, jeans, chinos, shorts, socks, boots, shoes/.test(pSitM));
 check('男性「没腿袜就光腿」不再误伤长裤', !/If image 1 shows no legwear, the legs stay bare/.test(pSitM));
+check('男性长裤同样不许变短裤', /never shorts/.test(pSitM));
 const pUpM = buildPrompt({ gender: 'male', halfBody: true, frame: [1024, 1024] });
 check('半身不带地面句（裁到大腿，椅子看不见）', !/stays on the floor in exactly/.test(pUpM));
 

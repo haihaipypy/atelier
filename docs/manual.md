@@ -655,24 +655,49 @@ and do not drop the arms flat against the sides, unless image 3 itself shows exa
 现在的写法是把腿脚单独拎出来，并且只限定腿脚：
 
 ```
-Image 3 is an unclothed mannequin, so its bare legs are not a styling choice: put on the legwear
-and footwear from image 1 — tights, stockings, socks, boots, shoes — on the final pose, bent
-and crossed legs included. If image 1 shows no legwear, the legs stay bare.
+Image 3 is an unclothed mannequin: its bare legs are not a styling choice. Seated or standing,
+dress them from image 1 — trousers, jeans, wide-leg pants, skirt, shorts, tights, stockings,
+socks, boots, shoes — same type, same length: a full-length trouser stays full length, two
+separate legs, never shorts or a skirt. Legs keep the stance of image 3, feet as far apart as
+drawn. No legwear in image 1 means bare legs; no footwear means plain flat shoes.
 ```
 
-最后半句很重要：图 1 本来就是光腿时（短裙配凉鞋、泳装），不能凭空加上丝袜。
+最后一句很重要：图 1 本来就是光腿时（短裙配凉鞋、泳装），不能凭空加上丝袜。
 
 > 这条约束**故意不写成「全身都按图 1 覆盖」**。那样写，露肩、露背、单肩这类剪裁会被模型
 > 好心补上布料——修好腿的同时毁掉领口。所以覆盖范围只提到腿脚，上身交给图 1 的原始剪裁。
 
-男性版这一段要换一份清单，原因是原句的字面歧义：
+#### 长裤为什么会变成短裙
+
+上面那版修好「腿光着」之后，紧接着出了第二种错：腿上有衣服了，**但类型不对**。
+
+| 图 1 | 成品 |
+|---|---|
+| 黑色蕾丝吊带 + 棕色阔腿长裤（挂拍，裤脚遮住脚） | 同一件吊带 + 棕色**百褶短裙** + 露腿 + 银色高跟 |
+
+上半身一模一样，说明服装约束是生效的；错的是下半身。原因还是那张清单：
 
 ```
-（女性）— tights, stockings, socks, boots, shoes — … If image 1 shows no legwear, the legs stay bare.
-（男性）— trousers, jeans, chinos, socks, boots, shoes — … If image 1 has no legwear at all, …
+— tights, stockings, socks, boots, shoes —     ← 全在脚上，没有一件是裤子
 ```
 
-男性套装是长裤，而原句的清单里只有「丝袜、长袜、袜子」，还跟着一句「图 1 没有腿袜就光腿」。
+模型按字面理解成「腿上只有袜子和鞋」，于是拿上衣的棕色配了一条短裙，顺手把腿画成细长
+交叉、脚尖点地的杂志站姿，再补一双图 1 里根本不存在的高跟鞋（裤脚遮住了脚，它自己编的）。
+
+三处补救，都在同一句里：
+
+1. **清单里加进下装**：`trousers, jeans, wide-leg pants, skirt, shorts`。
+2. **锁定类型与长度**：`same type, same length: a full-length trouser stays full length, … never shorts or a skirt`。
+   加「两条裤腿分开」（`two separate legs`）是为了把裤子和裙摆在语义上隔开——只说 `wide-leg` 时，
+   模型很容易理解成宽摆的裙子，这也是「阔腿裤 → 百褶裙」最直接的原因。
+3. **没看到鞋就穿平底**：`no footwear means plain flat shoes`。高跟鞋会让腿绷直、踮脚，
+   腿的姿态跟着一起跑偏；而图 1 是挂拍，脚常常被裤脚挡住。
+
+另外补了一句 `Legs keep the stance of image 3, feet as far apart as drawn`：只说「别并腿」太抽象，
+给一个可执行的量——**两脚的距离按线稿画的那样**。
+
+男性版这一段换一份清单（`trousers, jeans, chinos, shorts, socks, boots, shoes`），原因是原句的字面歧义：
+男性套装是长裤，而原清单里只有「丝袜、长袜、袜子」，还跟着一句「图 1 没有腿袜就光腿」。
 按字面理解，长裤不算 legwear，于是坐姿/躺姿真的会出一条光腿。
 
 #### 男性坐姿为什么要单独提「地面」
@@ -741,7 +766,7 @@ atelier/
 ├── scripts/
 │   ├── sync-catalogs.mjs   #   图库同步（支持 --offline / --only）
 │   ├── preview-server.mjs  #   本地预览（静态 + API 单端口）
-│   └── dry-run.mjs         #   端到端自检（119 项断言，无需密钥）
+│   └── dry-run.mjs         #   端到端自检（250+ 项断言，无需密钥）
 ├── .github/workflows/
 │   └── sync-catalogs.yml   #   每日自动同步
 ├── wrangler.jsonc          # 部署配置
@@ -749,11 +774,43 @@ atelier/
 └── LICENSE                 # MIT
 ```
 
+### 版本号怎么看
+
+页面右下角有一行小字：`v2026.11.18.1`。它的唯一用途是回答一个问题——
+**我刚推的那版，到底跑起来了没有？**
+
+因为它写在代码里（`shared/version.js`），不在缓存里、也不来自任何外部服务：
+
+| 现象 | 含义 |
+|---|---|
+| 刷新后 tag 变了 | 新版本已上线 |
+| 刷新后 tag 没变，悬停里的「服务端时间」在变 | 请求到了旧实例，或部署还在进行 |
+| tag 和「服务端时间」都不动 | 中间有缓存（接口本身是 `no-store`） |
+| 角落里什么都没有 | `/api/version` 挂了，或前端 JS 没加载 |
+
+悬停能看到三样东西：这一版改了什么（`note`）、服务端当前时间、Cloudflare 机房代码
+（部署在 Cloudflare 且有绑定 `CF_VERSION_METADATA` 时才会出现部署 id）。
+
+为什么是手写 tag 而不是 git hash：这个仓库没有构建步骤，Cloudflare 直接读仓库部署，
+Worker 运行时拿不到 commit 号（要拿得开 version metadata 绑定，本地就失效了）。
+手写一个 `YYYY.MM.DD.N` 反而最可靠，代价是**发布前要记得改**。
+
+发布流程：
+
+```bash
+# 1. 改 shared/version.js 的 tag 和 note
+# 2. 自检
+npm run dryrun          # 250+ 项，全绿再推
+# 3. 推上去，等 Cloudflare 构建完成，刷新页面看右下角
+git push
+```
+
 ### API
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | `GET` | `/api/config` | 能力探测：有无 AI、可用通道、模型列表 |
+| `GET` | `/api/version` | 构建标记（页面右下角那行小字） |
 | `GET` | `/api/prompt` | 取当前风格的 prompt 模板 |
 | `POST` | `/api/generate` | 合成三图 |
 | `GET` | `/api/proxy?url=` | 素材图代理（域名白名单） |

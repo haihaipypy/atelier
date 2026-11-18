@@ -4,6 +4,7 @@
  */
 
 import { generate, buildPrompt, clipPoseHint as clipHint, MODELS, DEFAULT_MODEL, HttpError, assertThreeImages } from './generate.js';
+import { BUILD } from './version.js';
 import { makeDemoImage } from './demo-image.js';
 import {
   readProfile,
@@ -65,6 +66,24 @@ export async function handleRequest(request, env = {}, aiRun = null) {
 
   if (url.pathname === '/api/config' && request.method === 'GET') {
     return json(await resolveBackends(env));
+  }
+
+  /**
+   * 构建标记：页面角落的小字从这里取。
+   *
+   * 用途只有一个——确认「刚推的那版到底有没有跑起来」。所以不走缓存，
+   * 并且把服务端时间和 Cloudflare 机房也带出来：tag 没变但时间在走，
+   * 说明请求打到了旧实例或中间有缓存；tag 变了就是新版本上线。
+   */
+  if (url.pathname === '/api/version' && request.method === 'GET') {
+    return json({
+      tag: BUILD.tag,
+      note: BUILD.note,
+      // 部署在 Cloudflare 时能拿到版本 id（未开 version metadata 时为 null）
+      deploy: env.CF_VERSION_METADATA?.id || null,
+      colo: request.cf?.colo || null,
+      now: new Date().toISOString(),
+    });
   }
 
   /* ── 自定义模型配置 ─────────────────────────────── */
