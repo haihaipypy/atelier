@@ -360,6 +360,7 @@ check('男性版只声明一次换身体', (pM.match(/male body/g) || []).length
 check('男性版不含旧的地面句与家具约束', !/stays on the floor in exactly|chair|stool/i.test(pM));
 // 长度上限在 2026-11-18 晚从 1400 调到 1520：POSE 段新增了「逐项点名照抄部位」的清单。
 // 512 token 的英文大致 1.8k 字符，1520 仍留 15% 余量；再往上加字就该先删旧话，别堆新话。
+// 极端情况：姿势库里最长的那条要点（SP-P006-diag，210 字符）拼进来约 1557 字符，仍在窗口内。
 check('男性提示词长度未失控', pM.length < 1520, `${pM.length} 字符`);
 check('女性版不含男性专用措辞', !/adult man|male body/i.test(buildPrompt({ gender: 'female' })));
 
