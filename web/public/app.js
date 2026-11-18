@@ -117,14 +117,6 @@ function upstreamMsg(status, json, raw, endpoint, refs) {
  * 之前前端也加一句、后端也加一句，同一句话在提示词里出现两次，模型反而更乱。
  */
 function poseHintFor() {
-  // 用户上传自己的线稿时，图库里没有 pose.en / pose.zh，姿势文字会是空的。
-  // 而本地跑通的那版恰恰是把动作逐字写进提示词的 —— 只给「图1 是姿势的绝对权威」
-  // 这种抽象句，模型会拿「服装展示照」的先验补空，退回正面站直、双臂下垂。
-  // 所以给一个显式输入框，让自定义线稿也能带上动作锚点；填了就优先用。
-  // typeof 保护是给 dry-run 用的：它用 new Function 单独执行这段，上下文里没有 document。
-  const field = typeof document === 'undefined' ? null : document.querySelector('#poseHint');
-  const typed = String(field?.value || '').replace(/\s+/g, ' ').trim();
-  if (typed) return typed;
   const pose = state.selected.pose?.pose || {};
   const raw = String((pose.en || pose.zh) || '')
     .replace(/\s+/g, ' ')
@@ -168,8 +160,6 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
     poseHint,
     // 半身姿势要换一套取景规则，服务端按这个标记拼 FRAMING 段
     halfBody: halfBody ? '1' : '0',
-    minimal: isMinimal() ? '1' : '0',
-    local: isLocal() ? '1' : '0',
   });
   if (frame) {
     q.set('w', String(frame[0]));
@@ -185,47 +175,15 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
     /* 落到下面的兜底 */
   }
   const who = state.gender === 'male' ? '成年男性' : '成年女性';
-  // 兜底也要跟着模式走，否则 /api/prompt 一挂，A/B 就变成了两套不同的东西
-  if (isLocal()) {
-    // 兜底也必须带具体动作：只说「照图1」时，模型会拿服装展示照的先验把空白填上。
-    const action = poseHint ? ` Reproduce this exact pose — ${poseHint}.` : '';
-    return 'Combine the three reference images into one photorealistic full-body portrait. '
-      + 'Image 1 is the pose line-art and is the absolute authority for body posture and camera angle; '
-      + 'image 2 gives the face and hair; image 3 gives the outfit.'
-      + action
-      + ' Copy every garment, and use a clean seamless studio backdrop.'
-      + (halfBody ? ' Crop at mid-thigh like image 1, with both hands visible.' : '');
-  }
-  if (isMinimal()) {
-    // 与 shared/generate.js 的极简版保持同一语言、同一结构，否则 /api/prompt 一挂，
-    // A/B 就变成了两套不同的东西，对照结果没法读。
-    const action = poseHint ? ` POSE: reproduce image 3 exactly — ${poseHint}.` : '';
-    return 'Combine the three reference images into one photorealistic photo of one person. '
-      + 'Image 1 is the outfit, image 2 is the face and hair, image 3 is the pose and camera angle.'
-      + action
-      + (halfBody ? ' Crop the shot like image 3.' : '');
-  }
-  const poseLine = poseHint ? `（${poseHint}）` : '';
-  // 兜底文案同样不能写死「全身照」：图3 裁到哪就是哪，写死景别等于让模型自己
-  // 挑一个能装下整身的姿势——通常就是并腿站直
-  const base = `图1是服装（忽略人台与背景，也不要取它的站姿），图2是${who}的脸与发型，图3是姿势${poseLine}。`
-    + `把三者合成到同一个${who}身上：服装材质与垂感照图1，五官与发色照图2，姿态与镜头角度照图3。`;
-  // 半身走另一套：裁到大腿中部、手必须露出来、不许补腿
-  if (halfBody) {
-    return base
-      + '图3是上半身参考（只画到胸下缘，没有腿）：按它的裁切出中景半身像，裁到大腿中部，人物占满画面。'
-      + '不要凭空补出腿、脚、鞋，也不要画出裁切范围以外的裙摆。'
-      + '手在这个景别里必须完整可见，图3 的手势（比心、剪刀手、托脸）要照做，不要把手放下或藏到身后。'
-      + '输出一张真实感强的半身人像，光影自然。';
-  }
-  return base
-    + `站姿以图3为准：不要并腿，不要把手贴在身侧，不要正对镜头收肩跨。`
-    + (state.gender === 'male'
-      // 男性版把「照搬」写在前面：旧版这里是一句「不要替换成站姿」，否定句里的
-      // 「站姿」反而成了模型可以挑的候选动作，实测就是这一句最容易被它选中
-      ? '注意图3是女性素体线稿：骨架与机位照搬（举起的胳膊仍然举着，抬起的膝盖仍然抬起），只把胸部与腰胯换成男性轮廓。'
-      : '')
-    + '输出一张真实感强的人物照，光影自然。';
+  // 兜底也必须带具体动作：只说「照图1」时，模型会拿服装展示照的先验把空白填上。
+  const action = poseHint ? ` Reproduce this exact pose — ${poseHint}.` : '';
+  return 'Combine the three reference images into one photorealistic full-body portrait. '
+    + 'Image 1 is the pose line-art and is the absolute authority for body posture and camera angle; '
+    + 'image 2 gives the face and hair; image 3 gives the outfit.'
+    + action
+    + ' Copy every garment, and use a clean seamless studio backdrop.'
+    + (halfBody ? ' Crop at mid-thigh like image 1, with both hands visible.' : '')
+    + (state.gender === 'male' ? ' The person is an adult man with a male body, keeping the pose of image 1.' : '');
 }
 
 /**
@@ -337,13 +295,10 @@ async function generateDirect({ images, prompt, size, ratio }) {
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-// 提示词/参考图配置：local 对齐本地跑通的那套 agnes 用法（默认）
-const promptMode = () => $('#promptMode')?.value || 'local';
-const isMinimal = () => promptMode() === 'minimal';
-const isLocal = () => promptMode() === 'local';
-// 本地成功案例的 --ref 顺序是 姿势 → 脸 → 服装。网站原来把姿势放最后一张，
-// 而「服装一直对、姿势一直不对」正好对应这个权重差。
-const LOCAL_SLOTS = ['pose', 'face', 'outfit'];
+// 送图顺序固定为 姿势 → 脸 → 服装。本地成功案例的 --ref 就是这个顺序，
+// 而「服装一直对、姿势一直不对」正好对应姿势放在最后一张时的权重差。
+// 姿势排第 1 之后，提示词里的「reference image 1」永远指姿势，内容与顺序一对一，不再有歧义。
+const REF_SLOTS = ['pose', 'face', 'outfit'];
 // 官方文档：size 只认 1K/2K/3K/4K 档位，宽高比必须单独放在 ratio。
 // 之前把 2K 档位换算成精确像素（1728x2304）塞进 size —— 官网写明这类值
 // 「可能会被自动映射到最接近的标准档位」，而且没给 ratio 时默认 1:1。
@@ -351,30 +306,6 @@ const LOCAL_SLOTS = ['pose', 'face', 'outfit'];
 // 本地脚本用的正是 --size 2K --ratio 3:4，这里照抄这个请求体。
 const AGNES_SIZE = '2K';
 const AGNES_RATIO_OK = new Set(['1:1', '3:4', '4:3', '16:9', '9:16', '2:3', '3:2', '21:9']);
-
-/**
- * 2026-11-18 用户在本地用 agnes-image-2.5-flash 一次跑通的完整提示词（约 1600 字符）。
- *
- * 网站内置模板最长的「本地对齐」也只有它的零头：POSE 段只有一句 pose.en，脸和服装
- * 都是「照抄图 N」这种抽象指令。而本地这版是有人看过三张图之后，把图里看到的动作、
- * 五官发型、每一件衣服逐件写出来的 —— 这才是两边效果的真正差距。
- *
- * 之所以做成「一键填入自定义 Prompt」而不是改内置模板：自定义 Prompt 本来就是最高
- * 优先级、完全覆盖内置模板，不动生成逻辑就不会给另外两个模式引入任何回归；而且用户
- * 换素材后能直接编辑这段文字，比写死在代码里灵活。
- *
- * 注意编号写死为 1=姿势 / 2=脸 / 3=服装，与本地对齐模式的送图顺序一致。所以填入时
- * 会自动把模式切到「本地对齐」，否则在「详细/极简」下（图1=服装）编号就全反了。
- */
-const LOCAL_FULL_TEMPLATE = `Combine the three reference images into ONE photorealistic full-body studio portrait of a single young woman, head-to-toe framing, centered, feet fully visible.
-
-POSE (from reference image 1, the line-art figure): reproduce that exact pose — standing upright, both arms raised with hands clasped behind the head, elbows opened outward, so the whole length of both arms is clearly visible from shoulder to wrist, chest lifted, legs straight and slightly apart, toes pointing forward, weight evenly balanced. Same body proportions and the same camera angle. Reference image 1 is the absolute authority for body posture, limb placement, head tilt, body orientation and camera angle; reproduce it exactly.
-
-FACE and HAIR (from reference image 2): the same young East Asian woman — long layered ash-blonde / light-brown hair falling past the shoulders with wispy curtain bangs, warm light-brown eyes, subtle rosy blush, glossy pink lips in a gentle closed-mouth smile, fair smooth skin, delicate features. Take ONLY the facial identity and hairstyle from this image and ignore its frontal angle and flat lighting. Keep the facial identity recognizable.
-
-OUTFIT (from reference image 3): mustard-gold velvet long-sleeve mini dress with a ruched gathered body, sweetheart neckline with a thin drawstring bow at the center chest, flared bell-shaped cuffs on the sleeves, drawstring ruching gathered at the hips; cream ribbed thigh-high stockings with a small satin bow at the top of each leg; brown suede chunky platform ankle boots; a thin gold chain necklace; a small brown leather shoulder bag hanging from a strap on her right shoulder. Copy every garment head to toe exactly as shown — same type, same length, same colors, fabric texture and accessories. The bare legs of the line-art mannequin are not a styling choice.
-
-STYLE: clean light-gray seamless studio backdrop, soft even frontal beauty lighting with a subtle floor shadow, crisp focus on the face, realistic natural skin texture, high fabric detail, professional fashion lookbook photography, vertical composition, no text, no watermark, no extra props.`;
 
 const el = (tag, attrs = {}, ...kids) => {
   const n = document.createElement(tag);
@@ -1104,7 +1035,7 @@ async function generate() {
   setBusy(true, '正在准备参考图…');
   try {
     // 三张并行处理：串行等待时每张都要单独跨域往返，累计很容易触发超时
-    const slots = isLocal() ? LOCAL_SLOTS : SLOTS;
+    const slots = REF_SLOTS;
     const images = await Promise.all(
       slots.map(async (k) => {
         const s = state.selected[k];
@@ -1169,8 +1100,6 @@ async function generate() {
         // 姿势参考图是女性素体线稿，光给图模型经常直接退回站姿；把「大约什么动作」也写成文字
         poseHint: poseHintFor(),
         halfBody,
-        minimal: isMinimal(),
-        local: isLocal(),
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
       };
@@ -1208,73 +1137,9 @@ async function generate() {
     hint.textContent = j.demo
       ? '演示模式完成：这是布局预览图，绑定 Workers AI 后会输出融合后的成品。'
       : `已生成，耗时 ${((j.ms ?? 0) / 1000).toFixed(1)}s。可换素材再生成一次做对比。`;
-    // 这次若既没填「姿势要点」、也没用完整模板，提示词里就一个具体画面词都没有 ——
-    // 全是「照抄图 N / 绝对权威」这类元指令，空白会被模型用「服装展示照」先验填上：
-    // 正面站直、双臂下垂，甚至把服装图里假人的空白腿一起抄进来。出图后直接指入口。
-    if (!$('#promptOverride')?.value.trim() && !$('#poseHint')?.value.trim()) {
-      hint.textContent += ' 这次提示词没有任何具体动作/服装描述，建议点上方「用本地同款完整提示词」再生成一次。';
-    }
   } catch (e) {
     $('#hint').textContent = e.message;
     $('#hint').classList.add('error');
-  } finally {
-    setBusy(false);
-  }
-}
-
-/**
- * 诊断探针：不带参考图，只发提示词 + 画幅调一次 Workers AI。
- *
- * 报 3043 / Internal server error 时，光看报错分不清是什么坏了，三个常见原因：
- * ① 模型或上游这次就是挂了；② 画幅/尺寸不被接受；③ 多图输入有问题（某张图太大、
- * 格式不认、三张一起就撑不住）。探针把 ①②③ 里的 ③ 摘出去：
- *
- *   - 探针成功 → 模型和画幅都没问题，问题在多图输入，该查送出的三张图；
- *   - 探针失败 → 跟图无关，是上游或额度，别再改提示词。
- *
- * 它不该被误当成「免费测额度」的按钮，所以结果只写一行字，不出图。
- */
-async function probeOnce() {
-  if (state.busy) return;
-  const ratio = $('#ratio').value;
-  const [width, height] = RATIO_MAP[ratio] || [1024, 1024];
-  const hint = $('#hint');
-  if (state.engine === 'custom') {
-    hint.classList.add('error');
-    hint.textContent = '探针只测 Workers AI。自定义通道请用「配置自定义模型」里的「测试连通」。';
-    return;
-  }
-  setBusy(true, `正在不带图试一次（${width}×${height}）…`);
-  try {
-    const r = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        probe: true,
-        images: [],
-        width,
-        height,
-        prompt: $('#promptOverride').value.trim()
-          || 'a plain grey studio backdrop, empty, no people',
-        model: $('#model')?.value || undefined,
-        engine: 'cloudflare',
-      }),
-    });
-    const j = await r.json();
-    hint.classList.remove('error');
-    if (r.ok && j.image) {
-      hint.textContent = `探针通过：模型和画幅（${width}×${height}）都没问题，耗时 ${((j.ms ?? 0) / 1000).toFixed(1)}s。`
-        + '所以报错出在多图输入上——换一组素材或换模型再试。';
-      return;
-    }
-    const d = j.detail || {};
-    const bits = [d.code ? `错误码 ${d.code}` : '', d.ray ? `Ray ${d.ray}` : ''].filter(Boolean);
-    hint.classList.add('error');
-    hint.textContent = `探针也失败了：${j.error || `HTTP ${r.status}`}${bits.length ? `（${bits.join(' · ')}）` : ''}`
-      + '。说明跟参考图无关，是上游或额度的问题。';
-  } catch (e) {
-    hint.classList.add('error');
-    hint.textContent = `探针请求没发出去：${e.message}`;
   } finally {
     setBusy(false);
   }
@@ -1324,7 +1189,7 @@ function showResult(j) {
   // 是不是被压成一张几乎看不清的缩略图。把实际送出的 data URI 原样摆出来即可，
   // 不用再靠猜 —— 缩略图、顺序、体积、解码后的像素尺寸一眼可查。
   if (Array.isArray(j.refs) && j.refs.length) {
-    const names = isLocal() ? ['姿势', '脸', '服装'] : ['服装', '脸', '姿势'];
+    const names = ['姿势', '脸', '服装'];
     const peek = el('details', { class: 'ref-peek' });
     peek.append(el('summary', {}, `本次送出的参考图（${j.refs.length} 张 · 按送出顺序）`));
     const row = el('div', { class: 'ref-row' });
@@ -1537,12 +1402,9 @@ function closeLightbox() {
 }
 
 function setDefaultPrompt() {
-  // 送图顺序随模式变：本地对齐是 姿势→脸→服装，另外两个是 服装→脸→姿势。
-  // 写死「图1=服装」会让默认模式下的用户照着错的编号写自定义 Prompt。
-  const order = isLocal()
-    ? '图1=姿势，图2=脸，图3=服装'
-    : '图1=服装，图2=脸，图3=姿势';
-  $('#promptOverride').placeholder = `留空使用内置模板：${order}。`;
+  // 送图顺序固定为 姿势→脸→服装，占位文案必须跟着这个顺序写，
+  // 否则照着「图1=服装」写自定义 Prompt，三段描述会全部对错图。
+  $('#promptOverride').placeholder = '留空使用内置模板：图1=姿势，图2=脸，图3=服装。';
 }
 
 boot().catch((e) => {
@@ -1805,16 +1667,3 @@ async function clearCfg() {
 $('#cfgSave')?.addEventListener('click', saveCfg);
 $('#cfgTest')?.addEventListener('click', testCfg);
 $('#cfgClear')?.addEventListener('click', clearCfg);
-$('#probeBtn')?.addEventListener('click', probeOnce);
-$('#promptMode')?.addEventListener('change', setDefaultPrompt);
-$('#fillLocalTpl')?.addEventListener('click', () => {
-  // 模板里的编号写死 1=姿势 / 2=脸 / 3=服装，必须配合「本地对齐」的送图顺序；
-  // 顺手把模式切过去，避免用户填完又选了「详细/极简」导致三段描述全对错图。
-  const mode = $('#promptMode');
-  if (mode) mode.value = 'local';
-  $('#promptOverride').value = LOCAL_FULL_TEMPLATE;
-  setDefaultPrompt();
-  const hint = $('#hint');
-  hint.classList.remove('error');
-  hint.textContent = '已填入本地同款完整提示词，并切到「本地对齐」模式。它会完全覆盖内置模板；换素材后请按自己的三张图修改描述。';
-});

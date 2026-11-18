@@ -576,28 +576,47 @@ standing or walking pose`——而「照搬」只有一句。
 
 ### 为什么成品总爱变成正面站直
 
-这是一个和性别无关的独立问题，男性版、女性版都会遇到。典型表现：图 3 明明是双腿分开、
-重心偏一侧、一条手臂略弯垂在身前的线稿，成品却变成并腿站直、双手贴身的正面照。
+先说结论，这是同一条因果链上最后、也最关键的一环：
 
-根源在于**模型对「标准陈列站姿」有很强的默认偏好**，有三种情况会把它勾出来：
+> **agnes 的多图合成按「每张参考图扮演什么角色」理解，它不会自己从线稿里读出动作。**
+> 姿势条目没有文字动作时，提示词里就只剩「reproduce the exact body posture…」这类
+> 类别名，模型就拿「服装展示照」的先验把空白填成正面站直、双臂下垂。
 
-| 诱因 | 为什么会勾出站姿 | 现在的处理 |
+#### 数据层面的真因（2026-11-18 实测）
+
+| 批次 | 条数 | 有 `pose.en` |
 |---|---|---|
-| 风格句写死 `full-body shot` | 要「全身」，就得找一个能装下整套衣服的姿势，最省事的是站直 | 景别交给图 3，风格句只描述质感与光线 |
-| 服装图里的人是正面站直 | `do not copy its standing front view` 这句本身就在提「站姿」，等于给了一个候选动作 | 改成「图 1 的姿态完全无效，不要从它取任何肢体位置或机位」 |
-| 姿态要点用「确认」口吻 | 「用来确认图 3」读起来像参考意见，模型宁可信文字 | 改成命令句，并点名四个具体反例 |
+| `SP-*`（shisei，webp） | 127 | 127（100%） |
+| `full_single_*`（ai-pose-gallery，png） | 315 | **0** |
+| `upper80v2_*`（ai-pose-gallery，png） | 125 | **0** |
 
-那条点名反例的句子是这样的：
+而「全身站立优先」的排序把 `full_single_*` 整批推到**第一屏 60 张**，
+于是随手点第一个必然没描述——这就是「越改越差」的具体节点：
+早期第一屏是 `SP-*`（有描述），排序改掉之后，用户默认点到的恰好全是没描述的那批。
 
-```
-The stance must follow image 3, not a default catalogue pose. Do not straighten the legs,
-do not close the gap between the feet, do not square the hips and shoulders to the camera,
-and do not drop the arms flat against the sides, unless image 3 itself shows exactly that.
-```
+处理：`scripts/fill-pose-en.mjs` 按中文标题（参考日文 `rawTitle`）逐条译成英文动作，
+440 条全部补齐，第一屏也没有漏网的。脚本是幂等的，已有描述（`SP-*` 那 127 条）不覆盖；
+表里没收录的标题会报错退出，不会悄悄留空。
 
-> 反例比正例管用。只说「照图 3 摆姿势」是给方向，说「别并腿、别收肩跨、别把手贴死」
-> 是堵住模型最可能走的那条捷径。若某个具体姿势仍不稳定，把它写到「补充描述」里最有效——
-> 那段文字在提示词最末尾，权重最高。
+#### 提示词层面还剩两条铁律
+
+| 铁律 | 为什么 |
+|---|---|
+| **否定句会被读成肯定动作** | T5 对 `not` 极弱。`do not drop the arms` 常被读成「drop the arms」，`do not square the body` 被读成「square the body」——正好是失败结果。所以整段提示词一个否定词都不留 |
+| **不要靠清单兜底** | 为修「腿装被丢」曾列过 `trousers / jeans / wide-leg pants`，模型从第一项开始挑，把短裙换成了牛仔裤。清单越长越像菜单 |
+
+服装段现在只有一句正面声明：`Render the person as one continuous, anatomically connected
+body from head to feet, with every garment worn on that body`。这句不点名任何具体衣物，
+对全部素材都成立，也不会把注意力引到「裸腿」「假人」上——之前那句
+`The bare legs of the line-art mannequin are not a styling choice` 就是反例：
+既是否定句、又点名裸腿，结果裙子下摆到过袜之间整段空白、袜子浮空。
+
+#### 已经被删掉的调试开关
+
+2026-11-18 期间为了定位这个问题，先后加过「提示词模式」（详细/极简/本地对齐）、
+「姿势要点」输入框、「一键填入本地同款完整提示词」按钮、诊断探针按钮。
+对照结论拿到之后就全部拆掉了——**它们让界面变复杂，也违背「选三张图就能出图」的初衷**。
+现在的形态：选三张图 → 点生成，提示词模式只有一套，动作描述来自姿势库自身的 `pose.en`。
 
 ### 上半身姿势为什么单独一套取景
 

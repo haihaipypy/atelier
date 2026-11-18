@@ -86,291 +86,96 @@ export function buildPrompt({
   poseHint = '',
   halfBody = false,
   frame = null,
-  minimal = false,
-  local = false,
 } = {}) {
-  // 本地对齐模式：照 2026-11-18 用户在本地用 agnes-image-2.5-flash 跑通的那套配置来。
-  // 同一模型、同一组素材，本地效果好得多。差异不在「文字多不多」，而在四件事：
-  //   ① 参考图顺序是 姿势→脸→服装（网站一直是 服装→脸→姿势）；
-  //   ② 姿势图用原图（网站压到 300px 缩略图 + JPEG，线稿细线全糊了）；
-  //   ③ 尺寸用 2K 官方档位（网站传 960x1280 这种会被静默标准化的精确值）；
-  //   ④ 提示词是「逐图正面描述」：POSE 段放最前、声明 absolute authority，
-  //      而不是一堆「别并腿、别贴身」的否定约束。
-  // 本地那版提示词约 1800 字符，比网站的还长——所以「文字是干扰」的假设不成立，
-  // 真正的问题是文字写的是抽象约束，不是画面内容。
-  if (local) {
-    const lines = [
-      'Photorealistic full-body fashion portrait of one person, head-to-toe, centered, feet fully visible.',
-      'Three reference images are given in this order: 1 = pose line-art, 2 = face, 3 = outfit.',
-    ];
-    // 男性库的 pose.en 来自上游、与线稿不严格对应（SP-P021），照旧不注入
-    const poseText = poseHint && gender !== 'male'
-      ? String(poseHint).replace(/\s+/g, ' ').trim().replace(/[.\s]+$/, '')
-      : '';
-    // 2026-11-18 复查：本地那版之所以一次成型，是因为它把姿势动作逐字写出来了
-    // （"standing upright, both arms raised with hands clasped behind the head, elbows
-    // opened outward, chest lifted, legs straight and slightly apart…"）。网站这版只说
-    // 「图1 是绝对权威、精确复现」，抽象权威句留出的空白会被「服装展示照」的先验填上：
-    // 模型默认正面站直、双臂下垂。更糟的是原来那三个否定句 —— do not square the body /
-    // do not mirror the arms / do not drop the arms —— T5 对否定不敏感，反而把
-    // "square the body"、"drop the arms" 读成了肯定动作，正好对上用户截图里的失败结果。
-    // 所以这里只做正面陈述：先给具体动作，再声明权威，一个否定词都不留。
-    lines.push(
-      'POSE — HIGHEST PRIORITY (reference image 1):'
-      + (poseText
-        ? ` reproduce this exact pose — ${poseText}. Follow reference image 1 for the arm and hand `
-          + 'positions, elbow angles, shoulder line, hip rotation, leg placement, head tilt, body '
-          + 'orientation and camera angle.'
-        : ' reproduce the exact body posture, arm and hand positions, elbow angles, shoulder line, '
-          + 'hip rotation, leg placement, head tilt, body orientation and camera angle of the line-art figure.')
-      + ' Reference image 1 is the absolute authority for body posture and camera angle.',
-    );
-    lines.push(
-      'FACE and HAIR (reference image 2): take ONLY the facial identity and hairstyle from it — '
-      + 'ignore its frontal angle and flat lighting.',
-    );
-    // 2026-11-18 第三轮复查：原来收尾那句 `The bare legs of the line-art mannequin are
-    // not a styling choice` 既是否定句、又点名了 "bare legs" / "mannequin"。用户这一版
-    // 的成品里，裙子下摆到过膝袜之间整段空白、袜子浮空，还多出一条图里没有的珍珠项链
-    // —— 模型把服装图里假人的空白腿和自由发挥的配饰一起抄了进来。元指令（照抄 / 绝对
-    // 权威）没有画面内容可锚，模型只能照着参考图的瑕疵拼贴。
-    // 处理：删掉那句带否定和具体名词的旧尾巴，改成正面声明「整个人体是连贯的、衣服穿
-    // 在这具身体上」。这句不依赖任何具体素材，对全部素材都成立。
-    lines.push(
-      'OUTFIT (reference image 3): copy every garment head to toe exactly as shown — same type, '
-      + 'same length, same colors, fabric, pattern and accessories. Render the person as one '
-      + 'continuous, anatomically connected body from head to feet, with every garment worn on '
-      + 'that body; the torso, hips, legs and feet are all present and connected.',
-    );
-    if (gender === 'male') lines.push('The person is an adult man with a male body, keeping the pose of image 1.');
-    if (halfBody) lines.push('FRAMING: crop like image 1 at mid-thigh; do not invent legs or a full-length stance, and keep both hands visible.');
-    lines.push(
-      'STYLE: clean seamless studio backdrop, soft even lighting, natural skin texture, sharp '
-      + 'focus, editorial fashion photography, vertical composition, no text, no watermark.',
-    );
-    if (style === 'anime') lines.push('Anime illustration style.');
-    if (extra) lines.push(extra);
-    return lines.join(' ');
-  }
-  // 极简模式：只交代三张图分别是什么，剩下全交给模型自己看图组合。
+  // ────────────────────────────────────────────────────────────────────────────
+  // 只有一条提示词路径。2026-11-18 之前这里挂过「详细 / 极简 / 本地对齐」三个模式，
+  // 是用来做 A/B 对照的调试开关；对照结论已经拿到，开关只会把界面搞复杂、违背
+  // 「选三张图就能出图」这个初衷，所以全部拆掉，只留下唯一一套写法。
   //
-  // 这条分支是为「多图融合模型到底需不需要我们用文字解释姿势」准备的对照实验。
-  // agnes-image-2.5-flash 这类模型本来就吃三张原图，姿势文字（poseHint）反而可能与
-  // 线稿打架：SP-P021 线稿单臂高举、上游文字写扶颈贴腿，成品照的是文字。
-  // 男性版去掉要点后没再出问题，女性版一直保留要点，姿势问题就从没断过。
+  // 这套写法照本地用 agnes-image-2.5-flash 一次跑通的那版配置来，四个要点缺一不可：
+  //   ① 参考图顺序 姿势 → 脸 → 服装（姿势永远排第 1，权重最高）；
+  //   ② 姿势图送原图（不压成 300px 缩略图 + JPEG，否则线稿细线全糊）；
+  //   ③ size 用 2K 档位 + 单独 ratio（精确像素会被官方静默标准化，画幅跟着跑偏）；
+  //   ④ 提示词逐图正面描述：先给**具体动作文字**，再声明权威。
   //
-  // 所以这里一个字的姿势描述都不写，也没有站姿反例、腿装清单、85mm 之类的风格长句——
-  // 那些都是「模型做错了就用文字补」攒出来的，补一句挤掉一句。
-  if (minimal) {
-    const lines = [
-      'Combine the three reference images into one photorealistic photo of one person.',
-      'Image 1 is the outfit, image 2 is the face and hair, image 3 is the pose and camera angle.',
-    ];
-    // 对照实验的结论（2026-11-18）：一个姿势字都不给时，三张图明明都在，模型却拿
-    // 「服装展示照」的先验把空白填上，成品永远是正面站直、双臂下垂。所以极简版保留
-    // 「只说三张图分别是什么」的骨架，但补一句具体动作锚点；依旧不加否定约束、
-    // 站姿反例和风格长句，和「详细」版的差别依然清晰。
-    const poseText = poseHint && gender !== 'male'
-      ? String(poseHint).replace(/\s+/g, ' ').trim().replace(/[.\s]+$/, '')
-      : '';
-    if (poseText) lines.push(`POSE: reproduce image 3 exactly — ${poseText}.`);
-    if (gender === 'male') lines.push("The person is an adult man: keep image 3's pose with a male body.");
-    if (halfBody) lines.push('Crop the shot like image 3; do not invent legs or a full-length stance.');
-    if (style === 'anime') lines.push('Anime illustration style.');
-    // 补充描述是用户自己写的，任何模式下都原样保留在最后
-    if (extra) lines.push(extra);
-    return lines.join(' ');
-  }
-  // 镜头信息里绝不能出现 "full-body" 这类景别词。
-  // 原因：图3 是姿势参考，图1 的服装常常是连衣裙/半身裙，两样一起给的时候模型
-  // 会去找一个"能把整套衣服完整展示"的安全站姿——最省事的就是正面站直、双手贴身。
-  // 景别交给图3（它自己裁到哪就是哪），这里只描述质感与光线。
-  const styleLine = {
-    photorealistic:
-      'Photorealistic editorial fashion photography, realistic skin texture, natural light, ' +
-      'clean seamless studio background, 85mm lens, sharp focus.',
-    anime:
-      'High-quality anime illustration, clean cel shading with soft gradients, ' +
-      'simple gradient background.',
-  }[style] || 'Photorealistic editorial photography.';
-
-  // 画幅描述：不写景别，只写形状，避免又把模型往「站直展示全身」上推
-  let frameLine = '';
-  if (Array.isArray(frame) && frame[0] > 0 && frame[1] > 0) {
-    const r = frame[0] / frame[1];
-    frameLine = Math.abs(r - 1) < 0.04
-      ? 'The output canvas is square; frame the figure to fill it, not to fit it.'
-      : r < 1
-        ? 'The output canvas is taller than wide; frame the figure to fill its width as well as its height.'
-        : 'The output canvas is wider than tall; frame the figure to fill its height as well as its width.';
-  }
-
-
-  // 男性版的参考图没有男性特征（中性人台 + 女性素体人偶），必须显式说明，
-  // 否则模型会按默认女性渲染，或者干脆丢掉姿势、退回站姿。
+  // ④ 是最关键的一条。agnes 的多图合成按「每张参考图扮演什么角色」理解，
+  // 它不会自己从线稿里读出动作。所以姿势条目必须带 pose.en（动作描述），
+  // 否则模型就用「服装展示照」的先验把空白填成正面站直、双臂下垂 ——
+  // 这正是「姿势不生效」最直接的来源。440 条没描述的条目已由
+  // scripts/fill-pose-en.mjs 补齐。
   //
-  // 「换身体」这件事放在这里，不放在姿势段里：姿势段越短，模型越容易把它当硬约束。
-  // 女性版的姿势段只有一句话，效果稳定；男性版曾经在同一位置堆了 600 字符的
-  // 骨架/轮廓/否定说明，权重被摊薄后模型挑了最省事的做法——整张图不用。
-  const subject =
-    gender === 'male'
-      ? 'The person is an adult man: flat chest, no makeup. ' +
-        'Reference image 3 is drawn on a female artist mannequin: give its skeleton a male body and ' +
-        'ignore only the mannequin\'s bust and hip curve, because the pose itself is copied as drawn.'
-      : 'The person is an adult woman.';
-
-  // 姿势段：一句话，短。
-  //
-  // 这是唯一一条经过反复验证有效的写法：短句被当成硬约束，长段被当成背景描述。
-  // 后续所有「再加一句」的尝试都失败了，而且不是加的那句没用，是它把这一句的权重
-  // 稀释掉了——成品从「姿势不太准」变成「两只手都抬到颈边、还换了条牛仔裤」。
-  // 教训写在 docs/manual.md「为什么最后只剩一句话」。
-  //
-  // 手数、头部朝向这类更细的约束一律不进这一段。
-  // 线稿风格那句并到这一句后面：它本来就属于「图3 只给姿势，别抄画法」，
-  // 单独成段只多占 100 字符，而 T5 的有效窗口只到 512 token。
-  const poseRef =
-    'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
-    'placement, leg crossing, hand positions and viewpoint exactly.';
-  // 姿态要点只对女性版注入，男性版**一个字都不注入**。
-  //
-  // 两个库的要点现在都优先取 pose.en（前端负责），即完整英文句——之前女性注入的是
-  // 清洗后的中文小标题「站立・双手扶颈后」，提示词是英文的，模型读不懂，等于没给。
-  // 男性则相反：文字是完整英文，但来自上游的姿态描述和图3 并不严格对应
-  // （SP-P021 线稿单臂高举、文字写的是扶颈贴腿），模型照的是**文字**，成品出现
-  // 扶颈 + 贴腿，用户只能说「姿势还是不对」。
-  // 所以：女性库的 en 与线稿同源可信 → 注入；男性库的 en 会打架 → 不注入。
-  //
-  // 要点仍保留在页面上（卡片标题、悬停提示），那是给人看的。
-  const hint = clipPoseHint(poseHint);
-  // 措辞是「同一姿势的另一种说法」，不是「用来核对图3」——后一种写法把文字降成了检查项，
-  // 模型读完该忽略还是忽略（图3 双手在脑后、成品双手垂在身侧，就是这么来的）。
-  // 从「元描述」改成「画面描述」。`Exact pose, matching image 3: X` 是在**谈论**一张图，
-  // 模型会把它当备注；`She is X.` 是在**描述要画的内容**，这才是图像模型熟悉的句式。
-  // 女性库 127 条英文要点全部能接在 She is 之后（121 条 -ing 开头，
-  // 6 条 in a ... 开头，「She is in a deep squat」同样成立）。
-  // 440 条没有 en 的条目回退到中文小标题，接 She is 会变成中英混杂，保持标签式不变。
-  const hintLine = hint && gender !== 'male'
-    ? (/^[\x00-\x7F]*$/.test(hint) && /^(standing|sitting|lying|kneeling|squatting|crouching|leaning|in a)\b/.test(hint)
-        ? `She is ${hint.replace(/\.$/, '')}.`
-        : `Exact pose, matching image 3: ${hint}.`)
-    : '';
-
-  // 上半身姿势是另一套取景规则。
-  //
-  // 女性库的 upper 线稿只画到胸下缘，男性库的 upper 线稿画到胯（大腿根）。
-  // 两边的裁切不同，取景措辞也就不能共用一句：说「和 image 3 完全一样」在女性库
-  // 是「到胸口」，到男性库就变成「到胯」——而下面还写着 cropped at mid-thigh，自相矛盾。
-  // 男性版因此改成「比 image 3 略松一点，裁到大腿中部」，并要求 image 3 里出现的
-  // 手、前臂、腰、胯全部留在画面内——半身像最容易丢的就是垂在身侧的那只手。
-  const framing = halfBody
-    ? gender === 'male'
-      ? 'FRAMING — image 3 is an upper-body reference: it stops at the hip and shows no legs below ' +
-        'that. Render a medium shot cropped around mid-thigh, slightly looser than image 3, and fill ' +
-        'the frame with the body instead of zooming out. Everything image 3 does show — both hands, ' +
-        'the forearms, the waist and the tilt of the hips — stays inside the frame, so no hand is cut ' +
-        'off at the edge. Do not invent legs, feet, shoes or a standing full-length stance, and do not ' +
-        'show the hem of the garment if it falls outside that crop. Every hand gesture from image 3 ' +
-        'must be reproduced and clearly readable — do not lower the arms, and do not hide the hands ' +
-        'behind the body, under the hair or outside the frame. When image 3 shows the hands doing ' +
-        'something (heart shape, peace sign, hands on cheeks, finger heart), that gesture is the ' +
-        'subject of the picture and the face must stay visible behind or between the hands.'
-      : 'FRAMING — image 3 is an upper-body reference: it stops below the chest and has no legs. ' +
-        'Render a medium close-up cropped at mid-thigh, exactly like the crop of image 3, and fill the ' +
-        'frame with the upper body instead of zooming out. Do not invent legs, feet, shoes or a ' +
-        'standing full-length stance, and do not show the hem of the garment if it falls outside that crop. ' +
-        'The arms, hands and head are fully visible in this crop, so every hand gesture from image 3 ' +
-        'must be reproduced and clearly readable — do not lower the arms, and do not hide the hands ' +
-        'behind the body, under the hair or outside the frame. When image 3 shows the hands doing ' +
-        'something (heart shape, peace sign, hands on cheeks, finger heart), that gesture is the ' +
-        'subject of the picture and the face must stay visible behind or between the hands.'
-    : '';
-
-  // 站姿兜底：只放最容易被抹掉的几个反例，且只对全身取景。
-  //
-  // 半身像整段跳过：它的取景段已经写着「别补腿、别摆全身站姿、别压胳膊」，
-  // 再加一句「腿多宽、脚在哪」只会让模型去画腿——正好与半身的要求相反。
-  //
-  // 曾经在这段里加过「数手臂」「头的朝向」「手放哪儿就留在哪儿」三类细则。
-  // 结果是整体崩：姿势段的权重被摊薄后，模型开始同时走错服装和姿势。
-  // 这类细则要么进 extra（末尾、权重最高），要么就别加。
-  // 手臂反例**删掉了**。这是这次的真因：CLIP/T5 对否定词权重极低，
-  // 「arms not hanging flat against the sides」送进去，模型读到的是后半截那个具体画面
-  // 「arms hanging flat against the sides」——于是手真的垂在身侧。男性版很早就踩过
-  // 同样的坑（「不要替换成站姿」写进否定句，成品就出站姿），当时修好了，
-  // 回滚时又把这句带了回来。腿脚与胯肩那几句都是正面量，实测有效（这次腿分开了），保留。
-  const stanceGuard = halfBody
-    ? ''
-    : 'The stance must follow image 3, not a default catalogue pose: legs as wide as drawn, ' +
-      'feet where drawn, hips and shoulders not squared to the camera.';
-
-  // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
-  // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
-  // 把人扶起来站着——两者都让姿势对不上。女性库混着椅坐与地面坐，这句话只对男性加。
-  // 半身像裁到大腿中部，椅子本来就看不见，这句只对全身加，省下来的字数留给取景说明
-  const floorLine = gender === 'male' && !halfBody
-    ? 'If image 3 is seated, kneeling, crouching or lying down, he stays on the floor in exactly ' +
-      'that position — do not lift him onto a chair or a stool, and do not stand him up.'
-    : '';
-
-  // 腿部服装：只交代**图1 里真的露出来的那部分**。
-  //
-  // 这一段的来历是一连串翻车。先是腿光着（清单里只有 tights/socks，漏了裤子）；
-  // 补上裤子之后，又出现「图1 是短裙 + 过膝袜，成品给她换了条蓝色牛仔裤」——
-  // 因为清单里按字母顺序列了 trousers, jeans, wide-leg pants, skirt...，
-  // 模型从第一项开始挑，挑中了牛仔裤。清单越长越危险：它变成了选项菜单。
-  //
-  // 所以现在不再枚举，只说两件事：
-  // ① 图3 的腿是裸模，别当造型——腿脚该穿什么，看图1 露出来的那部分；
-  // ② 类型和长度照图1，短的不许改长，长的不许改短。
-  //
-  // 腿的站姿（开合、重心、交叉）移到 stanceGuard 里统一说——那里本来就管全身的站姿，
-  // 而且对上半身取景也一样适用（上半身看不到腿，说了也无害，反而防止模型自己补腿）。
-  //
-  // 还有一层：图3 的腿是裸的，不提一句，模型就把裸腿当造型照抄（丝袜、靴子一起丢）。
-  // 这句只否掉「裸腿」，说的是「腿脚照图1」，不是「按清单选一件」。
-  const legwearLine =
-    'Image 3 is an unclothed mannequin: its bare legs are not a styling choice. The legs and feet ' +
-    'wear what image 1 shows on them — same type, same length, nothing swapped, so a skirt stays ' +
-    'that skirt and trousers stay trousers; bare legs stay bare.';
-
-  const parts = [
-    'Compose one person from the three reference images below.',
-    subject,
-    'Reference image 1 defines the OUTFIT ONLY — every garment on it, head to toe: top, bottoms, ' +
-      'legwear, footwear, bags and jewelry. Copy each one exactly: same type, same length, same ' +
-      'color. Ignore the body inside it — render a real person, no mannequin, no hollow torso.',
-    // 腿脚服装以前单独一段，原因是「图1 的姿态一律不要」会连带把腿上的衣服一起否掉。
-    // 现在服装段只说「照抄衣服」，不再提姿态，这段话就没有存在的必要了；
-    // 它反而在 2026-11 引发了一次事故：清单里枚举了 trousers / jeans / wide-leg pants，
-    // 模型从第一项开始挑，把短裙换成了牛仔裤。清单越长，越像一份选项菜单。
-    legwearLine,
-    'Reference image 2 gives the FACE ONLY: this exact identity, hairstyle and hair color.',
-    poseRef,
-    // 两句合一：line-art 那句属于「图3 只给姿势」，结尾的 anatomy 要求也是同一个意思。
-    // 分开写多花 90 字符，而 T5 的有效窗口只到 512 token。
-    'Ignore its line-art style and simplified proportions — a finished photo, natural anatomy.',
-    framing,
-    floorLine,
-    frameLine,
-    styleLine,
-    // 反例比正例管用：模型对「站直、双手贴身」的默认偏好极强，不点名的话，
-    // 只要服装是长裙就会自己滑回正面站姿。
-    // 它和下面那句要点一起停在末尾：姿势相关的全部约束集中到最后读到的位置，
-    // 彼此加强。分开摆（一个在中间、一个在末尾）时，读到最后只剩要点半句，
-    // 反例那半句已经被前面一大段服装说明冲淡了。
-    stanceGuard,
-    // 姿态要点放在这里：提示词末尾是全文权重最高的位置，而姿势恰恰是最先被稀释的一项。
-    // 它曾经排在「图3 只给姿势」后面（中间位置），模型读完前面一大段服装说明后
-    // 已经把这句当背景描述——线稿双手叉腰，成品双手垂在身侧，要点文本明明写着
-    // hands on her hips 也没用。移到末尾只挪位置、不加字，反而更短。
-    hintLine,
-    // 补充描述放在最后：这是全文权重最高的位置，用户亲眼看过成品后写的纠正应该落在这里。
-    // 它是用户的，就原样放在这儿——曾经试过在它后面自动追一句姿势要点，
-    // 结果那一句把用户的话挤成了半句，两个信息都没进去。
-    extra,
+  // 还有一条踩过坑的经验：**否定句会被读成肯定动作**。
+  // do not drop the arms / do not square the body 这类写法，T5 对否定不敏感，
+  // 反而把 "drop the arms"、"square the body" 当成要画的内容。所以整段一个否定词都不留。
+  // ────────────────────────────────────────────────────────────────────────────
+  const lines = [
+    'Photorealistic full-body fashion portrait of one person, head-to-toe, centered, feet fully visible.',
+    'Three reference images are given in this order: 1 = pose line-art, 2 = face, 3 = outfit.',
   ];
-  return parts.filter(Boolean).join(' ');
+
+  // 男性库的 pose.en 来自上游、与线稿不严格对应（SP-P021 线稿单臂高举、文字写扶颈贴腿），
+  // 照旧不注入，避免文字与线稿打架。
+  const poseText = poseHint && gender !== 'male'
+    ? String(poseHint).replace(/\s+/g, ' ').trim().replace(/[.\s]+$/, '')
+    : '';
+
+  lines.push(
+    'POSE — HIGHEST PRIORITY (reference image 1):'
+    + (poseText
+      ? ` reproduce this exact pose — ${poseText}. Follow reference image 1 for the arm and hand `
+        + 'positions, elbow angles, shoulder line, hip rotation, leg placement, head tilt, body '
+        + 'orientation and camera angle.'
+      : ' reproduce the exact body posture, arm and hand positions, elbow angles, shoulder line, '
+        + 'hip rotation, leg placement, head tilt, body orientation and camera angle of the line-art figure.')
+    + ' Reference image 1 is the absolute authority for body posture and camera angle.',
+  );
+
+  lines.push(
+    'FACE and HAIR (reference image 2): take ONLY the facial identity and hairstyle from it — '
+    + 'ignore its frontal angle and flat lighting.',
+  );
+
+  // 服装段收尾那句是「整个人体连贯」的正面声明。
+  // 之前这里挂过一句 The bare legs of the line-art mannequin are not a styling choice ——
+  // 既是否定句、又点名了 bare legs / mannequin，模型把服装图里假人的空白腿抄了进来，
+  // 成品出现「裙子下摆到过膝袜之间整段空白、袜子浮空」外加一条图里没有的珍珠项链。
+  // 换成正面声明后对全部素材都成立。
+  lines.push(
+    'OUTFIT (reference image 3): copy every garment head to toe exactly as shown — same type, '
+    + 'same length, same colors, fabric, pattern and accessories. Render the person as one '
+    + 'continuous, anatomically connected body from head to feet, with every garment worn on '
+    + 'that body; the torso, hips, legs and feet are all present and connected.',
+  );
+
+  if (gender === 'male') lines.push('The person is an adult man with a male body, keeping the pose of image 1.');
+
+  // 上半身姿势：线稿只画到胸下缘，按全身出图模型会自己编腿，编的过程中手势全丢。
+  // 这套措辞针对女性库（upper80v2 系列裁到胸下缘）；男性库裁到胯，用略松的一版。
+  if (halfBody) {
+    lines.push(
+      gender === 'male'
+        ? 'FRAMING — image 1 is an upper-body reference that stops at the hip: render a medium shot '
+          + 'cropped around mid-thigh, slightly looser than image 1, and fill the frame with the body '
+          + 'instead of zooming out. Everything image 1 shows — both hands, the forearms, the waist '
+          + 'and the tilt of the hips — stays inside the frame, so no hand is cut off at the edge. '
+          + 'Do not invent legs, feet, shoes or a standing full-length stance. Every hand gesture '
+          + 'from image 1 must be reproduced and clearly readable.'
+        : 'FRAMING — image 1 is an upper-body reference that stops below the chest: render a medium '
+          + 'close-up cropped at mid-thigh, exactly like the crop of image 1, and fill the frame with '
+          + 'the upper body instead of zooming out. Do not invent legs, feet, shoes or a standing '
+          + 'full-length stance. The arms, hands and head are fully visible in this crop, so every '
+          + 'hand gesture from image 1 must be reproduced and clearly readable.',
+    );
+  }
+
+  lines.push(
+    'STYLE: clean seamless studio backdrop, soft even lighting, natural skin texture, sharp '
+    + 'focus, editorial fashion photography, vertical composition, no text, no watermark.',
+  );
+  if (style === 'anime') lines.push('Anime illustration style.');
+  // 补充描述放最后：这是全文权重最高的位置，用户亲眼看过成品后写的纠正应该落在这里。
+  if (extra) lines.push(extra);
+  return lines.join(' ');
 }
 
 /**
@@ -583,7 +388,7 @@ export function buildCloudflareForm({ images, prompt, modelId, width = 1024, hei
  * @param {object}   p.env     Worker 的 env（读 AI binding 与 FLUX_MODEL）
  * @param {Function} p.aiRun   env.AI.run 的绑定版本（丢失 this 会报错，必须 bind）
  */
-export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, extra = '', gender, poseHint, halfBody, probe = false, minimal = false, local = false }) {
+export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, extra = '', gender, poseHint, halfBody, probe = false }) {
   // probe：只发 prompt + 尺寸，不带任何参考图。
   //
   // 诊断用。报 3043 / 500 时，最常见的三种原因是「模型不支持多图」「输入图太大/格式不认」
@@ -599,7 +404,7 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
     });
   }
 
-  const finalPrompt = prompt || buildPrompt({ style, extra, gender, poseHint, halfBody, minimal, local, frame: [width, height] });
+  const finalPrompt = prompt || buildPrompt({ style, extra, gender, poseHint, halfBody, frame: [width, height] });
   // 优先级：请求里显式指定（白名单校验）→ 环境变量 → 默认
   const allowed = new Set(Object.values(MODELS).map((m) => m.modelId));
   const wanted = model || env.FLUX_MODEL || DEFAULT_MODEL;

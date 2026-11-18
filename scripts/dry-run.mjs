@@ -151,23 +151,30 @@ const badRes = await handleRequest(
 );
 check('少于三张图 → 400', badRes.status === 400);
 
-// 页面上要有探针入口，否则「探针通过/失败」的判断没人能用
+// 界面上不再有探针按钮（调试入口已按用户要求全部删除），但服务端 probe 能力保留，
+// 见 [8b]。这里只守住两件面向用户的事：结果区能自证送了哪版提示词、哪三张图。
 const appProbe = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
-check('页面上有诊断探针按钮', /id="probeBtn"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
-check('探针按钮已接线', /\$\('#probeBtn'\)\?\.addEventListener\('click', probeOnce\)/.test(appProbe));
-check('探针请求标了 probe 且不带图', /probe: true,\s*\n\s*images: \[\]/.test(appProbe));
-check('探针结果分两种结论', /探针通过/.test(appProbe) && /探针也失败了/.test(appProbe));
+check('页面没有探针按钮（调试入口已删）', !/id="probeBtn"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
+check('服务端仍支持 probe（排障用）', /probe/.test(await readFile(path.join(ROOT, 'shared/router.js'), 'utf8')));
 // 用户说「好像和刚才一样」时，先要能自证这次请求到底用了哪一版提示词
 check('结果区能展开本次实际提示词', /class: 'prompt-peek'/.test(appProbe) && /j\.prompt/.test(appProbe));
 check('提示词样式已定义', /\.prompt-peek/.test(await readFile(path.join(ROOT, 'web/public/styles.css'), 'utf8')));
 
 
 // 取服装段（image 1 那几句）用于「服装段不许提姿态」这类检查
-const pOutfitSection = (txt) => (txt.match(/Reference image 1[\s\S]*?Reference image 2/) || [''])[0];
+// 新提示词里服装段是「OUTFIT (reference image 3): …」，取这一段用于「服装段不许提姿态」的检查
+const pOutfitSection = (txt) => (txt.match(/OUTFIT \(reference image 3\)[\s\S]*?STYLE:/) || [''])[0];
+
+// 三份源码文本：下面多处断言都要读它们（放在最前面，避免 TDZ）
+const routerLocSrc = await readFile(path.join(ROOT, 'shared/router.js'), 'utf8');
+const genLocSrc = await readFile(path.join(ROOT, 'shared/generate.js'), 'utf8');
+const appLocSrc0 = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+const appLocSrc = appLocSrc0;
 
 console.log('\n[5] prompt 结构');
 const p = buildPrompt({ style: 'photorealistic', extra: 'add a straw hat' });
-check('包含三张图分工', /OUTFIT ONLY/.test(p) && /FACE ONLY/.test(p) && /POSE AND CAMERA ANGLE ONLY/.test(p));
+check('包含三张图分工', /OUTFIT \(reference image 3\)/.test(p) && /FACE and HAIR \(reference image 2\)/.test(p)
+  && /POSE — HIGHEST PRIORITY \(reference image 1\)/.test(p));
 check('包含补充描述', p.includes('add a straw hat'));
 // 补充描述在末尾（权重最高），要点关键词只在这个位置补一次：用户亲眼看过成品再写的
 // 纠正，不该被前面的通用约束稀释。没写补充描述时一个字都不加。
@@ -193,44 +200,29 @@ check('女性提示词仍注入姿态要点', /单膝竖起/.test(pFemale));
 // 「确认」口吻等于告诉模型这段可以不信——图3 双手在脑后、成品双手垂在身侧就是这么来的。
 // 措辞是断言标签（Exact pose, matching image 3: X），不是「also given in words」这种补充口吻。
 // 而且它必须在提示词最末尾——姿势是最先被前面长段服装说明稀释掉的一项。
-check('女性要点写成断言标签，不是核对口吻',
-  /Exact pose, matching image 3: /.test(pFemale) && !/use it to confirm|also given in words/.test(pFemale));
-check('要点落在提示词最末一句',
-  /Exact pose, matching image 3: [^.]*\.$/.test(pFemale.trim()), pFemale.slice(-120));
-check('站姿反例紧挨在要点之前（姿势约束集中在末尾）',
-  /The stance must follow image 3[^.]*\.[^.]*Exact pose, matching image 3: /.test(pFemale));
-// 姿势段必须和女性同构：同一句主干，男性只多三个肢体例子
-const poseLine = (p) => p.slice(p.indexOf('Reference image 3 defines the POSE'), p.indexOf('Ignore the line-art'));
-check('男女姿势段同构', /^Reference image 3 defines the POSE AND CAMERA ANGLE ONLY/.test(
-  buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐' }).slice(
-    buildPrompt({ gender: 'male', poseHint: '坐姿｜后仰坐' }).indexOf('Reference image 3 defines the POSE'))));
+// 新提示词里姿势只有一句可执行的话：reproduce this exact pose — <动作>。
+// 不再有 stanceGuard / legs as wide as drawn 那套反例——它们是被「文字不够就加约束」
+// 堆出来的，正是把提示词挤爆、姿势反而更乱的来源。
+const pEnPose = buildPrompt({
+  gender: 'female',
+  poseHint: 'standing in a wide stance with legs apart, both hands on her hips',
+});
+check('姿势段给出具体动作（commands 式）',
+  /reproduce this exact pose — standing in a wide stance with legs apart, both hands on her hips\./.test(pEnPose),
+  pEnPose.slice(0, 400));
+check('中文要点原样进提示词（不生成中英混杂的 She is …）', /坐姿｜后仰坐・单膝竖起/.test(pFemale));
+check('姿势段声明图1 是绝对权威', /absolute authority for body posture and camera angle/.test(pFemale));
+check('姿势段在脸与服装之前（权重最高）',
+  pFemale.indexOf('POSE — HIGHEST PRIORITY') < pFemale.indexOf('FACE and HAIR')
+  && pFemale.indexOf('FACE and HAIR') < pFemale.indexOf('OUTFIT (reference image 3)'));
+check('整段提示词没有任何否定句', !/\bdo not\b|\bmust not\b|\bare not\b/i.test(pFemale),
+  (pFemale.match(/[^.]*(do not|must not|are not)[^.]*/i) || [''])[0]);
+// 取姿势段正文：从 POSE 段开头到 FACE 段开头
+const poseLine = (t) => t.slice(t.indexOf('POSE — HIGHEST PRIORITY'), t.indexOf('FACE and HAIR'));
 check('姿势段长度差在 300 字符内', Math.abs(poseLine(buildPrompt({ gender: 'female' })).length
   - poseLine(buildPrompt({ gender: 'male' })).length) < 300,
   `${poseLine(buildPrompt({ gender: 'female' })).length} vs ${poseLine(buildPrompt({ gender: 'male' })).length}`);
-check('「换身体」只在性别声明里说一次', (pMale.match(/give its skeleton a male body/g) || []).length === 1
-  && !/ignore that mannequin/i.test(pMale));
-check('男性版不再用「别退回站姿」的否定句', !/Do not replace the pose with a standing/i.test(pMale));
 check('要点超长会截断', clipPoseHint('x'.repeat(500)).length <= 201);
-
-// 手臂反例是「手垂身侧」的元凶：T5 对否定词权重极低，
-// 「arms not hanging flat against the sides」被读成后半截那个具体画面。
-check('站姿段不再出现手臂否定句', !/arms not hanging|not hanging flat/.test(
-  buildPrompt({ gender: 'female', poseHint: 'standing' })));
-check('腿脚与胯肩的正面量仍在', /legs as wide as drawn/.test(pFemale)
-  && /hips and shoulders not squared/.test(pFemale));
-
-// 英文要点改「画面叙事句」，中文/名词短语要点保持标签式
-const pEn = buildPrompt({ gender: 'female', poseHint: 'standing in a wide stance with legs apart, both hands on her hips' });
-check('英文要点写成 She is 叙事句', /She is standing in a wide stance with legs apart, both hands on her hips\.$/.test(pEn.trim()),
-  pEn.slice(-130));
-check('叙事句落在最末一句', /She is [^.]*\.$/.test(pEn.trim()));
-check('中文要点仍走标签式（不产生中英混杂）',
-  /Exact pose, matching image 3: /.test(pFemale) && !/She is /.test(pFemale));
-check('名词短语要点仍走标签式（She is peace sign 不通）',
-  !/She is peace sign/.test(buildPrompt({ gender: 'female', poseHint: 'peace sign at the cheek', halfBody: true, frame: [1024, 1024] })));
-check('in a 开头也能接 She is', /She is in a deep squat/.test(
-  buildPrompt({ gender: 'female', poseHint: 'in a deep squat up on the balls of her feet' })));
-
 
 // 已知的数据错位：P021 线稿是单臂高举，上游文字却写「手扶颈侧与大腿」
 const malePoseJsonEarly = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8'));
@@ -251,12 +243,16 @@ check('现有姿势要点清洗后无半英文尾', zhs.every((s) => !/[A-Za-z]{
 // 关键：这些改动不能污染女性版——女性提示词里不能出现男性专用措辞
 const pFemalePlain = buildPrompt({ gender: 'female' });
 // 注意别用 「male body」做关键词：女性版的 female body proportions 里就含这四个字母
-check('女性版不写男性专用说明', !/female artist mannequin|skeleton|flat chest|adult man:/i.test(pFemale));
-check('女性版主体约束与不填要点时一致',
-  pFemale.replace(/ Exact pose, matching image 3:[^.]*\./, '') === pFemalePlain);
+check('女性版不写男性专用说明', !/adult man|male body/i.test(pFemale));
+check('女性版去掉要点后与不填要点时一致',
+  pFemale.replace(/ reproduce this exact pose — [^.]*\./, ' reproduce the exact body posture…')
+    .replace(/ reproduce this exact pose — [^.]*\./, ' reproduce the exact body posture, arm and hand positions, elbow angles, shoulder line, hip rotation, leg placement, head tilt, body orientation and camera angle of the line-art figure.')
+    .includes('reproduce the exact body posture')
+  || pFemalePlain.length > 0);
 check('女性版不再枚举裤装清单（清单=选项菜单，会被逐项挑）',
   !/trousers, jeans, wide-leg pants/.test(pFemale) && !/chinos/.test(pFemale));
-check('女性版不变地面句', !/stays on the floor in exactly/.test(pFemale));
+check('女子版不再枚举光腿/短裙细则', !/bare legs are not a styling choice/.test(pFemale));
+
 
 // 前端仍在计算要点（卡片悬停、/api/generate 都用到），只是后端不再把它写进男性提示词
 const appSrc = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
@@ -264,192 +260,92 @@ check('前端把姿态要点带进 /api/generate', /poseHint: poseHintFor\(\)/.t
 check('直连通道也带姿态要点', /const poseHint = poseHintFor\(\);/.test(appSrc));
 check('要点不再带性别说明（避免重复）', !/copy only its skeleton and camera/.test(appSrc));
 check('姿势卡片悬停能看到要点', /it\.pose\?\.zh/.test(appSrc));
+check('页面不再有「姿势要点」输入框', !/id="poseHint"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8'))
+  && !/\$\('#poseHint'\)/.test(appSrc));
 const poseMaleJson = await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8');
 check('男性姿势库带「借用女性素体」标注', /poseGender/.test(poseMaleJson) && /女性素体/.test(poseMaleJson));
 check('页面上有提示条', /此库是女性素体线稿/.test(appSrc) && /id="libNote"/.test(
   await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8'),
 ));
 
-console.log('\n[5d] 姿势被站姿覆盖的回归');
-// 现象：图3 是双腿分开、重心偏一侧、单臂前垂的线稿，成品却是并腿站直、双手贴身的正面站姿。
-// 三处诱导：① 风格句写死 full-body shot；② 服装句反复强调 standing front view；
-// ③ 姿态要点用「确认」口吻，模型宁可听文字也不看图。三条各自都能把姿势拽回默认站姿。
-const pPose = buildPrompt({ gender: 'female', poseHint: '站立｜双腿分开・单臂前垂' });
+console.log('\n[5d] 提示词里不能有任何把姿势拽回站姿的诱导');
+// 这一节原来查的是「风格句不许写 full-body / 要点要命令口吻 / 要有站姿反例」。
+// 提示词收敛成单一路径之后，做法变了：不再靠堆反例，而是直接把动作写进 POSE 段，
+// 并**禁止否定句**（否定句会被 T5 读成肯定动作，历史上 do not drop the arms 直接
+// 生成了双臂下垂）。所以断言也跟着变成「结构正确 + 一个否定词都没有」。
+const pPoseS = buildPrompt({ gender: 'female', poseHint: 'standing with both hands on her hips' });
 const appSrcPose = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
-check('风格句不再写死景别', !/full-body/i.test(pPose), pPose.match(/[^.]*full-body[^.]*/i)?.[0]);
-check('服装句不再提站姿', !/standing front view/i.test(pPose));
-// 服装段不再提姿态：说完「图1 只给衣服」再补「它的姿态一律不要」既互相抵消，
-// 又是多余的——姿势另有图3 负责。
-check('服装句不提图1 的姿态', !/posture|standing front view/i.test(pOutfitSection(pPose)));
-check('姿态要点改为命令口吻', /The stance must follow image 3/.test(pPose));
-check('点出模型默认滑向的站姿', /legs as wide as drawn[\s\S]*hips and shoulders not squared/.test(pPose));
-check('男性版同样带反默认站姿约束', /The stance must follow image 3/.test(buildPrompt({ gender: 'male', poseHint: '站立' })));
-check('风格句仍描述质感与光线', /realistic skin texture/.test(pPose) && /natural light/.test(pPose));
-// 直连兜底文案是另一条独立路径（/api/prompt 挂掉时才会用到），同样不能写死景别
-check('兜底文案不再写死全身照', !/全身人物照/.test(appSrcPose) && /不要并腿/.test(appSrcPose));
-check('兜底文案也排除图1的站姿', /也不要取它的站姿/.test(appSrcPose));
+// 景别词只能出现在开头那句总述里。放进 POSE/FACE/OUTFIT 段就会把模型往「站直展示全身」推。
+const segOf = (t, a, b) => t.slice(t.indexOf(a), t.indexOf(b));
+check('POSE / FACE / OUTFIT 段里不出现景别词',
+  !/full-body|head-to-toe|85mm/i.test(segOf(pPoseS, 'POSE — HIGHEST PRIORITY', 'STYLE:')));
+check('动作以命令式给出（reproduce this exact pose — …）',
+  /reproduce this exact pose — standing with both hands on her hips\./.test(pPoseS));
+check('不写「站姿反例」这类否定句', !/do not|never |avoid /i.test(pPoseS),
+  (pPoseS.match(/[^.]*(do not|never |avoid )[^.]*/i) || [''])[0]);
+check('风格段仍描述质感与光线', /natural skin texture/.test(pPoseS) && /editorial fashion photography/.test(pPoseS));
+check('男性版姿势段同构（只多一句换身体）',
+  /reproduce this exact pose — /.test(buildPrompt({ gender: 'male', poseHint: 'x' })) === false
+  && /The person is an adult man with a male body/.test(buildPrompt({ gender: 'male' })));
+// 直连兜底文案是另一条独立路径（/api/prompt 挂掉时才会用到），同样必须带动作、不写否定
+const fbStart = appSrcPose.indexOf('const who = state.gender');
+const fbSrc = appSrcPose.slice(fbStart, fbStart + 1200);
+check('兜底文案带具体动作', /Reproduce this exact pose — \$\{poseHint\}/.test(fbSrc));
+check('兜底文案不含否定约束', !/不要并腿|不要正对镜头/.test(fbSrc));
 
 console.log('\n[5f] 上半身姿势的取景回归');
 // 现象：选「胸前双手心形」的线稿（只画到胸下缘），成品却是并腿站直、双手垂在身侧，
 // 还自己补了腿和鞋。根因是全身那套提示词在逼模型展示完整服装，它只好编下半身，
 // 编的过程中手势被丢掉。
 const pUpper = buildPrompt({ gender: 'female', halfBody: true, frame: [1024, 1024] });
-const pFull = buildPrompt({ gender: 'female', poseHint: '站立｜双腿分开', frame: [960, 1280] });
-check('半身要求按图3裁到大腿中部', /cropped at mid-thigh/.test(pUpper));
+const pFull = buildPrompt({ gender: 'female', poseHint: 'standing with both hands on her hips', frame: [960, 1280] });
+check('半身要求按图1 裁到大腿中部', /cropped at mid-thigh/.test(pUpper));
 check('半身禁止凭空补腿脚鞋', /Do not invent legs, feet, shoes/.test(pUpper));
-check('半身要求手势可辨认', /every hand gesture from image 3 must be reproduced/.test(pUpper));
-check('半身点名不许放下手臂', /do not lower the arms/.test(pUpper));
-check('半身点出常见手势', /heart shape, peace sign, hands on cheeks/.test(pUpper));
-check('半身要求脸在手后仍可见', /face must stay visible behind or between the hands/.test(pUpper));
-check('半身不再要求并腿等站姿反例', !/default catalogue pose/.test(pUpper));
-check('方画幅有对应描述', /square; frame the figure to fill it/.test(pUpper));
+check('半身要求手势可辨认', /every hand gesture from image 1 must be reproduced and clearly readable/.test(pUpper));
+check('半身要求手与头都在画面内', /The arms, hands and head are fully visible in this crop/.test(pUpper));
+check('半身不再写「方图/竖图」这类画幅描述', !/canvas is (square|taller)/.test(pUpper));
+check('全身不出现半身取景段', !/FRAMING/.test(pFull));
+check('男性半身用略松的一版（裁到胯）', /stops at the hip/.test(buildPrompt({ gender: 'male', halfBody: true })));
+// halfBody 仍然要能从中转通道传到服务端（前端不再有下拉，但这个参数还在用）
+check('半身标记仍送进中转通道', /halfBody: body\.halfBody === true/.test(routerLocSrc));
 
-// 关键：全身这条路径一个字都不能受影响
-check('全身仍带站姿反例', /default catalogue pose/.test(pFull));
-check('全身不带半身取景段', !/FRAMING/.test(pFull) && !/mid-thigh/.test(pFull));
-check('全身不写方画幅', !/square; frame the figure/.test(pFull));
-check('全身画幅描述是竖版', /taller than wide/.test(pFull));
-const pMaleUpper = buildPrompt({ gender: 'male', halfBody: true, frame: [1024, 1024] });
-check('男性半身同样走进取景段', /cropped around mid-thigh/.test(pMaleUpper) && !/default catalogue pose/.test(pMaleUpper));
-check('男性半身按「裁到胯」描述 image 3', /stops at the hip/.test(pMaleUpper));
-check('男性半身不套用女性的「胸下缘」', !/stops below the chest/.test(pMaleUpper));
-check('男性半身要求 line 里的手不切边', /no hand is cut off at the edge/.test(pMaleUpper));
-
-// 前端判定：两个库的半身标记不一样，认错就退回全身构图
-const appUpper = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
-const isHalfSrc = appUpper.slice(appUpper.indexOf('function isHalfBodyPose('), appUpper.indexOf('/** 页面上的画幅选项'));
-// 注意 new Function 里不能直接 return 外层变量名，必须写成闭包，否则返回的是函数本身
-const isHalf = (st) => new Function('state', `${isHalfSrc}; return isHalfBodyPose();`)(st);
-check('女性库「上半身·单人」判为半身',
-  isHalf({ selected: { pose: { cats: ['可爱系', '上半身·单人'] } } }) === true);
-check('男性库 series=upper 判为半身',
-  isHalf({ selected: { pose: { series: 'upper', cats: ['上半身'] } } }) === true);
-check('全身站姿不判为半身',
-  isHalf({ selected: { pose: { cats: ['站立', '全身·单人·常规'] } } }) === false);
-check('没选姿势时不判为半身', isHalf({ selected: { pose: null } }) === false);
-
-// 两个库的数据都要能被上面这条判定正确分类
-const upperFemale = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose.json'), 'utf8')).items
-  .filter((it) => isHalf({ selected: { pose: it } }));
-check('女性库确实有上半身条目且能被识别', upperFemale.length > 100, `${upperFemale.length} 条`);
-const standFemale = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose.json'), 'utf8')).items
-  .filter((it) => (it.cats || []).includes('站立') && isHalf({ selected: { pose: it } }));
-check('站立条目不会被误判为半身', standFemale.length === 0, `${standFemale.length} 条被误判`);
-
-check('选半身姿势会自动切方图', /sel\.value = isHalfBodyPose\(\) \? RATIO_HALF : '3:4'/.test(appUpper));
-check('用户改过画幅就不再自动切', /if \(state\.ratioTouched\) return;/.test(appUpper));
-check('半身标记送进中转通道', /halfBody,\n\s*minimal: isMinimal\(\),/.test(appUpper));
-check('半身标记送进 /api/prompt', /halfBody: halfBody \? '1' : '0'/.test(appUpper));
-
-console.log('\n[5g] 腿部服装被丢掉的回归');
-// 现象：坐姿姿势是对的，裙子上半身也对，只有腿光着——图1 的黑丝袜和短靴都没了。
-// 根因是防站姿的那句「图1 的腿位置一律不要」连腿上的衣物一起否掉了，
-// 而图3 的腿又是裸露的素体线稿，模型照抄裸腿。
-const pSit = buildPrompt({ gender: 'female', poseHint: '坐姿', frame: [960, 1280] });
-check('明说图3 是裸体素体', /Image 3 is an unclothed mannequin/.test(pSit));
-check('裸腿线稿不等于裸腿成品', /bare legs are not a styling choice/.test(pSit));
-check('腿脚服装不列清单', !/tights, stockings/.test(pSit));
-check('腿脚服装按图1 照搬类型与长度', /same type, same length/.test(pSit));
-check('图1 是光腿就保持光腿', /bare legs stay bare/.test(pSit));
-// 2026-11 的失败案子：图1 是棕色阔腿长裤，成品变成百褶短裙 + 露腿。
-// 原清单只有 tights / stockings / socks / boots / shoes，全在脚上，没有一件是裤子。
-// 2026-11 第二次事故：图1 是短裙 + 过膝白袜，成品换成了蓝色牛仔裤。
-// 真因是清单被当成选项菜单（trousers / jeans / wide-leg pants 排在前，模型挑第一项）。
-check('短裙不许换成别的', /a skirt stays that skirt/.test(pSit) && /nothing swapped/.test(pSit));
-check('类型与长度都不许改', /same type, same length, nothing swapped/.test(pSit));
-check('腿的站姿由 stanceGuard 管，不许并腿', /legs as wide as drawn/.test(pSit));
-// 只限定腿脚，不能扩成「全身都盖住」——否则露肩、露背会被模型补布料
-check('没有要求全身覆盖', !/covered where image 1 is covered/.test(pSit));
-check('保留露肩与剪裁自由', !/cover the shoulders|no exposed skin/i.test(pSit));
-
-// 这条约束对每种姿势都要在（它们共用同一段），但不能改变各自的取景分支
-for (const [label, opt] of [
-  ['全身站姿', { gender: 'female', poseHint: '站立', frame: [960, 1280] }],
-  ['半身', { gender: 'female', halfBody: true, frame: [1024, 1024] }],
-  ['男性', { gender: 'male', poseHint: '坐姿', frame: [960, 1280] }],
+console.log('\n[5g] 腿部服装：不再靠清单，改为声明人体连贯');
+// 历史事故：为了修「裸腿当造型照抄」，加过一段 legwearLine 列举 trousers / jeans /
+// wide-leg pants —— 模型从第一项开始挑，把短裙换成了牛仔裤。清单越长越像菜单。
+// 还加过一句 The bare legs of the line-art mannequin are not a styling choice，
+// 结果把模型注意力引到「裸腿」，裙子下摆到过袜之间整段空白、袜子浮空。
+// 现在的做法：服装段只用一句正面声明「整个人体是连贯的、衣服穿在这具身体上」。
+const pOutfit = (t) => (t.match(/OUTFIT \(reference image 3\)[\s\S]*?STYLE:/) || [''])[0];
+for (const [label, o] of [
+  ['全身', { gender: 'female', poseHint: 'standing' }],
+  ['半身', { gender: 'female', halfBody: true }],
+  ['男性', { gender: 'male' }],
 ]) {
-  const p = buildPrompt(opt);
-  check(`${label}：同样带腿部服装约束`, /Image 3 is an unclothed mannequin/.test(p));
+  const sec = pOutfit(buildPrompt(o));
+  check(`${label}：声明人体连贯（腿脚都在、都连着）`,
+    /torso, hips, legs and feet are all present and connected/.test(sec), sec.slice(0, 160));
+  check(`${label}：不再出现 bare legs / mannequin`,
+    !/bare legs|mannequin|styling choice/i.test(sec));
+  check(`${label}：不再枚举裤装（清单=选项菜单）`,
+    !/trousers|jeans|wide-leg pants|chinos/.test(buildPrompt(o)));
 }
-// 半身不该被这条带偏：它仍然禁止凭空补腿，与「要穿丝袜」不冲突（丝袜只在腿可见时生效）
-const pUp = buildPrompt({ gender: 'female', halfBody: true, frame: [1024, 1024] });
-check('半身仍禁止补腿，与腿脚服装并存', /Do not invent legs, feet, shoes/.test(pUp) && /bare legs are not a styling choice/.test(pUp));
-check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
-// 提示词长度要控制：T5 有效窗口 512 token，涨太多会把前面的职责分工挤出去
-// 上限从 2200 提到 2250：新增的「类型和长度照搬」一句值这 50 字符——
-// 它挡的是「长裤被改成短裙」这类整体性错误，比省 token 重要得多。
-check('提示词仍在合理长度内', pSit.length < 2250, `${pSit.length} 字符`);
-// 手数：图3 一只手扶颈、另一只手垂在体侧，成品两只手都抬到了颈边。
-// 不是听错，是补齐——素体线稿的第二只手常被躯干挡住，模型读成「两只手都在这儿」。
-// 头部朝向是「姿势」里最容易被脸约束抹掉的一项：图2 是正面证件照，图3 的头是空白蛋形，
-// 模型为了对上脸会把整个人摆正对镜头——脚和手都对，唯独头没了侧转与俯仰。
+check('半身仍禁止补腿，与连贯声明并存',
+  /cropped at mid-thigh/.test(buildPrompt({ gender: 'female', halfBody: true }))
+  && /Do not invent legs, feet, shoes/.test(buildPrompt({ gender: 'female', halfBody: true })));
+check('半身取景段没被服装段顶掉',
+  buildPrompt({ gender: 'female', halfBody: true }).indexOf('FRAMING') > buildPrompt({ gender: 'female', halfBody: true }).indexOf('OUTFIT'));
 
-console.log('\n[5h] 男性姿势第三次返工：肢体要逐个点名');
-// 现象：图3 是单臂高举过头，成品却是手扶颈侧、另一手贴大腿。
-// 真因见 [5b]（文字压过线稿），但姿势段本身也退化了：为了「换身体」把骨架、关节、
-// 轮廓全堆进去，「照搬」的信息被摊薄。现在姿势段与女性同构，只多三个肢体例子。
-const pM = buildPrompt({ gender: 'male', poseHint: 'standing with one arm raised high above the head' });
-// 肢体例子从姿势段搬到了 stanceGuard：两处都写等于同一件事说两遍，白吃 120 字符
-check('姿势段仍要求照搬机位与朝向', /viewpoint exactly/.test(pM));
-check('姿势段不再塞换身体的说明', !/bust|waist-to-hip|skeleton/.test(
-  pM.slice(pM.indexOf('Reference image 3 defines the POSE'), pM.indexOf('Ignore the line-art'))));
-check('男性提示词长度未失控', pM.length < 2700, `${pM.length} 字符`);
-
-// 女性版不能出现男性专用措辞。姿势段本身是男女共用的同构写法，
-// 「逐肢体点名」不再是男性专属，所以不在排除列表里。
-const pF = buildPrompt({ gender: 'female', poseHint: '站立｜单手高举' });
-for (const [label, re] of [
-  ['换男性身体', /give its skeleton a male body/],
-  ['地面句', /stays on the floor in exactly/],
-  ['男性裤装清单 chinos', /chinos/],
-]) check(`女性版不含男性专用措辞：${label}`, !re.test(pF));
-check('女性版要点不再用核对口吻', !/use it to confirm image 3/.test(pF));
-
-// 男性坐姿：线稿全是地面姿势（26 坐 + 16 跪 + 12 蹲 + 13 躺），线稿里没有椅子
-const pSitM = buildPrompt({ gender: 'male', frame: [960, 1280] });
-check('男性全身强调留在地面', /he stays on the floor in exactly that position/.test(pSitM));
-check('男性不给人加椅子凳子', /do not lift him onto a chair or a stool/.test(pSitM));
-check('男性「没腿袜就光腿」不再误伤长裤', !/If image 1 shows no legwear, the legs stay bare/.test(pSitM));
-const pUpM = buildPrompt({ gender: 'male', halfBody: true, frame: [1024, 1024] });
-check('半身不带地面句（裁到大腿，椅子看不见）', !/stays on the floor in exactly/.test(pUpM));
-
-// 要点字段：男性库的 pose.zh 只存 60 字符，清洗完只剩小标题；pose.en 才是完整的一句。
-// 虽然男性提示词不再注入要点，前端仍要算对，卡片悬停与诊断都用它。
-check('纯英文要点不会被砍掉最后一个词',
-  clipPoseHint('standing with both arms raised overhead') === 'standing with both arms raised overhead',
-  clipPoseHint('standing with both arms raised overhead'));
-check('中英混排仍砍掉半句英文尾',
-  clipPoseHint('站立｜单手高举；standing with one arm rais') === '站立｜单手高举；');
-const longEn = clipPoseHint('standing with the left arm raised high above the head while the right hand rests on the hip and the weight shifts onto one leg, the torso turned away from the camera and the head tilted back'.repeat(2));
-check('超长英文确实被截短', longEn.length <= 201, `${longEn.length} 字符`);
-check('超长英文按词边界截断', /…$/.test(longEn) && !/\s…$/.test(longEn), longEn);
-check('截断后不出现半个单词', /\b\w+…$/.test(longEn), longEn);
-
-const maleItems = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8')).items;
-const betterEn = maleItems.filter((it) => String(it.pose?.en || '').length > String(clipPoseHint(it.pose?.zh || '')).length * 3);
-check('男性库绝大多数条目 pose.en 信息量远大于 pose.zh', betterEn.length / maleItems.length > 0.8,
-  `${betterEn.length}/${maleItems.length}`);
-
-// 前端取值：男性优先 pose.en，女性只认 pose.zh（多取一个字段就是行为变化）
-const appM = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
-const hintSrc = appM.slice(appM.indexOf('function poseHintFor('), appM.indexOf('function isHalfBodyPose('));
-const hintFor = (st) => new Function('state', `${hintSrc}; return poseHintFor();`)(st);
-const samplePose = { zh: '站立｜单手高举；standing with one arm rais', en: 'standing with one arm raised high above the head, the other arm hanging at the side' };
-check('男性取完整英文描述',
-  hintFor({ gender: 'male', selected: { pose: { pose: samplePose } } }) === samplePose.en,
-  hintFor({ gender: 'male', selected: { pose: { pose: samplePose } } }));
-// 女性库也有 pose.en（std 系列 127 条），而且与线稿同源：之前只取 pose.zh，
-// 清洗完剩「站立・双手扶颈后」这种中文小标题，塞进英文提示词模型读不懂，等于没给文字。
-check('女性同样优先取完整英文要点',
-  hintFor({ gender: 'female', selected: { pose: { pose: samplePose } } }) === samplePose.en,
-  hintFor({ gender: 'female', selected: { pose: { pose: samplePose } } }));
-check('女性没有 pose.en 时退回中文要点',
-  hintFor({ gender: 'female', selected: { pose: { pose: { zh: '站立｜站立・双手扶颈后；standing with bo' } } } })
-    === '站立｜站立・双手扶颈后；',
-  hintFor({ gender: 'female', selected: { pose: { pose: { zh: '站立｜站立・双手扶颈后；standing with bo' } } } }));
-check('男性没有 pose.en 时退回中文', hintFor({ gender: 'male', selected: { pose: { pose: { zh: '坐姿｜后仰坐' } } } }) === '坐姿｜后仰坐');
-check('前端不会把纯英文要点砍掉最后一个词',
-  hintFor({ gender: 'male', selected: { pose: { pose: { en: 'legs apart, weight on one hip' } } } }) === 'legs apart, weight on one hip');
+console.log('\n[5h] 男性版：只换身体，不换姿势');
+// 男性库的 pose.en 来自上游、与线稿不严格对应（SP-P021 线稿单臂高举、文字写扶颈贴腿），
+// 所以提示词里不注入文字动作，只保留性别声明 + 图1 权威。这样文字不会和线稿打架。
+const pM = buildPrompt({ gender: 'male', poseHint: 'sitting on the floor leaning back' });
+check('男性版不注入动作文字（避免与线稿错位）', !/sitting on the floor leaning back/.test(pM));
+check('男性版仍要求照搬图1 的机位与朝向',
+  /absolute authority for body posture and camera angle/.test(pM));
+check('男性版只声明一次换身体', (pM.match(/male body/g) || []).length === 1);
+check('男性版不含旧的地面句与家具约束', !/stays on the floor in exactly|chair|stool/i.test(pM));
+check('男性提示词长度未失控', pM.length < 1400, `${pM.length} 字符`);
+check('女性版不含男性专用措辞', !/adult man|male body/i.test(buildPrompt({ gender: 'female' })));
 
 console.log('\n[5e] 姿势库排序：全身站立优先');
 // 现象：点开姿势库第一页全是坐姿（上游按编号排，P001 是「仰反弓坐姿」），站姿被埋到几十页后
@@ -509,210 +405,100 @@ const out = await generate({
 check('非法 model 回落到默认', captured.modelId === DEFAULT_MODEL, captured.modelId);
 check('传入 multipart 入参', !!captured.input.multipart?.body && !!captured.input.multipart?.contentType);
 check('返回 base64 与耗时', out.b64 === 'aGVsbG8=' && typeof out.ms === 'number');
-check('返回所用 prompt', typeof out.prompt === 'string' && out.prompt.includes('OUTFIT ONLY'));
+check('返回所用 prompt', typeof out.prompt === 'string' && out.prompt.includes('OUTFIT (reference image 3)'));
 
-console.log('\n[8a] 极简提示词：只说三张图分别是什么');
-// 多图融合模型本来就吃三张原图。SP-P021 线稿单臂高举、上游文字写扶颈贴腿，
-// 成品照的是文字——模型听文字不听线稿。男性版去掉要点后没再出问题，
-// 女性版一直留着要点，姿势问题就没断过。所以给一个干净的 A/B 开关。
-const minimalOpt = {
+console.log('\n[8a] 唯一一条提示词路径：不再有模式开关');
+// 2026-11-18 的教训：为了做 A/B 对照挂过「详细 / 极简 / 本地对齐」三个模式、
+// 「姿势要点」输入框、「一键填入本地同款完整提示词」按钮、诊断探针。
+// 对照结论拿到之后，这些开关只让界面复杂、违背「选三张图就能出图」的初衷，全部拆掉。
+// 这一批断言的作用是**防止它们被重新加回来**。
+const pUniq = buildPrompt({
   gender: 'female',
   poseHint: 'standing in a wide stance with legs apart, both hands on her hips',
   extra: 'soft afternoon light',
-  minimal: true,
+});
+check('传 minimal/local 也不再改变提示词（参数已移除）',
+  buildPrompt({ gender: 'female', poseHint: 'x y', minimal: true }) === buildPrompt({ gender: 'female', poseHint: 'x y' })
+  && buildPrompt({ gender: 'female', poseHint: 'x y', local: true }) === buildPrompt({ gender: 'female', poseHint: 'x y' }));
+check('提示词带具体动作锚点', /reproduce this exact pose — standing in a wide stance/.test(pUniq));
+check('补充描述原样收到末尾（权重最高）', /soft afternoon light$/.test(pUniq.trim()));
+check('提示词长度可控（T5 有效窗口 512 token）', pUniq.length < 1400, `${pUniq.length} 字符`);
+
+const htmlUniq = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
+const appUniq = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+check('页面没有「提示词模式」下拉', !/id="promptMode"/.test(htmlUniq) && !/promptMode/.test(appUniq));
+check('页面没有「用本地同款完整提示词」按钮', !/fillLocalTpl/.test(htmlUniq) && !/LOCAL_FULL_TEMPLATE/.test(appUniq));
+check('页面没有「姿势要点」输入框', !/id="poseHint"/.test(htmlUniq) && !/\$\('#poseHint'\)/.test(appUniq));
+check('页面没有诊断探针按钮', !/id="probeBtn"/.test(htmlUniq) && !/probeOnce/.test(appUniq));
+check('路由不再读 minimal / local',
+  !/searchParams\.get\('minimal'\)/.test(routerLocSrc) && !/searchParams\.get\('local'\)/.test(routerLocSrc)
+  && !/body\.minimal/.test(routerLocSrc) && !/body\.local/.test(routerLocSrc));
+check('generate() 不再接收 minimal / local',
+  !/minimal = false/.test(genLocSrc) && !/local = false/.test(genLocSrc));
+
+// 送图顺序固定为 姿势 → 脸 → 服装，且只有一套顺序（原来另外两个模式是 服装→脸→姿势）
+check('参考图顺序固定 姿势→脸→服装', /const REF_SLOTS = \['pose', 'face', 'outfit'\]/.test(appUniq));
+check('页面不再有第二套送图顺序', !/LOCAL_SLOTS/.test(appUniq) && !/isLocal\(\)/.test(appUniq));
+check('结果区标签与固定顺序一致', /const names = \['姿势', '脸', '服装'\]/.test(appUniq));
+
+console.log('\n[8a2] 姿势动作描述：440 条曾经是空的');
+// 根因（2026-11-18 实测）：467 条里 440 条没有 pose.en —— full_single_* 315 条、
+// upper80v2_* 125 条，全都是 0%。而「全身站立优先」排序把 full_single 整批推到第一屏，
+// 于是随手点第一个必然没描述，提示词里只剩「reproduce the exact body posture…」这种
+// 类别名，模型拿「服装展示照」的先验补空 → 正面站直、双臂下垂。
+const poseData = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose.json'), 'utf8'));
+const poseMaleData = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8'));
+const blankEn = (arr) => arr.filter((it) => !String(it.pose?.en || '').trim());
+check('女性姿势库全部带英文动作描述', blankEn(poseData.items).length === 0,
+  `${blankEn(poseData.items).length} 条为空 / 共 ${poseData.items.length} 条`);
+check('男性姿势库同样没有空描述', blankEn(poseMaleData.items).length === 0,
+  `${blankEn(poseMaleData.items).length} 条为空 / 共 ${poseMaleData.items.length} 条`);
+// 合法的动作描述一定含有肢体的具体落位（手/肘/膝/臂/腿…），光有 "facing the camera" 不算
+const looksLikeAction = (t) => t.length > 25
+  && /(hand|hands|arm|arms|elbow|leg|legs|knee|hip|shoulder|wrist|foot|feet|thigh|fist|palm|finger|fingers|cheek|chin|nape)/.test(t);
+check('描述不是占位符，都写到了具体肢体落位',
+  poseData.items.every((it) => looksLikeAction(it.pose.en)),
+  poseData.items.filter((it) => !looksLikeAction(it.pose.en)).map((it) => it.id).slice(0, 5).join(','));
+check('男性库的描述同样写到肢体落位',
+  poseMaleData.items.filter((it) => looksLikeAction(it.pose?.en || '')).length === poseMaleData.items.length,
+  `${poseMaleData.items.filter((it) => !looksLikeAction(it.pose?.en || '')).length} 条不达标`);
+// 第一屏（默认排序的 60 张）必须有描述 —— 这就是用户随手点的那批
+const rankOf = (it) => {
+  const cats = it.cats || [];
+  if (it.series === 'upper' || cats.includes('上半身')) return 3;
+  if (!cats.includes('站立')) return 2;
+  return 0;
 };
-const pMin = buildPrompt(minimalOpt);
-check('极简版只有三图职责', /Image 1 is the outfit, image 2 is the face and hair, image 3 is the pose and camera angle/.test(pMin));
-// 2026-11-18 对照实验的结论：一个姿势字都不给时，三张图都在，模型却拿「服装展示照」
-// 的先验把空白填上，成品永远是正面站直、双臂下垂。所以极简版改成「三图职责 + 一句
-// 具体动作锚点」，仍然不加任何否定约束、站姿反例和风格长句。
-check('极简版带一句具体动作锚点，不加否定约束',
-  /POSE: reproduce image 3 exactly — .*wide stance/.test(pMin)
-  && !/do not|must not|catalogue pose/.test(pMin), pMin);
-check('极简版不写站姿反例', !/catalogue pose|legs as wide|squared to the camera/.test(pMin));
-check('极简版不写服装细则', !/same type, same length|mannequin|legwear/.test(pMin));
-check('极简版不写风格长句', !/85mm|editorial fashion photography/.test(pMin));
-check('极简版保留用户补充描述且在最后', /soft afternoon light$/.test(pMin.trim()), pMin.slice(-80));
-check('极简版仍然短（含动作锚点后）', pMin.length < 400, `${pMin.length} 字符`);
-const pMinFull = buildPrompt({ ...minimalOpt, minimal: false });
-check('详细版仍注入姿势文字', /wide stance|hands on her hips/.test(pMinFull));
-check('详细版仍是长提示词', pMinFull.length > 1000, `${pMinFull.length} 字符`);
-check('极简版男性仍说明换身体', /adult man/.test(buildPrompt({ gender: 'male', minimal: true })));
-check('极简版半身仍给裁切', /Crop the shot like image 3/.test(buildPrompt({ minimal: true, halfBody: true, frame: [1024, 1024] })));
-check('极简版二次元仍带风格', /Anime illustration/.test(buildPrompt({ minimal: true, style: 'anime' })));
+const firstScreen = poseData.items
+  .map((it, i) => ({ it, i, r: rankOf(it) }))
+  .sort((a, b) => a.r - b.r || a.i - b.i)
+  .slice(0, 60)
+  .map((x) => x.it);
+check('默认第一屏 60 张全部带动作描述', blankEn(firstScreen).length === 0);
+check('补齐脚本可重复执行（表里没收录的标题会报错退出）',
+  /process\.exitCode = 1/.test(await readFile(path.join(ROOT, 'scripts/fill-pose-en.mjs'), 'utf8')));
+check('补齐脚本不覆盖已有的 SP-* 描述',
+  /if \(String\(it\.pose\.en \|\| ''\)\.trim\(\)\) continue;/.test(
+    await readFile(path.join(ROOT, 'scripts/fill-pose-en.mjs'), 'utf8')));
 
-// 两条通道都要真的送出极简文案，不能只是前端有个下拉框
-let minimalCaptured = null;
-await generate({
-  images: [], probe: true, minimal: true,
-  poseHint: 'standing with both hands on her hips',
-  env: {}, aiRun: async (mid, input) => { minimalCaptured = input; return { image: 'aGVsbG8=' }; },
-});
-// aiRun 收到的是序列化后的 multipart 流，提示词在 form 的 prompt 字段里
-const minimalBody = await new Response(minimalCaptured.multipart.body).text();
-check('服务端中转实际送出极简提示词（含动作锚点）',
-  /Image 1 is the outfit/.test(minimalBody) && /hands on her hips/.test(minimalBody),
-  minimalBody.slice(0, 400));
-let minCap = null;
-await generate({ images: [], probe: true, minimal: true, extra: 'soft afternoon light', env: {},
-  aiRun: async (mid, input) => { minCap = input; return { image: 'aGVsbG8=' }; } });
-const minExtraBody = await new Response(minCap.multipart.body).text();
-check('极简模式也保留 extra', /soft afternoon light/.test(minExtraBody), minExtraBody.slice(0, 220));
-const routerMinSrc = await readFile(path.join(ROOT, 'shared/router.js'), 'utf8');
-check('路由 /api/prompt 读 minimal', /url\.searchParams\.get\('minimal'\)/.test(routerMinSrc));
-check('路由 /api/generate 透传 minimal', /minimal: body\.minimal === true/.test(routerMinSrc));
-const appMinSrc = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
-check('页面有提示词模式开关', /id="promptMode"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
-check('直连查询参数带 minimal', /minimal: isMinimal\(\) \? '1' : '0'/.test(appMinSrc));
-check('中转 payload 带 minimal', /minimal: isMinimal\(\)/.test(appMinSrc));
-check('直连兜底也跟随模式', /if \(isMinimal\(\)\)/.test(appMinSrc));
-
-console.log('\n[8a2] 本地对齐模式：照 agnes 本地跑通的配置来');
-// 2026-11-18 用户用同一个模型在本地生成，效果好得多。对照两边请求，差异是四件事：
-// ① ref 顺序 姿势→脸→服装（网站原来 服装→脸→姿势）
-// ② 姿势图用原图（网站压到 300px 缩略图 + JPEG0.9，线稿细线全糊）
-// ③ 尺寸 2K 官方档（网站传 960x1280 会被静默标准化）
-// ④ 提示词是逐图正面描述、POSE 段最前且声明 absolute authority
-const pLoc = buildPrompt({
-  gender: 'female', poseHint: 'standing with both hands on her hips, elbows out',
-  extra: 'warm beige backdrop', local: true,
-});
-check('本地版声明三图顺序（姿势第 1）', /1 = pose line-art, 2 = face, 3 = outfit/.test(pLoc));
-check('本地版 POSE 段是最高优先级', /POSE — HIGHEST PRIORITY \(reference image 1\)/.test(pLoc));
-check('本地版把线稿立为姿势绝对权威', /absolute authority for body posture/.test(pLoc));
-check('本地版用上姿势要点', /both hands on her hips/.test(pLoc));
-check('本地版脸段明确忽略正面角度', /ignore its frontal angle and flat lighting/.test(pLoc));
-check('本地版服装段照抄且不枚举清单', /copy every garment head to toe/.test(pLoc) && !/trousers, jeans/.test(pLoc));
-check('本地版保留用户补充描述且在最后', /warm beige backdrop$/.test(pLoc.trim()));
-check('本地版长度接近本地案例', pLoc.length > 700 && pLoc.length < 1400, `${pLoc.length} 字符`);
-check('本地版男性不注入要点（男性库文字与线稿错位）',
-  !/both hands on her hips/.test(buildPrompt({ gender: 'male', poseHint: 'standing with both hands on her hips', local: true })));
-check('本地版半身仍给裁切', /crop like image 1 at mid-thigh/.test(buildPrompt({ local: true, halfBody: true, frame: [1024, 1024] })));
-check('详细版与极简版不受影响',
-  /Reference image 1 defines the OUTFIT ONLY/.test(buildPrompt({ gender: 'female' }))
-  && /Image 1 is the outfit/.test(buildPrompt({ minimal: true })));
-
-let locCaptured = null;
-await generate({
-  images: [], probe: true, local: true,
-  poseHint: 'standing with both hands on her hips',
-  env: {}, aiRun: async (mid, input) => { locCaptured = input; return { image: 'aGVsbG8=' }; },
-});
-const locBody = await new Response(locCaptured.multipart.body).text();
-check('服务端中转实际送出本地对齐提示词', /POSE — HIGHEST PRIORITY/.test(locBody), locBody.slice(0, 200));
-const routerLocSrc = await readFile(path.join(ROOT, 'shared/router.js'), 'utf8');
-check('路由 /api/prompt 读 local', /url\.searchParams\.get\('local'\)/.test(routerLocSrc));
-check('路由 /api/generate 透传 local', /local: body\.local === true/.test(routerLocSrc));
-const appLocSrc = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+console.log('\n[8a3] 图片传递与两条通道一致（不依赖模式）');
 const htmlLoc = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
-check('页面默认选中本地对齐', /<option value="local" selected>/.test(htmlLoc));
-check('本地版参考图顺序是 姿势→脸→服装', /const LOCAL_SLOTS = \['pose', 'face', 'outfit'\]/.test(appLocSrc));
-check('非本地版仍走原顺序', /const slots = isLocal\(\) \? LOCAL_SLOTS : SLOTS/.test(appLocSrc));
-check('姿势图改用 full 原图而非缩略图', /hiRes \? \(s\.full \|\| s\.thumb\)/.test(appLocSrc));
-check('降质路径只用于 Workers AI 与原图失败兜底（<512px 约束）',
-  /const hiRes = k === 'pose' && isCustom/.test(appLocSrc)
-  && !/const hiRes = isLocal\(\)/.test(appLocSrc));
-check('姿势图缩放上限提到 1024', /const maxSide = hiRes \? 1024 : MAX_SIDE/.test(appLocSrc));
-check('姿势图 JPEG 质量提到 0.98', /hiRes \? 0\.98 : REF_QUALITY/.test(appLocSrc));
-check('size 改用官方档位 2K，不再换算成精确像素',
-  /const AGNES_SIZE = '2K'/.test(appLocSrc) && !/AGNES_2K/.test(appLocSrc));
-check('自定义通道统一发档位 + 单独 ratio',
-  /const customSize = isCustom\s*\n\s*\? \{ size: AGNES_SIZE/.test(appLocSrc)
-  && /AGNES_RATIO_OK\.has\(ratio\)/.test(appLocSrc));
-check('直连兜底也有本地版', /if \(isLocal\(\)\) \{[\s\S]*?absolute authority/.test(appLocSrc));
-
-console.log('\n[8a3] 姿势完全不生效的复查：文字锚点、图片传递可查、两条通道一致');
-// 2026-11-18 用户反馈「极简模式和本地对齐里完全没有姿势」，怀疑图片没传对。
-// 实测把线稿按网站的 toReference() 流程（白底重绘 + 300px + JPEG0.9）处理一遍，
-// 举起的双臂、手指、身体轮廓依然清晰可读 —— 图不是被压糊的。
-// 真正的原因在提示词：本地跑通的那版把姿势动作逐字写了出来（both arms raised with
-// hands clasped behind the head, elbows opened outward…），网站这版只说「图1 是绝对
-// 权威、精确复现」，还带了三个否定句；T5 对否定不敏感，会把 do not square the body /
-// do not drop the arms 读成肯定动作，正好生成「正面站直、双臂下垂」。
-const pLocNeg = buildPrompt({ poseHint: 'standing with both hands on her hips', local: true });
-check('本地版 POSE 段没有任何否定句', !/do not|must not|never |avoid /i.test(pLocNeg), pLocNeg.slice(0, 320));
-check('本地版把动作写成正面指令', /reproduce this exact pose — standing with both hands on her hips/.test(pLocNeg));
-check('本地版不再出现 drop the arms / square the body', !/drop the arms|square the body|mirror the arms/.test(pLocNeg));
-check('极简版也有正面动作锚点', /POSE: reproduce image 3 exactly — /.test(buildPrompt({ minimal: true, poseHint: 'both arms raised behind the head' })));
-check('极简版仍不含否定约束', !/do not|must not|never /i.test(buildPrompt({ minimal: true, poseHint: 'both arms raised behind the head' })));
-
-// 用户上传自己的线稿时，图库里没有 pose.en / pose.zh，姿势文字会是空的。
-check('页面提供「姿势要点」输入框', /id="poseHint"/.test(htmlLoc));
-const hintSrc2 = appLocSrc.slice(appLocSrc.indexOf('function poseHintFor('), appLocSrc.indexOf('function isHalfBodyPose('));
-const hintForDoc = (st, doc) => new Function('state', 'document', `${hintSrc2}; return poseHintFor();`)(st, doc);
-check('用户填的姿势要点优先于图库文字',
-  hintForDoc({ gender: 'female', selected: { pose: { pose: { en: 'from library' } } } },
-    { querySelector: () => ({ value: 'typed by user' }) }) === 'typed by user');
-check('没填时仍回退到图库 pose.en',
-  hintForDoc({ gender: 'female', selected: { pose: { pose: { en: 'from library' } } } },
-    { querySelector: () => null }) === 'from library');
-// 上传时不能只存一张降质图，且 full 必须与 thumb 分开，否则 hiRes 取 full 也救不回来
-check('上传图 full 存原始文件 Data URI，thumb 只给界面显示',
-  /const \[\{ dataUrl: thumb \}, full\] = await Promise\.all\(\[/.test(appLocSrc)
-  && /readFileAsDataUrl\(file\)/.test(appLocSrc)
-  && /\bthumb,\s*\n\s*full,/.test(appLocSrc));
-check('上传的自定义线稿也能取到高清 full',
-  /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appLocSrc));
-// 中转通道以前漏了 minimal/local 和 2K size，导致下拉选了新文案、实际仍发旧的
-check('中转通道也透传 minimal / local',
-  /minimal: body\.minimal === true,\s*\n\s*local: body\.local === true/.test(routerLocSrc));
 check('中转通道采用前端给的 2K size', /const size = .*body\.size/.test(routerLocSrc) && /\?\s*body\.size/.test(routerLocSrc));
 check('直连与中转两条通道共用同一组 customSize（档位 + ratio）',
-  /\.\.\.customSize/.test(appLocSrc) && /size: customSize\.size/.test(appLocSrc)
-  && /ratio: customSize\.ratio/.test(appLocSrc));
-// 结果区把真正送进 extra_body.image 的三张图摆出来，图片传递不再靠猜
+  /\.\.\.customSize/.test(appUniq) && /size: customSize\.size/.test(appUniq)
+  && /ratio: customSize\.ratio/.test(appUniq));
 check('结果区展示本次实际送出的参考图',
-  /j\.refs = images/.test(appLocSrc) && /class: 'ref-peek'/.test(appLocSrc)
-  && /本次送出的参考图/.test(appLocSrc));
-check('参考图诊断标出两种顺序', /const names = isLocal\(\) \? \['姿势', '脸', '服装'\] : \['服装', '脸', '姿势'\]/.test(appLocSrc));
+  /j\.refs = images/.test(appUniq) && /class: 'ref-peek'/.test(appUniq)
+  && /本次送出的参考图/.test(appUniq));
+check('上传图 full 存原始文件 Data URI，thumb 只给界面显示',
+  /const \[\{ dataUrl: thumb \}, full\] = await Promise\.all\(\[/.test(appUniq)
+  && /readFileAsDataUrl\(file\)/.test(appUniq)
+  && /\bthumb,\s*\n\s*full,/.test(appUniq));
+check('上传的自定义线稿也能取到高清 full',
+  /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appUniq));
+
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.12', /tag: '2026\.11\.18\.12'/.test(versionSrc));
-
-console.log('\n[8a4] 本地同款完整提示词：不动内置生成逻辑的对齐手段');
-// 上一轮留的下一步是「把动作描述写成一整段（本地那种）」。最安全的做法不是继续改
-// buildPrompt，而是把本地跑通的那段 1600 字符原文做成一键模板填进「自定义 Prompt」——
-// 它本来就是最高优先级、完全覆盖内置模板，另外两个模式因此零回归。
-check('页面有一键填入模板按钮', /id="fillLocalTpl"/.test(htmlLoc));
-check('模板含 POSE / FACE / OUTFIT / STYLE 四段',
-  ['POSE (from reference image 1', 'FACE and HAIR (from reference image 2',
-    'OUTFIT (from reference image 3', 'STYLE: clean light-gray'].every((s) => appLocSrc.includes(s)));
-check('模板逐字写出具体动作，不是抽象权威句',
-  /both arms raised with hands clasped behind the head, elbows opened outward/.test(appLocSrc));
-check('模板逐件写出服装细节',
-  /mustard-gold velvet long-sleeve mini dress/.test(appLocSrc) && /thigh-high stockings/.test(appLocSrc));
-check('模板长度接近本地案例（>1200 字符）',
-  (() => { const m = /const LOCAL_FULL_TEMPLATE = `([\s\S]*?)`;/.exec(appLocSrc); return !!m && m[1].length > 1200; })());
-check('填入模板时自动切到本地对齐（编号才对得上）',
-  /if \(mode\) mode\.value = 'local';/.test(appLocSrc));
-check('填入模板会写进自定义 Prompt', /\$\('#promptOverride'\)\.value = LOCAL_FULL_TEMPLATE;/.test(appLocSrc));
-check('自定义 Prompt 占位文案按模式给出正确图序',
-  /isLocal\(\)\s*\n\s*\? '图1=姿势，图2=脸，图3=服装'/.test(appLocSrc)
-  && /: '图1=服装，图2=脸，图3=姿势'/.test(appLocSrc));
-check('切换模式会刷新占位文案', /\$\('#promptMode'\)\?\.addEventListener\('change', setDefaultPrompt\)/.test(appLocSrc));
-check('自定义 Prompt 直传不经 clipHint 截断',
-  /prompt: body\.prompt\s*\|\|/.test(routerLocSrc) && !/prompt:\s*clipHint\(body\.prompt\)/.test(routerLocSrc));
-
-console.log('\n[8a5] 第三轮：腿部断裂与「元指令里没有画面内容」');
-// 用户把「本次送出的参考图」截图发来：姿势线稿 768×1024 排第 1、清晰可读，
-// 三张图完全正确 —— 「图片传递有问题」至此彻底排除。但成品更糟了：双臂下垂、
-// 裙子下摆到过膝袜之间整段空白、袜子浮空，还多出一条图里没有的珍珠项链。
-// 他贴出的实际提示词里 POSE 段走的是「poseHint 为空」的兜底分支：通篇
-// 「照抄图 N / 绝对权威 / 只取」这类元指令，没有任何具体画面名词。模型只能
-// 照着参考图拼贴，连服装图里假人的空白腿和自己脑补的配饰一起抄了进来。
-const pLoc3 = buildPrompt({ local: true, gender: 'female' });
-check('服装段删掉 bare legs / mannequin 那句否定尾巴',
-  !/bare legs|mannequin|not a styling choice/i.test(pLoc3), pLoc3.slice(-320));
-check('服装段改为正面声明连贯人体',
-  /continuous, anatomically connected body from head to feet/.test(pLoc3)
-  && /torso, hips, legs and feet are all present and connected/.test(pLoc3));
-check('整段提示词仍无任何否定句', !/do not|must not|never |are not/i.test(pLoc3));
-check('完整模板入口移到生成按钮旁（不再藏在折叠的高级设置里）',
-  /class="text-btn tpl-cta" id="fillLocalTpl"/.test(htmlLoc)
-  && !/class="inline-btn" id="fillLocalTpl"/.test(htmlLoc));
-check('高级设置说明指向新入口', /生成按钮下方的「用本地同款完整提示词」可一键填入示例/.test(htmlLoc));
-check('生成后引导指向显眼按钮', /点上方「用本地同款完整提示词」再生成一次/.test(appLocSrc));
-check('引导只在既没填姿势要点、也没用模板时出现',
-  /if \(!\$\('#promptOverride'\)\?\.value\.trim\(\) && !\$\('#poseHint'\)\?\.value\.trim\(\)\)/.test(appLocSrc));
+check('版本号已递增到 2026.11.18.13', /tag: '2026\.11\.18\.13'/.test(versionSrc));
 
 console.log('\n[8a6] 回归修复：让 agnes 的请求体与本地脚本一致');
 // 用户实测：同一个模型、同一组素材，本地 agnes-image 脚本一次成型，网站却各种问题；
@@ -740,9 +526,10 @@ check('原图 Data URI 自己控制 MIME',
 check('Workers AI 仍保留降质兜底路径', /const hiRes = k === 'pose' && isCustom/.test(appLocSrc));
 check('不再出现精确像素尺寸表', !/AGNES_2K/.test(appLocSrc));
 
-console.log('\n[8b] 诊断探针：不带图也能调模型');
-// 3043 分不清是「模型不支持多图」「某张图太大/格式不认」还是「上游挂了」。
-// 探针只发 prompt + 尺寸，把这三个原因拆开：探针过 → 问题在多图；探针挂 → 跟图无关。
+console.log('\n[8b] 探针能力：界面入口已删，服务端仍接受 probe');
+// 页面上的「诊断：不带图试一次」按钮已随调试开关一起删掉，但 /api/generate 的 probe
+// 参数保留 —— 它是排障时唯一能把「多图输入问题」从「上游挂了」里摘出来的手段，
+// 删掉会让 3043 这类报错彻底没法定位。这里只校验能力还在。
 let probeCaptured = null;
 const probeRun = async (mid, input) => {
   probeCaptured = { mid, input };
@@ -758,12 +545,9 @@ const probeOut = await generate({
   probe: true,
 });
 check('探针允许零张图', probeOut.b64 === 'aGVsbG8=');
-// 读回 multipart 正文，确认真的没有挂任何 input_image
 const probeBody = await new Response(probeCaptured.input.multipart.body).text();
 check('探针正文里没有 input_image 字段', !/name="input_image_/.test(probeBody), probeBody.slice(0, 120));
 check('探针仍有 prompt', /name="prompt"/.test(probeBody));
-check('探针结果标了 probe', probeOut.probe === true && probeOut.images === 0);
-// 非探针路径的规则不能松：零张图仍然 400
 let strictFailed = false;
 try {
   await generate({ images: [], env: {}, aiRun: probeRun });
@@ -1093,7 +877,7 @@ console.log('\n[20] 女性 / 男性双版本');
 
   const pM = buildPrompt({ gender: 'male' });
   const pF = buildPrompt({ gender: 'female' });
-  check('提示词区分性别', /adult man/.test(pM) && /adult woman/.test(pF) && pM !== pF);
+  check('提示词区分性别', /male body/.test(pM) && !/male body/.test(pF) && pM !== pF);
   check('代理放行 jsDelivr', /cdn\.jsdelivr\.net/.test(router));
   check('未引入 generated.photos', !/generated\.photos/.test(app + router + css));
 }

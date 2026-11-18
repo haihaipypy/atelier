@@ -146,10 +146,8 @@ export async function handleRequest(request, env = {}, aiRun = null) {
     const poseHint = clipHint(url.searchParams.get('poseHint'));
     // 上半身姿势要换一套取景规则（裁到大腿中部、手必须露出），详见 buildPrompt 的 framing 段
     const halfBody = url.searchParams.get('halfBody') === '1';
-    const minimal = url.searchParams.get('minimal') === '1';
-    const local = url.searchParams.get('local') === '1';
     const frame = [Number(url.searchParams.get('w')) || 0, Number(url.searchParams.get('h')) || 0];
-    return json({ prompt: buildPrompt({ style, extra, gender, poseHint, halfBody, minimal, local, frame }) });
+    return json({ prompt: buildPrompt({ style, extra, gender, poseHint, halfBody, frame }) });
   }
 
   /**
@@ -230,10 +228,8 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         const profile = await readProfile(env);
         if (!profile.ready) throw new HttpError(400, '自定义模型尚未配置完整');
         assertThreeImages(body.images);
-        // 中转通道以前漏了 minimal / local：前端下拉选了「本地对齐」，/api/prompt 预览
-        // 显示的是新文案，这里却仍按默认的「详细」版拼，实际送出去的是另一套提示词。
-        // 版本 tag 和结果区的「本次实际提示词」都对不上，是「改了没生效」的一大来源。
-        // 尺寸同理：本地对齐要用官方 2K 档，而不是 960x1280 这种会被静默标准化的值。
+        // 尺寸必须是官方档位（2K）或精确像素二选一。传 960x1280 这类自定精确值会被
+        // 静默标准化，画幅和构图跟着跑偏，所以前端传什么这里就原样发什么。
         const size = /^(\d{3,4}x\d{3,4}|[1-4]K)$/.test(String(body.size || ''))
           ? body.size
           : `${body.width || 1024}x${body.height || 1024}`;
@@ -247,8 +243,6 @@ export async function handleRequest(request, env = {}, aiRun = null) {
               poseHint: clipHint(body.poseHint),
               halfBody: body.halfBody === true,
               frame: [Number(body.width) || 0, Number(body.height) || 0],
-              minimal: body.minimal === true,
-              local: body.local === true,
             }),
           size,
           // 自定义模型（agnes 这一系）用档位 + 单独 ratio；不传 ratio 会按默认 1:1 出图
@@ -278,8 +272,6 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         height: body.height || 1024,
         seed: body.seed,
         probe,
-        minimal: body.minimal === true,
-        local: body.local === true,
         env,
         aiRun: aiRun || env.AI?.run?.bind(env.AI),
       });
