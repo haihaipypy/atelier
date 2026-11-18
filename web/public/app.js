@@ -274,7 +274,7 @@ function describeRefImages(images) {
  * 之所以需要它：不少模型服务商会整段屏蔽云厂商出口 IP（Cloudflare 首当其冲），
  * 服务端中转会直接被 403。代价是要求对方允许跨域（CORS），否则浏览器会拦下。
  */
-async function generateDirect({ images, prompt, size }) {
+async function generateDirect({ images, prompt, size, ratio }) {
   const cfg = readLocalCfg();
   if (!cfg?.baseUrl || !cfg?.apiKey || !cfg?.model) throw new Error('直连模式还没有在本机保存配置');
   const endpoint = endpointOf(cfg.baseUrl);
@@ -287,7 +287,11 @@ async function generateDirect({ images, prompt, size }) {
       throw new Error('额外参数不是合法 JSON');
     }
   }
-  const body = { model: cfg.model, prompt, n: 1, size, ...extra };
+  // 档位式 size 必须配一个单独的 ratio，否则官方默认按 1:1 出图。
+  const body = { model: cfg.model, prompt, n: 1, size };
+  if (ratio) body.ratio = ratio;
+  // 额外参数放最后，用户显式写了 size / ratio 时以他为准
+  Object.assign(body, extra);
   const refs = normalizeRefImages(images);
   if (refs.length !== (Array.isArray(images) ? images.length : 0)) {
     throw new Error(`参考图格式不对：每张都得是 data:image/...;base64 的字符串（本次 ${describeRefImages(refs)}）`);
@@ -340,11 +344,13 @@ const isLocal = () => promptMode() === 'local';
 // 本地成功案例的 --ref 顺序是 姿势 → 脸 → 服装。网站原来把姿势放最后一张，
 // 而「服装一直对、姿势一直不对」正好对应这个权重差。
 const LOCAL_SLOTS = ['pose', 'face', 'outfit'];
-// agnes 官方尺寸表的 2K 档。传 960x1280 这种自定精确值会被静默标准化，
-// 本地用的是 --size 2K --ratio 3:4 → 1728x2304。
-const AGNES_2K = {
-  '3:4': '1728x2304', '1:1': '2048x2048', '9:16': '1472x2624', '4:3': '2304x1728',
-};
+// 官方文档：size 只认 1K/2K/3K/4K 档位，宽高比必须单独放在 ratio。
+// 之前把 2K 档位换算成精确像素（1728x2304）塞进 size —— 官网写明这类值
+// 「可能会被自动映射到最接近的标准档位」，而且没给 ratio 时默认 1:1。
+// 输出画幅跟想要的 3:4 对不上，构图和下半身就全跟着跑偏。
+// 本地脚本用的正是 --size 2K --ratio 3:4，这里照抄这个请求体。
+const AGNES_SIZE = '2K';
+const AGNES_RATIO_OK = new Set(['1:1', '3:4', '4:3', '16:9', '9:16', '2:3', '3:2', '21:9']);
 
 /**
  * 2026-11-18 用户在本地用 agnes-image-2.5-flash 一次跑通的完整提示词（约 1600 字符）。
@@ -994,6 +1000,51 @@ async function toReference(src, { hiRes = false } = {}) {
   return { dataUrl: canvas.toDataURL('image/jpeg', hiRes ? 0.98 : REF_QUALITY), w, h };
 }
 
+/**
+ * agnes 自定义通道专用：把素材图按原始字节取回，原样转成 Data URI。
+ *
+ * 网站刚上线时 toReference() 输出的就是 PNG 原图。3734304 为了修 Workers AI
+ * FLUX.2 的 3043，把参考图统一压成 480px / JPEG 0.9 —— 这条降质路径后来被
+ * 无差别套到了 agnes 上：脸只剩 384×480、服装只剩 320×480，丝绒纹理、抽绳、
+ * 袜口这些细节全靠模型脑补，于是出现「裙子下面空白、多出图里没有的项链」
+ * 这类拼贴瑕疵。本地脚本 --ref 传的是原始文件（PNG/JPG 原样 Data URI），
+ * 效果好的那版请求体就是三张原图。
+ *
+ * Workers AI 仍走 toReference() 的降质路径，<512px 约束不能破。
+ */
+function mimeFromUrl(src) {
+  if (/\.jpe?g([?#]|$)/i.test(src)) return 'image/jpeg';
+  if (/\.webp([?#]|$)/i.test(src)) return 'image/webp';
+  return 'image/png';
+}
+
+async function toOriginalDataUrl(src) {
+  const r = await fetch(proxied(src));
+  if (!r.ok) throw new Error(`原始素材读取失败（HTTP ${r.status}）`);
+  const blob = await r.blob();
+  // 保险丝：正常素材库原图在 1MB 以内，本地脚本也是这个量级
+  if (blob.size > 4 * 1024 * 1024) throw new Error('原图超过 4MB');
+  // 自己拼 Data URI 而不是 FileReader：能控制 MIME，避免代理返回
+  // application/octet-stream 时把上游喂成 data:application/...;base64
+  const mime = /^image\//.test(blob.type) ? blob.type : mimeFromUrl(src);
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x4000) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + 0x4000));
+  }
+  return `data:${mime};base64,${btoa(bin)}`;
+}
+
+/** 本地上传的文件原样转 Data URI，不经 canvas 重绘/缩放/转码 */
+function readFileAsDataUrl(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(String(fr.result));
+    fr.onerror = () => rej(new Error('读取本地图片失败'));
+    fr.readAsDataURL(file);
+  });
+}
+
 /** 外链图片改走本站代理；data: / blob: 与同源地址原样返回 */
 function proxied(src) {
   if (!src) return src;
@@ -1044,6 +1095,12 @@ async function generate() {
   // 画幅以 select 当前值为准：syncRatioForPose 已在选姿势时把它切好，用户手动改过也会体现在这里
   const ratio = $('#ratio').value;
   const [width, height] = RATIO_MAP[ratio] || [1024, 1024];
+  // 自定义模型（agnes）与 Workers AI 是两套尺寸写法：前者档位 + 单独 ratio，
+  // 后者精确像素走 multipart。混用会让 agnes 静默标准化画幅。
+  const isCustom = state.engine === 'custom';
+  const customSize = isCustom
+    ? { size: AGNES_SIZE, ratio: AGNES_RATIO_OK.has(ratio) ? ratio : '3:4' }
+    : { size: `${width}x${height}`, ratio: undefined };
   setBusy(true, '正在准备参考图…');
   try {
     // 三张并行处理：串行等待时每张都要单独跨域往返，累计很容易触发超时
@@ -1052,14 +1109,19 @@ async function generate() {
       slots.map(async (k) => {
         const s = state.selected[k];
         if (!s) throw new Error('素材未选齐');
-        // 姿势线稿是细线条，缩略图 + JPEG0.9 会把叉腰的手、胯部的轻微扭转糊掉。
-        // 只要走自定义模型（agnes）就拿 full 原图 / 1024px / JPEG0.98：三种提示词模式
-        // 都依赖这张图，没必要只在「本地对齐」下保真，否则切个模式就多一个变量。
-        // Workers AI FLUX.2 有 <512px 的约束，给它 1024px 线稿会直接报 3043，故那边保留小图。
-        const hiRes = k === 'pose' && state.engine === 'custom';
-        // 上传图以前写死取 s.thumb：那时 full 与 thumb 是同一张降质图，无所谓。
-        // 现在 full 已单独存了高清版，这里必须跟着 hiRes 走，否则上传的自定义线稿
-        // 永远拿不到原图 —— 而用户拿本地成功案例来对比时，传的恰恰是自定义线稿。
+        // agnes 自定义通道：三张图都送原始字节，与本地脚本 --ref 传原文件一致。
+        // 不再走 canvas 白底重绘 / 480px 缩放 / JPEG 压缩那条为 FLUX.2 加的降质路径。
+        if (isCustom) {
+          // 上传图：full 存的就是原始文件的 Data URI
+          if (s.origin === 'upload' && typeof s.full === 'string' && s.full.startsWith('data:')) return s.full;
+          try {
+            return await toOriginalDataUrl(s.full || s.thumb);
+          } catch (e) {
+            console.warn('[ref] 原图读取失败，退回压缩图：', e.message);
+          }
+        }
+        // Workers AI 的 <512px 约束，以及原图读取失败时的兜底：保留降质路径
+        const hiRes = k === 'pose' && isCustom;
         const first = hiRes ? (s.full || s.thumb) : (s.thumb || s.full);
         const fallback = hiRes
           ? (s.thumb && s.thumb !== first ? s.thumb : null)
@@ -1091,16 +1153,16 @@ async function generate() {
         images,
         prompt: $('#promptOverride').value.trim()
           || (await buildPromptOnServer({ halfBody, frame: [width, height] })),
-        size: isLocal() ? (AGNES_2K[ratio] || `${width}x${height}`) : `${width}x${height}`,
+        ...customSize,
       });
     } else {
       const payload = {
         images,
         width,
         height,
-        // 中转以前只带 width/height，服务端会拼成 960x1280 这类被静默标准化的值，
-        // 本地对齐的官方 2K 档在中转通道上等于没开。两条通道必须用同一个 size。
-        size: isLocal() ? (AGNES_2K[ratio] || `${width}x${height}`) : `${width}x${height}`,
+        // 两条通道用同一组「档位 + ratio」；Workers AI 那边仍走 width/height 的 multipart
+        size: customSize.size,
+        ratio: customSize.ratio,
         style: $('#style').value,
         extra: $('#extra').value.trim(),
         prompt: $('#promptOverride').value.trim(),
@@ -1347,10 +1409,13 @@ function bindUI() {
     if (!file || !uploadTarget) return;
     const url = URL.createObjectURL(file);
     try {
-      // 上传时不能只留一张 480px / JPEG0.9 的降质图：本地对齐模式会取 full 当姿势原图，
-      // 若 full 与 thumb 指向同一张，后面再把分辨率提到 1024 也救不回来（细线已经丢了）。
-      const { dataUrl: thumb } = await toReference(url);
-      const { dataUrl: full } = await toReference(url, { hiRes: true });
+      // thumb 只给界面显示；full 存用户选中的原始文件字节（PNG/JPG 原样 Data URI）。
+      // agnes 通道直接把它送出去，与本地脚本 --ref 传原文件完全一致——
+      // 以前 upload 那一刻就压成 480px/JPEG0.9，信息丢了后面再怎么提分辨率也救不回。
+      const [{ dataUrl: thumb }, full] = await Promise.all([
+        toReference(url),
+        readFileAsDataUrl(file),
+      ]);
       state.selected[uploadTarget] = {
         id: `upload-${Date.now()}`,
         title: file.name,

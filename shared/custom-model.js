@@ -123,7 +123,7 @@ export async function clearProfile(env) {
  *   b64  —— 参考图走 data URI（最通用，本项目的默认：前端已压缩到 <512）
  *   auto —— 先用 b64，遇到「不支持图生图」类错误再提示用户切换
  */
-export async function generateCustom({ images, prompt, size, profile, signal }) {
+export async function generateCustom({ images, prompt, size, ratio, profile, signal }) {
   if (!profile.ready) throw new HttpError(400, '自定义模型尚未配置完整');
 
   const endpoint = /\/images\/generations$/.test(profile.baseUrl)
@@ -139,13 +139,18 @@ export async function generateCustom({ images, prompt, size, profile, signal }) 
     }
   }
 
+  // 官方文档：size 用档位（1K/2K/3K/4K），宽高比必须单独放在 ratio。
+  // 只给 size 时服务端按默认 1:1 出图；塞精确像素（1728x2304）会被静默标准化。
+  // 本地脚本 --size 2K --ratio 3:4 的请求体里两样都有，好的那版就是这么发的。
   const body = {
     model: profile.model,
     prompt,
     n: 1,
     size,
-    ...extra,
   };
+  if (ratio) body.ratio = ratio;
+  // 额外参数放最后：用户在「额外参数」里显式写了 size / ratio 时以他为准
+  Object.assign(body, extra);
 
   // 多图输入：放进 extra_body.image（与 Agnes / 多数聚合网关一致）。
   // 先归一化再送：数组里若混进 { dataUrl, w, h } 这种包装对象，上游只会回

@@ -609,13 +609,16 @@ check('页面默认选中本地对齐', /<option value="local" selected>/.test(h
 check('本地版参考图顺序是 姿势→脸→服装', /const LOCAL_SLOTS = \['pose', 'face', 'outfit'\]/.test(appLocSrc));
 check('非本地版仍走原顺序', /const slots = isLocal\(\) \? LOCAL_SLOTS : SLOTS/.test(appLocSrc));
 check('姿势图改用 full 原图而非缩略图', /hiRes \? \(s\.full \|\| s\.thumb\)/.test(appLocSrc));
-check('高清线稿只给自定义模型，且三种提示词模式都保真（Workers AI 有 <512px 约束）',
-  /const hiRes = k === 'pose' && state\.engine === 'custom'/.test(appLocSrc)
+check('降质路径只用于 Workers AI 与原图失败兜底（<512px 约束）',
+  /const hiRes = k === 'pose' && isCustom/.test(appLocSrc)
   && !/const hiRes = isLocal\(\)/.test(appLocSrc));
 check('姿势图缩放上限提到 1024', /const maxSide = hiRes \? 1024 : MAX_SIDE/.test(appLocSrc));
 check('姿势图 JPEG 质量提到 0.98', /hiRes \? 0\.98 : REF_QUALITY/.test(appLocSrc));
-check('2K 尺寸表按官方档位', /'3:4': '1728x2304'/.test(appLocSrc) && /'9:16': '1472x2624'/.test(appLocSrc));
-check('仅本地对齐模式使用 2K 尺寸', /size: isLocal\(\) \? \(AGNES_2K\[ratio\]/.test(appLocSrc));
+check('size 改用官方档位 2K，不再换算成精确像素',
+  /const AGNES_SIZE = '2K'/.test(appLocSrc) && !/AGNES_2K/.test(appLocSrc));
+check('自定义通道统一发档位 + 单独 ratio',
+  /const customSize = isCustom\s*\n\s*\? \{ size: AGNES_SIZE/.test(appLocSrc)
+  && /AGNES_RATIO_OK\.has\(ratio\)/.test(appLocSrc));
 check('直连兜底也有本地版', /if \(isLocal\(\)\) \{[\s\S]*?absolute authority/.test(appLocSrc));
 
 console.log('\n[8a3] 姿势完全不生效的复查：文字锚点、图片传递可查、两条通道一致');
@@ -644,9 +647,9 @@ check('没填时仍回退到图库 pose.en',
   hintForDoc({ gender: 'female', selected: { pose: { pose: { en: 'from library' } } } },
     { querySelector: () => null }) === 'from library');
 // 上传时不能只存一张降质图，且 full 必须与 thumb 分开，否则 hiRes 取 full 也救不回来
-check('上传分别保留缩略图与高清原图',
-  /const \{ dataUrl: thumb \} = await toReference\(url\);/.test(appLocSrc)
-  && /const \{ dataUrl: full \} = await toReference\(url, \{ hiRes: true \}\)/.test(appLocSrc)
+check('上传图 full 存原始文件 Data URI，thumb 只给界面显示',
+  /const \[\{ dataUrl: thumb \}, full\] = await Promise\.all\(\[/.test(appLocSrc)
+  && /readFileAsDataUrl\(file\)/.test(appLocSrc)
   && /\bthumb,\s*\n\s*full,/.test(appLocSrc));
 check('上传的自定义线稿也能取到高清 full',
   /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appLocSrc));
@@ -654,14 +657,16 @@ check('上传的自定义线稿也能取到高清 full',
 check('中转通道也透传 minimal / local',
   /minimal: body\.minimal === true,\s*\n\s*local: body\.local === true/.test(routerLocSrc));
 check('中转通道采用前端给的 2K size', /const size = .*body\.size/.test(routerLocSrc) && /\?\s*body\.size/.test(routerLocSrc));
-check('直连与中转两条通道都带 2K 尺寸', (appLocSrc.match(/AGNES_2K\[ratio\]/g) || []).length >= 2);
+check('直连与中转两条通道共用同一组 customSize（档位 + ratio）',
+  /\.\.\.customSize/.test(appLocSrc) && /size: customSize\.size/.test(appLocSrc)
+  && /ratio: customSize\.ratio/.test(appLocSrc));
 // 结果区把真正送进 extra_body.image 的三张图摆出来，图片传递不再靠猜
 check('结果区展示本次实际送出的参考图',
   /j\.refs = images/.test(appLocSrc) && /class: 'ref-peek'/.test(appLocSrc)
   && /本次送出的参考图/.test(appLocSrc));
 check('参考图诊断标出两种顺序', /const names = isLocal\(\) \? \['姿势', '脸', '服装'\] : \['服装', '脸', '姿势'\]/.test(appLocSrc));
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.11', /tag: '2026\.11\.18\.11'/.test(versionSrc));
+check('版本号已递增到 2026.11.18.12', /tag: '2026\.11\.18\.12'/.test(versionSrc));
 
 console.log('\n[8a4] 本地同款完整提示词：不动内置生成逻辑的对齐手段');
 // 上一轮留的下一步是「把动作描述写成一整段（本地那种）」。最安全的做法不是继续改
@@ -708,6 +713,32 @@ check('高级设置说明指向新入口', /生成按钮下方的「用本地同
 check('生成后引导指向显眼按钮', /点上方「用本地同款完整提示词」再生成一次/.test(appLocSrc));
 check('引导只在既没填姿势要点、也没用模板时出现',
   /if \(!\$\('#promptOverride'\)\?\.value\.trim\(\) && !\$\('#poseHint'\)\?\.value\.trim\(\)\)/.test(appLocSrc));
+
+console.log('\n[8a6] 回归修复：让 agnes 的请求体与本地脚本一致');
+// 用户实测：同一个模型、同一组素材，本地 agnes-image 脚本一次成型，网站却各种问题；
+// 而且「刚部署好时效果是没问题的」。查 git 历史定位到两处回归：
+//   ① 3734304 为修 Workers AI FLUX.2 的 3043，把参考图统一压成 480px/JPEG，
+//      这条降质被无差别套到 agnes 上（脸 384x480、服装 320x480）；
+//   ② f6d591b 曾实现「档位 + 单独 ratio」，被 8075446 一次性回退 623 行抹掉，
+//      之后网站只发 size:"1728x2304"、完全不带 ratio —— 官方文档写明 ratio 默认 1:1、
+//      精确像素会被静默标准化。本地脚本发的是 size:"2K" + ratio:"3:4" 和三张原图。
+const customSrc = await readFile(path.join(ROOT, 'shared/custom-model.js'), 'utf8');
+check('generateCustom 接收 ratio', /generateCustom\(\{ images, prompt, size, ratio/.test(customSrc));
+check('中转请求体写入 ratio', /if \(ratio\) body\.ratio = ratio;/.test(customSrc));
+check('router 把 ratio 传给 generateCustom', /ratio: body\.ratio \|\| undefined/.test(routerLocSrc));
+check('直连请求体写入 ratio',
+  /async function generateDirect\(\{ images, prompt, size, ratio \}\)/.test(appLocSrc)
+  && /if \(ratio\) body\.ratio = ratio;/.test(appLocSrc));
+check('额外参数优先级低于显式 size/ratio',
+  /Object\.assign\(body, extra\)/.test(appLocSrc) && /Object\.assign\(body, extra\)/.test(customSrc));
+check('agnes 通道取原始字节而非 canvas 重绘',
+  /async function toOriginalDataUrl\(src\)/.test(appLocSrc)
+  && /return await toOriginalDataUrl\(s\.full \|\| s\.thumb\)/.test(appLocSrc));
+check('上传图直接返回原始 Data URI', /s\.full\.startsWith\('data:'\)\) return s\.full/.test(appLocSrc));
+check('原图 Data URI 自己控制 MIME',
+  /mimeFromUrl\(src\)/.test(appLocSrc) && /data:\$\{mime\};base64/.test(appLocSrc));
+check('Workers AI 仍保留降质兜底路径', /const hiRes = k === 'pose' && isCustom/.test(appLocSrc));
+check('不再出现精确像素尺寸表', !/AGNES_2K/.test(appLocSrc));
 
 console.log('\n[8b] 诊断探针：不带图也能调模型');
 // 3043 分不清是「模型不支持多图」「某张图太大/格式不认」还是「上游挂了」。

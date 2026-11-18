@@ -251,6 +251,8 @@ export async function handleRequest(request, env = {}, aiRun = null) {
               local: body.local === true,
             }),
           size,
+          // 自定义模型（agnes 这一系）用档位 + 单独 ratio；不传 ratio 会按默认 1:1 出图
+          ratio: body.ratio || undefined,
           profile,
           signal: AbortSignal.timeout(Number(env.CUSTOM_TIMEOUT_MS || 120000)),
         });
