@@ -104,13 +104,26 @@ export function buildPrompt({
       'Three reference images are given in this order: 1 = pose line-art, 2 = face, 3 = outfit.',
     ];
     // 男性库的 pose.en 来自上游、与线稿不严格对应（SP-P021），照旧不注入
-    const poseText = poseHint && gender !== 'male' ? ` ${poseHint}` : '';
+    const poseText = poseHint && gender !== 'male'
+      ? String(poseHint).replace(/\s+/g, ' ').trim().replace(/[.\s]+$/, '')
+      : '';
+    // 2026-11-18 复查：本地那版之所以一次成型，是因为它把姿势动作逐字写出来了
+    // （"standing upright, both arms raised with hands clasped behind the head, elbows
+    // opened outward, chest lifted, legs straight and slightly apart…"）。网站这版只说
+    // 「图1 是绝对权威、精确复现」，抽象权威句留出的空白会被「服装展示照」的先验填上：
+    // 模型默认正面站直、双臂下垂。更糟的是原来那三个否定句 —— do not square the body /
+    // do not mirror the arms / do not drop the arms —— T5 对否定不敏感，反而把
+    // "square the body"、"drop the arms" 读成了肯定动作，正好对上用户截图里的失败结果。
+    // 所以这里只做正面陈述：先给具体动作，再声明权威，一个否定词都不留。
     lines.push(
       'POSE — HIGHEST PRIORITY (reference image 1):'
-      + (poseText ? ` the figure is${poseText.replace(/^\s+/, ' ')}.` : ' reproduce the exact body posture.')
-      + ' Reference image 1 is the absolute authority for body posture, limb placement, head tilt, '
-      + 'body orientation and camera angle; reproduce it exactly, do not square the body to the '
-      + 'camera, do not mirror the arms, and do not drop the arms.',
+      + (poseText
+        ? ` reproduce this exact pose — ${poseText}. Follow reference image 1 for the arm and hand `
+          + 'positions, elbow angles, shoulder line, hip rotation, leg placement, head tilt, body '
+          + 'orientation and camera angle.'
+        : ' reproduce the exact body posture, arm and hand positions, elbow angles, shoulder line, '
+          + 'hip rotation, leg placement, head tilt, body orientation and camera angle of the line-art figure.')
+      + ' Reference image 1 is the absolute authority for body posture and camera angle.',
     );
     lines.push(
       'FACE and HAIR (reference image 2): take ONLY the facial identity and hairstyle from it — '
@@ -145,6 +158,14 @@ export function buildPrompt({
       'Combine the three reference images into one photorealistic photo of one person.',
       'Image 1 is the outfit, image 2 is the face and hair, image 3 is the pose and camera angle.',
     ];
+    // 对照实验的结论（2026-11-18）：一个姿势字都不给时，三张图明明都在，模型却拿
+    // 「服装展示照」的先验把空白填上，成品永远是正面站直、双臂下垂。所以极简版保留
+    // 「只说三张图分别是什么」的骨架，但补一句具体动作锚点；依旧不加否定约束、
+    // 站姿反例和风格长句，和「详细」版的差别依然清晰。
+    const poseText = poseHint && gender !== 'male'
+      ? String(poseHint).replace(/\s+/g, ' ').trim().replace(/[.\s]+$/, '')
+      : '';
+    if (poseText) lines.push(`POSE: reproduce image 3 exactly — ${poseText}.`);
     if (gender === 'male') lines.push("The person is an adult man: keep image 3's pose with a male body.");
     if (halfBody) lines.push('Crop the shot like image 3; do not invent legs or a full-length stance.');
     if (style === 'anime') lines.push('Anime illustration style.');

@@ -230,6 +230,13 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         const profile = await readProfile(env);
         if (!profile.ready) throw new HttpError(400, '自定义模型尚未配置完整');
         assertThreeImages(body.images);
+        // 中转通道以前漏了 minimal / local：前端下拉选了「本地对齐」，/api/prompt 预览
+        // 显示的是新文案，这里却仍按默认的「详细」版拼，实际送出去的是另一套提示词。
+        // 版本 tag 和结果区的「本次实际提示词」都对不上，是「改了没生效」的一大来源。
+        // 尺寸同理：本地对齐要用官方 2K 档，而不是 960x1280 这种会被静默标准化的值。
+        const size = /^(\d{3,4}x\d{3,4}|[1-4]K)$/.test(String(body.size || ''))
+          ? body.size
+          : `${body.width || 1024}x${body.height || 1024}`;
         const out = await generateCustom({
           images: body.images,
           prompt: body.prompt
@@ -240,8 +247,10 @@ export async function handleRequest(request, env = {}, aiRun = null) {
               poseHint: clipHint(body.poseHint),
               halfBody: body.halfBody === true,
               frame: [Number(body.width) || 0, Number(body.height) || 0],
+              minimal: body.minimal === true,
+              local: body.local === true,
             }),
-          size: `${body.width || 1024}x${body.height || 1024}`,
+          size,
           profile,
           signal: AbortSignal.timeout(Number(env.CUSTOM_TIMEOUT_MS || 120000)),
         });

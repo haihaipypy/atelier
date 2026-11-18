@@ -117,6 +117,14 @@ function upstreamMsg(status, json, raw, endpoint, refs) {
  * 之前前端也加一句、后端也加一句，同一句话在提示词里出现两次，模型反而更乱。
  */
 function poseHintFor() {
+  // 用户上传自己的线稿时，图库里没有 pose.en / pose.zh，姿势文字会是空的。
+  // 而本地跑通的那版恰恰是把动作逐字写进提示词的 —— 只给「图1 是姿势的绝对权威」
+  // 这种抽象句，模型会拿「服装展示照」的先验补空，退回正面站直、双臂下垂。
+  // 所以给一个显式输入框，让自定义线稿也能带上动作锚点；填了就优先用。
+  // typeof 保护是给 dry-run 用的：它用 new Function 单独执行这段，上下文里没有 document。
+  const field = typeof document === 'undefined' ? null : document.querySelector('#poseHint');
+  const typed = String(field?.value || '').replace(/\s+/g, ' ').trim();
+  if (typed) return typed;
   const pose = state.selected.pose?.pose || {};
   const raw = String((pose.en || pose.zh) || '')
     .replace(/\s+/g, ' ')
@@ -179,16 +187,23 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
   const who = state.gender === 'male' ? '成年男性' : '成年女性';
   // 兜底也要跟着模式走，否则 /api/prompt 一挂，A/B 就变成了两套不同的东西
   if (isLocal()) {
+    // 兜底也必须带具体动作：只说「照图1」时，模型会拿服装展示照的先验把空白填上。
+    const action = poseHint ? ` Reproduce this exact pose — ${poseHint}.` : '';
     return 'Combine the three reference images into one photorealistic full-body portrait. '
       + 'Image 1 is the pose line-art and is the absolute authority for body posture and camera angle; '
-      + 'image 2 gives the face and hair; image 3 gives the outfit. Reproduce the pose exactly, '
-      + 'copy every garment, and use a clean seamless studio backdrop.'
+      + 'image 2 gives the face and hair; image 3 gives the outfit.'
+      + action
+      + ' Copy every garment, and use a clean seamless studio backdrop.'
       + (halfBody ? ' Crop at mid-thigh like image 1, with both hands visible.' : '');
   }
   if (isMinimal()) {
-    return '图1是服装，图2是脸与发型，图3是姿势与机位。把三者合成到同一个人身上。'
-      + (halfBody ? '按图3 的裁切出半身像。' : '')
-      + `输出一张真实感强的${who}照片。`;
+    // 与 shared/generate.js 的极简版保持同一语言、同一结构，否则 /api/prompt 一挂，
+    // A/B 就变成了两套不同的东西，对照结果没法读。
+    const action = poseHint ? ` POSE: reproduce image 3 exactly — ${poseHint}.` : '';
+    return 'Combine the three reference images into one photorealistic photo of one person. '
+      + 'Image 1 is the outfit, image 2 is the face and hair, image 3 is the pose and camera angle.'
+      + action
+      + (halfBody ? ' Crop the shot like image 3.' : '');
   }
   const poseLine = poseHint ? `（${poseHint}）` : '';
   // 兜底文案同样不能写死「全身照」：图3 裁到哪就是哪，写死景别等于让模型自己
@@ -1012,14 +1027,15 @@ async function generate() {
       slots.map(async (k) => {
         const s = state.selected[k];
         if (!s) throw new Error('素材未选齐');
-        // 本地对齐模式下姿势图要拿 full（w900）而不是 300px 缩略图；
-        // 其余两张保持原来的小图，控制请求体体积。
-        // 只给自定义模型（agnes）提分辨率：Workers AI FLUX.2 有 <512px 的约束，
-        // 给它 1024px 线稿会直接报 3043。演示模式也不需要。
-        const hiRes = isLocal() && k === 'pose' && state.engine === 'custom';
-        const first = s.origin === 'upload'
-          ? s.thumb
-          : hiRes ? (s.full || s.thumb) : (s.thumb || s.full);
+        // 姿势线稿是细线条，缩略图 + JPEG0.9 会把叉腰的手、胯部的轻微扭转糊掉。
+        // 只要走自定义模型（agnes）就拿 full 原图 / 1024px / JPEG0.98：三种提示词模式
+        // 都依赖这张图，没必要只在「本地对齐」下保真，否则切个模式就多一个变量。
+        // Workers AI FLUX.2 有 <512px 的约束，给它 1024px 线稿会直接报 3043，故那边保留小图。
+        const hiRes = k === 'pose' && state.engine === 'custom';
+        // 上传图以前写死取 s.thumb：那时 full 与 thumb 是同一张降质图，无所谓。
+        // 现在 full 已单独存了高清版，这里必须跟着 hiRes 走，否则上传的自定义线稿
+        // 永远拿不到原图 —— 而用户拿本地成功案例来对比时，传的恰恰是自定义线稿。
+        const first = hiRes ? (s.full || s.thumb) : (s.thumb || s.full);
         const fallback = hiRes
           ? (s.thumb && s.thumb !== first ? s.thumb : null)
           : (s.full && s.full !== first ? s.full : null);
@@ -1057,6 +1073,9 @@ async function generate() {
         images,
         width,
         height,
+        // 中转以前只带 width/height，服务端会拼成 960x1280 这类被静默标准化的值，
+        // 本地对齐的官方 2K 档在中转通道上等于没开。两条通道必须用同一个 size。
+        size: isLocal() ? (AGNES_2K[ratio] || `${width}x${height}`) : `${width}x${height}`,
         style: $('#style').value,
         extra: $('#extra').value.trim(),
         prompt: $('#promptOverride').value.trim(),
@@ -1092,6 +1111,9 @@ async function generate() {
       }
     }
 
+    // 把这次真正送进 extra_body.image 的三张图挂到结果上，让「图片到底传对没有」
+    // 变成肉眼可查的东西，而不是靠猜。只存在内存里，不写进任何请求或日志。
+    j.refs = images;
     showResult(j);
     // 成功后给明确的状态文案，避免停留在「正在生成…」
     const hint = $('#hint');
@@ -1099,6 +1121,11 @@ async function generate() {
     hint.textContent = j.demo
       ? '演示模式完成：这是布局预览图，绑定 Workers AI 后会输出融合后的成品。'
       : `已生成，耗时 ${((j.ms ?? 0) / 1000).toFixed(1)}s。可换素材再生成一次做对比。`;
+    // 自定义线稿没有图库的 pose.en，等于完全没有文字动作锚点；本地跑通的那版
+    // 恰恰是把动作逐字写出来的。出图后补一句引导，别让用户对着站姿反复试。
+    if (state.selected.pose?.origin === 'upload' && !$('#poseHint')?.value.trim()) {
+      hint.textContent += ' 自定义线稿建议到「高级设置 → 姿势要点」补一句英文动作描述，姿势会稳很多。';
+    }
   } catch (e) {
     $('#hint').textContent = e.message;
     $('#hint').classList.add('error');
@@ -1205,6 +1232,28 @@ function showResult(j) {
     peek.append(el('pre', {}, j.prompt));
     meta.append(peek);
   }
+  // 「姿势完全没生效」时第一个要排掉的是：三张图真的送对了吗、姿势图排在第几张、
+  // 是不是被压成一张几乎看不清的缩略图。把实际送出的 data URI 原样摆出来即可，
+  // 不用再靠猜 —— 缩略图、顺序、体积、解码后的像素尺寸一眼可查。
+  if (Array.isArray(j.refs) && j.refs.length) {
+    const names = isLocal() ? ['姿势', '脸', '服装'] : ['服装', '脸', '姿势'];
+    const peek = el('details', { class: 'ref-peek' });
+    peek.append(el('summary', {}, `本次送出的参考图（${j.refs.length} 张 · 按送出顺序）`));
+    const row = el('div', { class: 'ref-row' });
+    j.refs.forEach((src, i) => {
+      const cell = el('figure', { class: 'ref-cell' });
+      const img = el('img', { src, alt: `参考图 ${i + 1}` });
+      const cap = el('figcaption', {},
+        `${i + 1}. ${names[i] || '参考图'} · ${Math.round(src.length / 1024)}KB`);
+      img.addEventListener('load', () => {
+        if (img.naturalWidth) cap.textContent += ` · ${img.naturalWidth}×${img.naturalHeight}`;
+      });
+      cell.append(img, cap);
+      row.append(cell);
+    });
+    peek.append(row);
+    meta.append(peek);
+  }
 }
 
 /* ─────────────────────────── 其它交互 ─────────────────────────── */
@@ -1272,12 +1321,15 @@ function bindUI() {
     if (!file || !uploadTarget) return;
     const url = URL.createObjectURL(file);
     try {
-      const { dataUrl } = await toReference(url);
+      // 上传时不能只留一张 480px / JPEG0.9 的降质图：本地对齐模式会取 full 当姿势原图，
+      // 若 full 与 thumb 指向同一张，后面再把分辨率提到 1024 也救不回来（细线已经丢了）。
+      const { dataUrl: thumb } = await toReference(url);
+      const { dataUrl: full } = await toReference(url, { hiRes: true });
       state.selected[uploadTarget] = {
         id: `upload-${Date.now()}`,
         title: file.name,
-        thumb: dataUrl,
-        full: dataUrl,
+        thumb,
+        full,
         origin: 'upload',
       };
       updateSlots();

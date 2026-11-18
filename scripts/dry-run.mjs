@@ -523,12 +523,17 @@ const minimalOpt = {
 };
 const pMin = buildPrompt(minimalOpt);
 check('极简版只有三图职责', /Image 1 is the outfit, image 2 is the face and hair, image 3 is the pose and camera angle/.test(pMin));
-check('极简版不注入姿势文字', !/wide stance|hands on her hips|standing/.test(pMin), pMin);
+// 2026-11-18 对照实验的结论：一个姿势字都不给时，三张图都在，模型却拿「服装展示照」
+// 的先验把空白填上，成品永远是正面站直、双臂下垂。所以极简版改成「三图职责 + 一句
+// 具体动作锚点」，仍然不加任何否定约束、站姿反例和风格长句。
+check('极简版带一句具体动作锚点，不加否定约束',
+  /POSE: reproduce image 3 exactly — .*wide stance/.test(pMin)
+  && !/do not|must not|catalogue pose/.test(pMin), pMin);
 check('极简版不写站姿反例', !/catalogue pose|legs as wide|squared to the camera/.test(pMin));
 check('极简版不写服装细则', !/same type, same length|mannequin|legwear/.test(pMin));
 check('极简版不写风格长句', !/85mm|editorial fashion photography/.test(pMin));
 check('极简版保留用户补充描述且在最后', /soft afternoon light$/.test(pMin.trim()), pMin.slice(-80));
-check('极简版足够短', pMin.length < 250, `${pMin.length} 字符`);
+check('极简版仍然短（含动作锚点后）', pMin.length < 400, `${pMin.length} 字符`);
 const pMinFull = buildPrompt({ ...minimalOpt, minimal: false });
 check('详细版仍注入姿势文字', /wide stance|hands on her hips/.test(pMinFull));
 check('详细版仍是长提示词', pMinFull.length > 1000, `${pMinFull.length} 字符`);
@@ -545,9 +550,9 @@ await generate({
 });
 // aiRun 收到的是序列化后的 multipart 流，提示词在 form 的 prompt 字段里
 const minimalBody = await new Response(minimalCaptured.multipart.body).text();
-check('服务端中转实际送出极简提示词',
-  /Image 1 is the outfit/.test(minimalBody) && !/hands on her hips/.test(minimalBody),
-  minimalBody.slice(0, 220));
+check('服务端中转实际送出极简提示词（含动作锚点）',
+  /Image 1 is the outfit/.test(minimalBody) && /hands on her hips/.test(minimalBody),
+  minimalBody.slice(0, 400));
 let minCap = null;
 await generate({ images: [], probe: true, minimal: true, extra: 'soft afternoon light', env: {},
   aiRun: async (mid, input) => { minCap = input; return { image: 'aGVsbG8=' }; } });
@@ -604,13 +609,59 @@ check('页面默认选中本地对齐', /<option value="local" selected>/.test(h
 check('本地版参考图顺序是 姿势→脸→服装', /const LOCAL_SLOTS = \['pose', 'face', 'outfit'\]/.test(appLocSrc));
 check('非本地版仍走原顺序', /const slots = isLocal\(\) \? LOCAL_SLOTS : SLOTS/.test(appLocSrc));
 check('姿势图改用 full 原图而非缩略图', /hiRes \? \(s\.full \|\| s\.thumb\)/.test(appLocSrc));
-check('高清线稿只给自定义模型（Workers AI 有 <512px 约束）',
-  /const hiRes = isLocal\(\) && k === 'pose' && state\.engine === 'custom'/.test(appLocSrc));
+check('高清线稿只给自定义模型，且三种提示词模式都保真（Workers AI 有 <512px 约束）',
+  /const hiRes = k === 'pose' && state\.engine === 'custom'/.test(appLocSrc)
+  && !/const hiRes = isLocal\(\)/.test(appLocSrc));
 check('姿势图缩放上限提到 1024', /const maxSide = hiRes \? 1024 : MAX_SIDE/.test(appLocSrc));
 check('姿势图 JPEG 质量提到 0.98', /hiRes \? 0\.98 : REF_QUALITY/.test(appLocSrc));
 check('2K 尺寸表按官方档位', /'3:4': '1728x2304'/.test(appLocSrc) && /'9:16': '1472x2624'/.test(appLocSrc));
 check('仅本地对齐模式使用 2K 尺寸', /size: isLocal\(\) \? \(AGNES_2K\[ratio\]/.test(appLocSrc));
 check('直连兜底也有本地版', /if \(isLocal\(\)\) \{[\s\S]*?absolute authority/.test(appLocSrc));
+
+console.log('\n[8a3] 姿势完全不生效的复查：文字锚点、图片传递可查、两条通道一致');
+// 2026-11-18 用户反馈「极简模式和本地对齐里完全没有姿势」，怀疑图片没传对。
+// 实测把线稿按网站的 toReference() 流程（白底重绘 + 300px + JPEG0.9）处理一遍，
+// 举起的双臂、手指、身体轮廓依然清晰可读 —— 图不是被压糊的。
+// 真正的原因在提示词：本地跑通的那版把姿势动作逐字写了出来（both arms raised with
+// hands clasped behind the head, elbows opened outward…），网站这版只说「图1 是绝对
+// 权威、精确复现」，还带了三个否定句；T5 对否定不敏感，会把 do not square the body /
+// do not drop the arms 读成肯定动作，正好生成「正面站直、双臂下垂」。
+const pLocNeg = buildPrompt({ poseHint: 'standing with both hands on her hips', local: true });
+check('本地版 POSE 段没有任何否定句', !/do not|must not|never |avoid /i.test(pLocNeg), pLocNeg.slice(0, 320));
+check('本地版把动作写成正面指令', /reproduce this exact pose — standing with both hands on her hips/.test(pLocNeg));
+check('本地版不再出现 drop the arms / square the body', !/drop the arms|square the body|mirror the arms/.test(pLocNeg));
+check('极简版也有正面动作锚点', /POSE: reproduce image 3 exactly — /.test(buildPrompt({ minimal: true, poseHint: 'both arms raised behind the head' })));
+check('极简版仍不含否定约束', !/do not|must not|never /i.test(buildPrompt({ minimal: true, poseHint: 'both arms raised behind the head' })));
+
+// 用户上传自己的线稿时，图库里没有 pose.en / pose.zh，姿势文字会是空的。
+check('页面提供「姿势要点」输入框', /id="poseHint"/.test(htmlLoc));
+const hintSrc2 = appLocSrc.slice(appLocSrc.indexOf('function poseHintFor('), appLocSrc.indexOf('function isHalfBodyPose('));
+const hintForDoc = (st, doc) => new Function('state', 'document', `${hintSrc2}; return poseHintFor();`)(st, doc);
+check('用户填的姿势要点优先于图库文字',
+  hintForDoc({ gender: 'female', selected: { pose: { pose: { en: 'from library' } } } },
+    { querySelector: () => ({ value: 'typed by user' }) }) === 'typed by user');
+check('没填时仍回退到图库 pose.en',
+  hintForDoc({ gender: 'female', selected: { pose: { pose: { en: 'from library' } } } },
+    { querySelector: () => null }) === 'from library');
+// 上传时不能只存一张降质图，且 full 必须与 thumb 分开，否则 hiRes 取 full 也救不回来
+check('上传分别保留缩略图与高清原图',
+  /const \{ dataUrl: thumb \} = await toReference\(url\);/.test(appLocSrc)
+  && /const \{ dataUrl: full \} = await toReference\(url, \{ hiRes: true \}\)/.test(appLocSrc)
+  && /\bthumb,\s*\n\s*full,/.test(appLocSrc));
+check('上传的自定义线稿也能取到高清 full',
+  /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appLocSrc));
+// 中转通道以前漏了 minimal/local 和 2K size，导致下拉选了新文案、实际仍发旧的
+check('中转通道也透传 minimal / local',
+  /minimal: body\.minimal === true,\s*\n\s*local: body\.local === true/.test(routerLocSrc));
+check('中转通道采用前端给的 2K size', /const size = .*body\.size/.test(routerLocSrc) && /\?\s*body\.size/.test(routerLocSrc));
+check('直连与中转两条通道都带 2K 尺寸', (appLocSrc.match(/AGNES_2K\[ratio\]/g) || []).length >= 2);
+// 结果区把真正送进 extra_body.image 的三张图摆出来，图片传递不再靠猜
+check('结果区展示本次实际送出的参考图',
+  /j\.refs = images/.test(appLocSrc) && /class: 'ref-peek'/.test(appLocSrc)
+  && /本次送出的参考图/.test(appLocSrc));
+check('参考图诊断标出两种顺序', /const names = isLocal\(\) \? \['姿势', '脸', '服装'\] : \['服装', '脸', '姿势'\]/.test(appLocSrc));
+const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
+check('版本号已递增到 2026.11.18.9', /tag: '2026\.11\.18\.9'/.test(versionSrc));
 
 console.log('\n[8b] 诊断探针：不带图也能调模型');
 // 3043 分不清是「模型不支持多图」「某张图太大/格式不认」还是「上游挂了」。

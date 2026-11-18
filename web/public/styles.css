@@ -527,6 +527,25 @@ a { color: inherit; }
   border-radius: 8px;
 }
 
+/* 「本次送出的参考图」：默认收起，展开后三张并排，直接看到模型实际收到的是什么。
+   判断「图片传递有没有问题」时，比读日志或猜提示词快得多。 */
+.ref-peek { flex-basis: 100%; }
+.ref-peek summary { cursor: pointer; color: var(--ink-2); padding: 2px 0; user-select: none; }
+.ref-peek summary:hover { color: var(--sel); }
+.ref-row {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin: 8px 0 0; padding: 10px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+}
+.ref-cell { margin: 0; flex: 1 1 90px; min-width: 90px; max-width: 170px; }
+.ref-cell img {
+  display: block; width: 100%; height: 132px; object-fit: contain;
+  background: #fff; border: 1px solid var(--line); border-radius: 6px;
+}
+.ref-cell figcaption {
+  margin-top: 4px; font-size: 10.5px; line-height: 1.4;
+  color: var(--ink-3); word-break: break-word;
+}
 
 /* 提示词模式：和生成按钮同一栏，方便两张图来回切着对比 */
 .prompt-mode-row {
