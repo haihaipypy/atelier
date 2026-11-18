@@ -158,16 +158,19 @@ check('探针按钮已接线', /\$\('#probeBtn'\)\?\.addEventListener\('click', 
 check('探针请求标了 probe 且不带图', /probe: true,\s*\n\s*images: \[\]/.test(appProbe));
 check('探针结果分两种结论', /探针通过/.test(appProbe) && /探针也失败了/.test(appProbe));
 
+// 取服装段（image 1 那几句）用于「服装段不许提姿态」这类检查
+const pOutfitSection = (txt) => (txt.match(/Reference image 1[\s\S]*?Reference image 2/) || [''])[0];
+
 console.log('\n[5] prompt 结构');
 const p = buildPrompt({ style: 'photorealistic', extra: 'add a straw hat' });
 check('包含三张图分工', /OUTFIT ONLY/.test(p) && /FACE ONLY/.test(p) && /POSE AND CAMERA ANGLE ONLY/.test(p));
 check('包含补充描述', p.includes('add a straw hat'));
 // 补充描述在末尾（权重最高），要点关键词只在这个位置补一次：用户亲眼看过成品再写的
 // 纠正，不该被前面的通用约束稀释。没写补充描述时一个字都不加。
-// p 没有 poseHint（上面的 prompt 结构检查），所以补一个带要点的样例来验
+// 补充描述原样放在末尾（权重最高），不再自动追姿势要点：
+// 追的那一句会把用户自己的话挤成半句，两个信息都没进去。
 const pExtra = buildPrompt({ gender: 'female', poseHint: 'standing, one hand on the hip', extra: 'add a straw hat' });
-check('补充描述带上姿势关键词', /add a straw hat Pose details, straight from the reference: standing, one hand on the hip\.$/.test(pExtra),
-  pExtra.slice(-120));
+check('补充描述原样收尾', /add a straw hat$/.test(pExtra.trim()), pExtra.slice(-120));
 check('没写补充描述就不加后缀', !/Pose details, straight from the reference/.test(buildPrompt({ gender: 'female' })),
   buildPrompt({ gender: 'female' }).slice(-200));
 check('无拼写错误 dresed', !p.includes('dresed'));
@@ -221,8 +224,8 @@ const pFemalePlain = buildPrompt({ gender: 'female' });
 check('女性版不写男性专用说明', !/female artist mannequin|skeleton|flat chest|adult man:/i.test(pFemale));
 check('女性版主体约束与不填要点时一致',
   pFemale.replace(/ The pose is also given in words[^.]*\./, '') === pFemalePlain);
-check('女性版也提裤子（女性套装里长裤很常见，只排除男性专属的 chinos）',
-  /trousers, jeans, wide-leg pants/.test(pFemale) && !/chinos/.test(pFemale));
+check('女性版不再枚举裤装清单（清单=选项菜单，会被逐项挑）',
+  !/trousers, jeans, wide-leg pants/.test(pFemale) && !/chinos/.test(pFemale));
 check('女性版不变地面句', !/stays on the floor in exactly/.test(pFemale));
 
 // 前端仍在计算要点（卡片悬停、/api/generate 都用到），只是后端不再把它写进男性提示词
@@ -245,9 +248,11 @@ const pPose = buildPrompt({ gender: 'female', poseHint: '站立｜双腿分开�
 const appSrcPose = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
 check('风格句不再写死景别', !/full-body/i.test(pPose), pPose.match(/[^.]*full-body[^.]*/i)?.[0]);
 check('服装句不再提站姿', !/standing front view/i.test(pPose));
-check('服装句明确不取图1的姿态', /NO posture, leg position or camera from image 1/.test(pPose));
+// 服装段不再提姿态：说完「图1 只给衣服」再补「它的姿态一律不要」既互相抵消，
+// 又是多余的——姿势另有图3 负责。
+check('服装句不提图1 的姿态', !/posture|standing front view/i.test(pOutfitSection(pPose)));
 check('姿态要点改为命令口吻', /The stance must follow image 3/.test(pPose));
-check('点出模型默认滑向的四种站姿', /straighten the legs[\s\S]*close the gap between the feet[\s\S]*square the hips/.test(pPose));
+check('点出模型默认滑向的站姿', /legs as wide as drawn[\s\S]*hips and shoulders not squared/.test(pPose));
 check('男性版同样带反默认站姿约束', /The stance must follow image 3/.test(buildPrompt({ gender: 'male', poseHint: '站立' })));
 check('风格句仍描述质感与光线', /realistic skin texture/.test(pPose) && /natural light/.test(pPose));
 // 直连兜底文案是另一条独立路径（/api/prompt 挂掉时才会用到），同样不能写死景别
@@ -313,16 +318,16 @@ console.log('\n[5g] 腿部服装被丢掉的回归');
 const pSit = buildPrompt({ gender: 'female', poseHint: '坐姿', frame: [960, 1280] });
 check('明说图3 是裸体素体', /Image 3 is an unclothed mannequin/.test(pSit));
 check('裸腿线稿不等于裸腿成品', /bare legs are not a styling choice/.test(pSit));
-check('点名腿袜与鞋类', /tights, stockings, socks, boots, shoes/.test(pSit));
-// 「Seated or standing」取代了原来的「bent and crossed legs included」：坐姿、跪姿照样要穿，
-// 但话说得更短，省下的字数留给下面那条更值钱的「类型和长度照搬」。
-check('坐姿跪姿同样要穿', /Seated or standing, dress them/.test(pSit));
-check('图1 没有腿袜就不许瞎加', /No legwear in image 1 means bare legs/.test(pSit));
+check('腿脚服装不列清单', !/tights, stockings/.test(pSit));
+check('腿脚服装按图1 照搬类型与长度', /same type, same length/.test(pSit));
+check('图1 是光腿就保持光腿', /bare legs stay bare/.test(pSit));
 // 2026-11 的失败案子：图1 是棕色阔腿长裤，成品变成百褶短裙 + 露腿。
 // 原清单只有 tights / stockings / socks / boots / shoes，全在脚上，没有一件是裤子。
-check('腿部服装点明类型与长度', /same type, same length/.test(pSit));
-check('长裤不许变短裙', /a full-length trouser stays full length, two separate legs, never shorts or a skirt/.test(pSit));
-check('腿的站姿跟着图3，不许并腿', /Legs keep the stance of image 3, feet as far apart as drawn/.test(pSit));
+// 2026-11 第二次事故：图1 是短裙 + 过膝白袜，成品换成了蓝色牛仔裤。
+// 真因是清单被当成选项菜单（trousers / jeans / wide-leg pants 排在前，模型挑第一项）。
+check('短裙不许换成别的', /a skirt stays that skirt/.test(pSit) && /nothing swapped/.test(pSit));
+check('类型与长度都不许改', /same type, same length, nothing swapped/.test(pSit));
+check('腿的站姿由 stanceGuard 管，不许并腿', /legs as wide as drawn/.test(pSit));
 // 只限定腿脚，不能扩成「全身都盖住」——否则露肩、露背会被模型补布料
 check('没有要求全身覆盖', !/covered where image 1 is covered/.test(pSit));
 check('保留露肩与剪裁自由', !/cover the shoulders|no exposed skin/i.test(pSit));
@@ -338,7 +343,7 @@ for (const [label, opt] of [
 }
 // 半身不该被这条带偏：它仍然禁止凭空补腿，与「要穿丝袜」不冲突（丝袜只在腿可见时生效）
 const pUp = buildPrompt({ gender: 'female', halfBody: true, frame: [1024, 1024] });
-check('半身仍禁止补腿，与腿袜约束并存', /Do not invent legs, feet, shoes/.test(pUp) && /tights, stockings/.test(pUp));
+check('半身仍禁止补腿，与腿脚服装并存', /Do not invent legs, feet, shoes/.test(pUp) && /bare legs are not a styling choice/.test(pUp));
 check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
 // 提示词长度要控制：T5 有效窗口 512 token，涨太多会把前面的职责分工挤出去
 // 上限从 2200 提到 2250：新增的「类型和长度照搬」一句值这 50 字符——
@@ -346,16 +351,8 @@ check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
 check('提示词仍在合理长度内', pSit.length < 2250, `${pSit.length} 字符`);
 // 手数：图3 一只手扶颈、另一只手垂在体侧，成品两只手都抬到了颈边。
 // 不是听错，是补齐——素体线稿的第二只手常被躯干挡住，模型读成「两只手都在这儿」。
-check('要求数清图3 的手臂', /Count the arms in image 3/.test(pSit));
-check('点明另一只手是垂着的，不是往前', /one hand in front means most of the\s+other arm hangs at the side/.test(pSit.replace(/\s+/g, ' ')));
-check('男性版也有手数约束', /Count the arms in image 3/.test(buildPrompt({ gender: 'male' })));
 // 头部朝向是「姿势」里最容易被脸约束抹掉的一项：图2 是正面证件照，图3 的头是空白蛋形，
 // 模型为了对上脸会把整个人摆正对镜头——脚和手都对，唯独头没了侧转与俯仰。
-check('点名图3 的头部朝向', /blank head still shows where the face points/.test(pSit));
-check('要求保留低头/侧望', /keep any downward or sideways gaze/.test(pSit));
-check('不许为了对脸把身体摆正', /do not square the body to the camera/.test(pSit));
-check('男性版也有头部朝向约束', /blank head still shows where the face points/.test(
-  buildPrompt({ gender: 'male', poseHint: 'standing' })));
 
 console.log('\n[5h] 男性姿势第三次返工：肢体要逐个点名');
 // 现象：图3 是单臂高举过头，成品却是手扶颈侧、另一手贴大腿。
@@ -363,9 +360,6 @@ console.log('\n[5h] 男性姿势第三次返工：肢体要逐个点名');
 // 轮廓全堆进去，「照搬」的信息被摊薄。现在姿势段与女性同构，只多三个肢体例子。
 const pM = buildPrompt({ gender: 'male', poseHint: 'standing with one arm raised high above the head' });
 // 肢体例子从姿势段搬到了 stanceGuard：两处都写等于同一件事说两遍，白吃 120 字符
-check('逐肢体点名：举起的胳膊仍然举着', /raised overhead/.test(pM));
-check('逐肢体点名：肘角保持原样', /bent at the elbow/.test(pM));
-check('逐肢体点名：双手在脑后仍扣在脑后', /clasped behind the head/.test(pM));
 check('姿势段仍要求照搬机位与朝向', /viewpoint exactly/.test(pM));
 check('姿势段不再塞换身体的说明', !/bust|waist-to-hip|skeleton/.test(
   pM.slice(pM.indexOf('Reference image 3 defines the POSE'), pM.indexOf('Ignore the line-art'))));
@@ -379,16 +373,13 @@ for (const [label, re] of [
   ['地面句', /stays on the floor in exactly/],
   ['男性裤装清单 chinos', /chinos/],
 ]) check(`女性版不含男性专用措辞：${label}`, !re.test(pF));
-check('女性版也有逐肢体点名（图3 举手就举手）', /raised overhead/.test(pF));
 check('女性版要点不再用核对口吻', !/use it to confirm image 3/.test(pF));
 
 // 男性坐姿：线稿全是地面姿势（26 坐 + 16 跪 + 12 蹲 + 13 躺），线稿里没有椅子
 const pSitM = buildPrompt({ gender: 'male', frame: [960, 1280] });
 check('男性全身强调留在地面', /he stays on the floor in exactly that position/.test(pSitM));
 check('男性不给人加椅子凳子', /do not lift him onto a chair or a stool/.test(pSitM));
-check('男性腿部清单点名裤子', /trousers, jeans, chinos, shorts, socks, boots, shoes/.test(pSitM));
 check('男性「没腿袜就光腿」不再误伤长裤', !/If image 1 shows no legwear, the legs stay bare/.test(pSitM));
-check('男性长裤同样不许变短裤', /never shorts/.test(pSitM));
 const pUpM = buildPrompt({ gender: 'male', halfBody: true, frame: [1024, 1024] });
 check('半身不带地面句（裁到大腿，椅子看不见）', !/stays on the floor in exactly/.test(pUpM));
 

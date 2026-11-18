@@ -125,31 +125,19 @@ export function buildPrompt({
         'ignore only the mannequin\'s bust and hip curve, because the pose itself is copied as drawn.'
       : 'The person is an adult woman.';
 
-  // 姿势段：男女共用同一句主干。
+  // 姿势段：一句话，短。
   //
-  // 这一句是三次返工后收敛出来的写法。要点是**短**：姿势段的长度直接决定它被
-  // 当成硬约束还是背景描述。曾经为了「换身体」把骨架、关节、轮廓全塞进来，
-  // 结果选了「单手高举」却输出手扶后颈、另一只手插兜的成品——手抬起来了，
-  // 但抬到哪儿完全由模型自己决定。
+  // 这是唯一一条经过反复验证有效的写法：短句被当成硬约束，长段被当成背景描述。
+  // 后续所有「再加一句」的尝试都失败了，而且不是加的那句没用，是它把这一句的权重
+  // 稀释掉了——成品从「姿势不太准」变成「两只手都抬到颈边、还换了条牛仔裤」。
+  // 教训写在 docs/manual.md「为什么最后只剩一句话」。
   //
-  // 结尾那组「逐肢体」例子只管动作本身：举手仍举、肘角不变、手在头上仍在头上。
-  // 对任何姿势都成立，不偏袒某一类，所以男女共用。
-  // （女性版的失败案子是「图3 双手在脑后、成品双手垂在身侧」——模型把手放下了，
-  //   不是抬错位置，是整段忽略，点名字之后才有东西可抓。）
-  // 肢体例子从这一段搬到了 stanceGuard（那里本来就有一句「手放哪儿就留在哪儿」）。
-  // 两处都写等于同一件事说了两遍，白白吃掉 120 字符——而 T5 只认前 512 token。
-  //
-  // 抬头/转头单独点名，因为它是**唯一一个会被脸约束主动抹掉的姿势信息**：
-  // 图2 是证件照式的正面脸，图3 的头是空白蛋形（没有五官可对），两者一比，
-  // 模型只剩一个选择——把身体转到正面、让脸正对镜头。于是身体的扭转、低头的角度
-  // 一起消失：双脚方向、手的位置都对，唯独头是「证件照」。这就是「动作差不多，
-  // 但头部动作和侧转都没有」。
-  //
-  // 写进 stanceGuard（提示词最后一段）而不是上面：那里已经写着「别把胯肩摆正对镜头」，
-  // 头部说明放同一段才收得住，否则同一件事分成两处说，模型各听一半。
+  // 手数、头部朝向这类更细的约束一律不进这一段。
+  // 线稿风格那句并到这一句后面：它本来就属于「图3 只给姿势，别抄画法」，
+  // 单独成段只多占 100 字符，而 T5 的有效窗口只到 512 token。
   const poseRef =
     'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
-    'placement, leg crossing, hand positions and viewpoint exactly, limb by limb.';
+    'placement, leg crossing, hand positions and viewpoint exactly.';
   // 姿态要点只对女性版注入，男性版**一个字都不注入**。
   //
   // 两个库的要点现在都优先取 pose.en（前端负责），即完整英文句——之前女性注入的是
@@ -197,22 +185,19 @@ export function buildPrompt({
         'subject of the picture and the face must stay visible behind or between the hands.'
     : '';
 
-  // 站姿反例只对全身取景有意义。半身像里「别并腿」既不可见，又会把模型
-  // 往「画出腿」上拽——那样正好丢掉手势，与半身的要求相反。
+  // 站姿兜底：只放最容易被抹掉的几个反例，且只对全身取景。
   //
-  // 反例之后必须补一句正例：只写「别把手贴在身侧」时，模型找的替代方案是「手插兜」
-  // 或「手扶胯」，仍然不是图3 的动作。「手放在哪就留在哪」把自由度收回到线稿上，
-  // 对任何姿势都成立（含本身就是双手贴身的姿势）。
+  // 半身像整段跳过：它的取景段已经写着「别补腿、别摆全身站姿、别压胳膊」，
+  // 再加一句「腿多宽、脚在哪」只会让模型去画腿——正好与半身的要求相反。
+  //
+  // 曾经在这段里加过「数手臂」「头的朝向」「手放哪儿就留在哪儿」三类细则。
+  // 结果是整体崩：姿势段的权重被摊薄后，模型开始同时走错服装和姿势。
+  // 这类细则要么进 extra（末尾、权重最高），要么就别加。
   const stanceGuard = halfBody
     ? ''
-    : 'The stance must follow image 3, not a default catalogue pose. Do not straighten the legs, ' +
-      'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
-      'and do not drop the arms flat against the sides. ' +
-      'Whatever image 3 does with the arms — raised overhead, bent at the elbow, clasped behind ' +
-      'the head — stays that way. Count the arms in image 3: one hand in front means most of the ' +
-      'other arm hangs at the side, not forward. Its blank head still shows where the face points: ' +
-      'tilt and turn the head that way, keep any downward or sideways gaze, and do not square the ' +
-      'body to the camera to face the viewer front-on.';
+    : 'The stance must follow image 3, not a default catalogue pose: legs as wide as drawn, ' +
+      'feet where drawn, hips and shoulders not squared to the camera, and arms not hanging flat ' +
+      'against the sides unless image 3 shows exactly that.';
 
   // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
   // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
@@ -223,44 +208,43 @@ export function buildPrompt({
       'that position — do not lift him onto a chair or a stool, and do not stand him up.'
     : '';
 
-  // 腿部服装要单独说一遍，而且必须点明**类型与长度**。
+  // 腿部服装：只交代**图1 里真的露出来的那部分**。
   //
-  // 起因：图1 是「蕾丝吊带 + 棕色阔腿长裤」，图3 是举手叉腰的站姿线稿，成品上半身全对，
-  // 下半身却变成棕色百褶短裙 + 露腿 + 高跟鞋。原句只列了 tights / stockings / socks /
-  // boots / shoes —— 全在脚上，没有一件是裤子。模型按字面理解成「腿上只有袜子和鞋」，
-  // 于是自己拿上衣的颜色配了一条短裙，顺手把腿摆成细长交叉的模特站姿。
+  // 这一段的来历是一连串翻车。先是腿光着（清单里只有 tights/socks，漏了裤子）；
+  // 补上裤子之后，又出现「图1 是短裙 + 过膝袜，成品给她换了条蓝色牛仔裤」——
+  // 因为清单里按字母顺序列了 trousers, jeans, wide-leg pants, skirt...，
+  // 模型从第一项开始挑，挑中了牛仔裤。清单越长越危险：它变成了选项菜单。
   //
-  // 所以清单里加进裤子/裙子/短裤，再补一句「类型和长度都照搬，长裤不能变短裤或短裙」，
-  // 并用「两条裤腿分开」把「裤子」和「裙摆」在语义上隔开——只说 wide-leg 时，
-  // 模型很容易理解成宽摆的裙子。
-  const legwearLine = gender === 'male'
-    ? 'Image 3 is an unclothed mannequin: its bare legs are not a styling choice. Seated or ' +
-      'standing, dress them from image 1 — trousers, jeans, chinos, shorts, socks, boots, shoes — ' +
-      'same type, same length: a full-length trouser stays full length, two separate legs, never ' +
-      'shorts. Legs keep the stance of image 3, feet as far apart as drawn. No legwear in image 1 ' +
-      'means bare legs; no footwear means plain flat shoes.'
-    : 'Image 3 is an unclothed mannequin: its bare legs are not a styling choice. Seated or ' +
-      'standing, dress them from image 1 — trousers, jeans, wide-leg pants, skirt, shorts, tights, ' +
-      'stockings, socks, boots, shoes — same type, same length: a full-length trouser stays full ' +
-      'length, two separate legs, never shorts or a skirt. Legs keep the stance of image 3, feet as ' +
-      'far apart as drawn. No legwear in image 1 means bare legs; no footwear means plain flat shoes.';
+  // 所以现在不再枚举，只说两件事：
+  // ① 图3 的腿是裸模，别当造型——腿脚该穿什么，看图1 露出来的那部分；
+  // ② 类型和长度照图1，短的不许改长，长的不许改短。
+  //
+  // 腿的站姿（开合、重心、交叉）移到 stanceGuard 里统一说——那里本来就管全身的站姿，
+  // 而且对上半身取景也一样适用（上半身看不到腿，说了也无害，反而防止模型自己补腿）。
+  //
+  // 还有一层：图3 的腿是裸的，不提一句，模型就把裸腿当造型照抄（丝袜、靴子一起丢）。
+  // 这句只否掉「裸腿」，说的是「腿脚照图1」，不是「按清单选一件」。
+  const legwearLine =
+    'Image 3 is an unclothed mannequin: its bare legs are not a styling choice. The legs and feet ' +
+    'wear what image 1 shows on them — same type, same length, nothing swapped, so a skirt stays ' +
+    'that skirt and trousers stay trousers; bare legs stay bare.';
 
   const parts = [
     'Compose one person from the three reference images below.',
     subject,
-    'Reference image 1 defines the OUTFIT ONLY: copy its garments, colors, fabric, patterns, ' +
-      'accessories and footwear exactly as shown. Ignore the mannequin body inside it — render a ' +
-      'real person, no hollow torso. Its pose means nothing: take NO posture, leg position or ' +
-      'camera from image 1, even if it stands straight.',
-    // 腿脚服装由下面这段单独交代，所以这里不再写「衣服覆盖全身」——那句话既与「姿态一律不要」
-    // 挨在一起容易互相抵消，又和 legwearLine 重复。
+    'Reference image 1 defines the OUTFIT ONLY — every garment on it, head to toe: top, bottoms, ' +
+      'legwear, footwear, bags and jewelry. Copy each one exactly: same type, same length, same ' +
+      'color. Ignore the body inside it — render a real person, no mannequin, no hollow torso.',
+    // 腿脚服装以前单独一段，原因是「图1 的姿态一律不要」会连带把腿上的衣服一起否掉。
+    // 现在服装段只说「照抄衣服」，不再提姿态，这段话就没有存在的必要了；
+    // 它反而在 2026-11 引发了一次事故：清单里枚举了 trousers / jeans / wide-leg pants，
+    // 模型从第一项开始挑，把短裙换成了牛仔裤。清单越长，越像一份选项菜单。
     legwearLine,
     'Reference image 2 gives the FACE ONLY: this exact identity, hairstyle and hair color.',
     poseRef,
-    // 两句合一：line-art 那句本来就属于「图3 只给姿势」，末尾的 anatomy 要求也是同一个意思。
-    // 分开写多花 100 字符，而 T5 的有效窗口只到 512 token，省下的字数要留给末尾的站姿反例。
-    'Ignore the line-art style and simplified proportions of image 3 — a finished photo: outfit ' +
-      'from 1, face from 2, pose from 3, natural anatomy.',
+    // 两句合一：line-art 那句属于「图3 只给姿势」，结尾的 anatomy 要求也是同一个意思。
+    // 分开写多花 90 字符，而 T5 的有效窗口只到 512 token。
+    'Ignore its line-art style and simplified proportions — a finished photo, natural anatomy.',
     // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
     hintLine,
     framing,
@@ -272,31 +256,11 @@ export function buildPrompt({
     frameLine,
     styleLine,
     // 补充描述放在最后：这是全文权重最高的位置，用户亲眼看过成品后写的纠正应该落在这里。
-    // 关键词只在「用户自己写了东西」时注射，没写就一个字都不加——不然等于替所有人生成一遍。
-    extra ? withPoseKeywords(extra, poseHint) : '',
+    // 它是用户的，就原样放在这儿——曾经试过在它后面自动追一句姿势要点，
+    // 结果那一句把用户的话挤成了半句，两个信息都没进去。
+    extra,
   ];
   return parts.filter(Boolean).join(' ');
-}
-
-/**
- * 把姿势要点里的关键词缀在用户的补充描述之后。
- *
- * 起因是一类很顽固的偏差：图3 一只手扶颈、另一只手**垂在体侧**，成品两只手都抬到了颈边。
- * 这不是「听错」，是「补齐」——线稿是女性素体，第二只手常常被躯干挡住只露出一截，
- * 模型就把它理解成「两只手都在这儿」。
- *
- * 提示词里已经写了这一条，但用户亲手写的那句话在末尾、权重最高。所以把要点里的
- * 动作短语缀在它后面，让「用户纠正」和「姿势细节」落在同一个高权重位置。
- *
- * 只在用户在补充描述里写了东西时才缀：没写就一个字都不加，否则等于替所有人改稿。
- * 另外用一个固定的开头把两者隔开，模型不会把用户的风格描述（比如「暖光」）
- * 当成姿势的一部分。
- */
-export function withPoseKeywords(extra, poseHint) {
-  const text = String(extra || '').trim();
-  const hint = clipPoseHint(poseHint);
-  if (!text || !hint) return text;
-  return `${text} Pose details, straight from the reference: ${hint}.`;
 }
 
 /**
