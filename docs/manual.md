@@ -700,6 +700,39 @@ drawn. No legwear in image 1 means bare legs; no footwear means plain flat shoes
 男性套装是长裤，而原清单里只有「丝袜、长袜、袜子」，还跟着一句「图 1 没有腿袜就光腿」。
 按字面理解，长裤不算 legwear，于是坐姿/躺姿真的会出一条光腿。
 
+#### 姿势为什么非要在最后一句
+
+回滚到 1380 字符之后，服装回来了，姿势又不行了：线稿双手叉腰、双腿分开，成品双手垂在
+身侧、双腿并拢。要点文本明明写着 `hands on her hips, elbows out`——字是对的，位置不对。
+
+同一句话放在不同位置，效果差一个量级：
+
+| 位置 | 写法 | 结果 |
+|---|---|---|
+| 中段（紧接「图3 只给姿势」） | `The pose is also given in words, matching image 3 exactly: …` | 被当背景描述，手照样放下 |
+| 末尾（风格段之后） | `Exact pose, matching image 3: …` | 目前最好的一版 |
+
+两个变化同时起作用，而且都**不增加长度**：
+
+1. **挪位置。** 提示词末尾是权重最高的位置。这句话原来排在服装说明（四句、300 字符）
+   后面，模型读完那一大段之后已经进入「商品图」模式，再读到这句只会当成备注。
+2. **改口吻。** `also given in words` 明确把它降级成「补充信息」，`matching image 3
+   exactly` 又像是在说「这是一句待核对的描述」。改成标签式（`Exact pose, matching
+   image 3: X`）才是约束的口吻。
+
+站姿反例（`The stance must follow image 3…`）也一起挪到了末尾，紧挨在要点之前。
+理由：这两句说的是一件事的两面（反面「别并腿、别贴身」+ 正面「双手叉腰」），
+分开摆时模型各听一半；连读才收得住。
+
+另外把反例结尾的逃生口收窄了：
+
+```
+（旧）… and arms not hanging flat against the sides unless image 3 shows exactly that.
+（新）… and the arms not hanging flat against the sides when image 3 puts them somewhere else.
+```
+
+旧的写法是给模型留了「我觉得图 3 就是这样」的借口，而它恰恰最擅长这么想。
+
 #### 为什么最后只剩一句话
 
 这一节的标题是整份文档里最沉的一条教训。

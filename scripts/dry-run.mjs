@@ -187,8 +187,14 @@ check('男性提示词不再注入姿态要点', !/单膝竖起/.test(pMaleSit),
 check('女性提示词仍注入姿态要点', /单膝竖起/.test(pFemale));
 // 要点措辞：说成「与图3 一致的另一种描述」，而不是「用来核对图3」。
 // 「确认」口吻等于告诉模型这段可以不信——图3 双手在脑后、成品双手垂在身侧就是这么来的。
-check('女性要点写成与图3 同一姿势，不是核对口吻',
-  /The pose is also given in words, matching image 3 exactly/.test(pFemale) && !/use it to confirm/.test(pFemale));
+// 措辞是断言标签（Exact pose, matching image 3: X），不是「also given in words」这种补充口吻。
+// 而且它必须在提示词最末尾——姿势是最先被前面长段服装说明稀释掉的一项。
+check('女性要点写成断言标签，不是核对口吻',
+  /Exact pose, matching image 3: /.test(pFemale) && !/use it to confirm|also given in words/.test(pFemale));
+check('要点落在提示词最末一句',
+  /Exact pose, matching image 3: [^.]*\.$/.test(pFemale.trim()), pFemale.slice(-120));
+check('站姿反例紧挨在要点之前（姿势约束集中在末尾）',
+  /The stance must follow image 3[^.]*\.[^.]*Exact pose, matching image 3: /.test(pFemale));
 // 姿势段必须和女性同构：同一句主干，男性只多三个肢体例子
 const poseLine = (p) => p.slice(p.indexOf('Reference image 3 defines the POSE'), p.indexOf('Ignore the line-art'));
 check('男女姿势段同构', /^Reference image 3 defines the POSE AND CAMERA ANGLE ONLY/.test(
@@ -223,7 +229,7 @@ const pFemalePlain = buildPrompt({ gender: 'female' });
 // 注意别用 「male body」做关键词：女性版的 female body proportions 里就含这四个字母
 check('女性版不写男性专用说明', !/female artist mannequin|skeleton|flat chest|adult man:/i.test(pFemale));
 check('女性版主体约束与不填要点时一致',
-  pFemale.replace(/ The pose is also given in words[^.]*\./, '') === pFemalePlain);
+  pFemale.replace(/ Exact pose, matching image 3:[^.]*\./, '') === pFemalePlain);
 check('女性版不再枚举裤装清单（清单=选项菜单，会被逐项挑）',
   !/trousers, jeans, wide-leg pants/.test(pFemale) && !/chinos/.test(pFemale));
 check('女性版不变地面句', !/stays on the floor in exactly/.test(pFemale));

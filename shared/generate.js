@@ -151,8 +151,12 @@ export function buildPrompt({
   const hint = clipPoseHint(poseHint);
   // 措辞是「同一姿势的另一种说法」，不是「用来核对图3」——后一种写法把文字降成了检查项，
   // 模型读完该忽略还是忽略（图3 双手在脑后、成品双手垂在身侧，就是这么来的）。
+  // 措辞从「also given in words, matching image 3 exactly」改成断言式标签。
+  // "also" 把它降级成补充信息，"matching" 又暗示这是一句待核对的描述——
+  // 两处都让模型觉得「可以不信」。写成标签（Exact pose, matching image 3: X）
+  // 才是约束的口吻。
   const hintLine = hint && gender !== 'male'
-    ? `The pose is also given in words, matching image 3 exactly: ${hint}.`
+    ? `Exact pose, matching image 3: ${hint}.`
     : '';
 
   // 上半身姿势是另一套取景规则。
@@ -196,8 +200,8 @@ export function buildPrompt({
   const stanceGuard = halfBody
     ? ''
     : 'The stance must follow image 3, not a default catalogue pose: legs as wide as drawn, ' +
-      'feet where drawn, hips and shoulders not squared to the camera, and arms not hanging flat ' +
-      'against the sides unless image 3 shows exactly that.';
+      'feet where drawn, hips and shoulders not squared to the camera, and the arms not hanging ' +
+      'flat against the sides when image 3 puts them somewhere else.';
 
   // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
   // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
@@ -245,16 +249,21 @@ export function buildPrompt({
     // 两句合一：line-art 那句属于「图3 只给姿势」，结尾的 anatomy 要求也是同一个意思。
     // 分开写多花 90 字符，而 T5 的有效窗口只到 512 token。
     'Ignore its line-art style and simplified proportions — a finished photo, natural anatomy.',
-    // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
-    hintLine,
     framing,
-    // 反例比正例管用：模型对「站直、双手贴身」的默认偏好极强，不点名的话，
-    // 只要服装是长裙就会自己滑回正面站姿。这一句放在姿势段之后、风格之前，
-    // 让它落在模型最后读到的位置附近。
-    stanceGuard,
     floorLine,
     frameLine,
     styleLine,
+    // 反例比正例管用：模型对「站直、双手贴身」的默认偏好极强，不点名的话，
+    // 只要服装是长裙就会自己滑回正面站姿。
+    // 它和下面那句要点一起停在末尾：姿势相关的全部约束集中到最后读到的位置，
+    // 彼此加强。分开摆（一个在中间、一个在末尾）时，读到最后只剩要点半句，
+    // 反例那半句已经被前面一大段服装说明冲淡了。
+    stanceGuard,
+    // 姿态要点放在这里：提示词末尾是全文权重最高的位置，而姿势恰恰是最先被稀释的一项。
+    // 它曾经排在「图3 只给姿势」后面（中间位置），模型读完前面一大段服装说明后
+    // 已经把这句当背景描述——线稿双手叉腰，成品双手垂在身侧，要点文本明明写着
+    // hands on her hips 也没用。移到末尾只挪位置、不加字，反而更短。
+    hintLine,
     // 补充描述放在最后：这是全文权重最高的位置，用户亲眼看过成品后写的纠正应该落在这里。
     // 它是用户的，就原样放在这儿——曾经试过在它后面自动追一句姿势要点，
     // 结果那一句把用户的话挤成了半句，两个信息都没进去。
