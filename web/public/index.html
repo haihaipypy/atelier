@@ -148,6 +148,12 @@
         <span class="spinner" hidden></span><span class="label">生成合成图</span>
       </button>
       <p class="hint" id="hint">从左侧选齐 服装 / 脸 / 姿势 三个素材后即可生成。</p>
+      <!-- 诊断探针：不要素材，只发提示词 + 画幅。报 3043 时用它分辨「模型/上游的问题」
+           还是「多图输入的问题」——探针过 → 问题在图，探针挂 → 跟图无关。 -->
+      <button type="button" class="text-btn probe-btn" id="probeBtn"
+        title="只发提示词和画幅、不带任何参考图调一次模型。用来判断报错是模型/上游的问题，还是多图输入的问题。">
+        诊断：不带图试一次
+      </button>
     </div>
 
     <div class="result" id="result">

@@ -151,6 +151,13 @@ const badRes = await handleRequest(
 );
 check('少于三张图 → 400', badRes.status === 400);
 
+// 页面上要有探针入口，否则「探针通过/失败」的判断没人能用
+const appProbe = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+check('页面上有诊断探针按钮', /id="probeBtn"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
+check('探针按钮已接线', /\$\('#probeBtn'\)\?\.addEventListener\('click', probeOnce\)/.test(appProbe));
+check('探针请求标了 probe 且不带图', /probe: true,\s*\n\s*images: \[\]/.test(appProbe));
+check('探针结果分两种结论', /探针通过/.test(appProbe) && /探针也失败了/.test(appProbe));
+
 console.log('\n[5] prompt 结构');
 const p = buildPrompt({ style: 'photorealistic', extra: 'add a straw hat' });
 check('包含三张图分工', /OUTFIT ONLY/.test(p) && /FACE ONLY/.test(p) && /POSE AND CAMERA ANGLE ONLY/.test(p));
@@ -329,6 +336,13 @@ check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
 // 上限从 2200 提到 2250：新增的「类型和长度照搬」一句值这 50 字符——
 // 它挡的是「长裤被改成短裙」这类整体性错误，比省 token 重要得多。
 check('提示词仍在合理长度内', pSit.length < 2250, `${pSit.length} 字符`);
+// 头部朝向是「姿势」里最容易被脸约束抹掉的一项：图2 是正面证件照，图3 的头是空白蛋形，
+// 模型为了对上脸会把整个人摆正对镜头——脚和手都对，唯独头没了侧转与俯仰。
+check('点名图3 的头部朝向', /blank head still shows where the face points/.test(pSit));
+check('要求保留低头/侧望', /keep any downward or sideways gaze/.test(pSit));
+check('不许为了对脸把身体摆正', /do not square the body to the camera/.test(pSit));
+check('男性版也有头部朝向约束', /blank head still shows where the face points/.test(
+  buildPrompt({ gender: 'male', poseHint: 'standing' })));
 
 console.log('\n[5h] 男性姿势第三次返工：肢体要逐个点名');
 // 现象：图3 是单臂高举过头，成品却是手扶颈侧、另一手贴大腿。
@@ -338,7 +352,7 @@ const pM = buildPrompt({ gender: 'male', poseHint: 'standing with one arm raised
 // 肢体例子从姿势段搬到了 stanceGuard：两处都写等于同一件事说两遍，白吃 120 字符
 check('逐肢体点名：举起的胳膊仍然举着', /raised overhead/.test(pM));
 check('逐肢体点名：肘角保持原样', /bent at the elbow/.test(pM));
-check('逐肢体点名：双手在脑后仍扣在脑后', /hands clasped behind the head/.test(pM));
+check('逐肢体点名：双手在脑后仍扣在脑后', /clasped behind the head/.test(pM));
 check('姿势段仍要求照搬机位与朝向', /viewpoint exactly/.test(pM));
 check('姿势段不再塞换身体的说明', !/bust|waist-to-hip|skeleton/.test(
   pM.slice(pM.indexOf('Reference image 3 defines the POSE'), pM.indexOf('Ignore the line-art'))));
@@ -462,6 +476,38 @@ check('非法 model 回落到默认', captured.modelId === DEFAULT_MODEL, captur
 check('传入 multipart 入参', !!captured.input.multipart?.body && !!captured.input.multipart?.contentType);
 check('返回 base64 与耗时', out.b64 === 'aGVsbG8=' && typeof out.ms === 'number');
 check('返回所用 prompt', typeof out.prompt === 'string' && out.prompt.includes('OUTFIT ONLY'));
+
+console.log('\n[8b] 诊断探针：不带图也能调模型');
+// 3043 分不清是「模型不支持多图」「某张图太大/格式不认」还是「上游挂了」。
+// 探针只发 prompt + 尺寸，把这三个原因拆开：探针过 → 问题在多图；探针挂 → 跟图无关。
+let probeCaptured = null;
+const probeRun = async (mid, input) => {
+  probeCaptured = { mid, input };
+  return { image: 'aGVsbG8=' };
+};
+const probeOut = await generate({
+  images: [],
+  prompt: 'a plain studio backdrop',
+  env: {},
+  aiRun: probeRun,
+  width: 768,
+  height: 1024,
+  probe: true,
+});
+check('探针允许零张图', probeOut.b64 === 'aGVsbG8=');
+// 读回 multipart 正文，确认真的没有挂任何 input_image
+const probeBody = await new Response(probeCaptured.input.multipart.body).text();
+check('探针正文里没有 input_image 字段', !/name="input_image_/.test(probeBody), probeBody.slice(0, 120));
+check('探针仍有 prompt', /name="prompt"/.test(probeBody));
+check('探针结果标了 probe', probeOut.probe === true && probeOut.images === 0);
+// 非探针路径的规则不能松：零张图仍然 400
+let strictFailed = false;
+try {
+  await generate({ images: [], env: {}, aiRun: probeRun });
+} catch (e) {
+  strictFailed = e.status === 400;
+}
+check('非探针仍要求三张图', strictFailed);
 
 console.log('\n[9] 配额耗尽给出可读报错');
 try {

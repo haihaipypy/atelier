@@ -196,7 +196,13 @@ export async function handleRequest(request, env = {}, aiRun = null) {
 
     // 演示模式：既没有自定义模型也没绑定 AI 时拼一张「布局预览图」，让交互可以完整走通。
     // 校验前置，保证演示模式与真实生成的入参规则一致（避免演示能过、上线才报错）。
+    // probe=1：诊断探针，只发 prompt + 尺寸，不带参考图。演示模式没有上游可探，
+    // 但接口仍要给出明确答复，否则前端会以为「探针坏了」。
+    const probe = body.probe === true;
     if (!backends.ready) {
+      if (probe) {
+        return json({ probe: true, ok: false, demo: true, error: '演示模式没有可探测的上游' }, 409);
+      }
       try {
         assertThreeImages(body.images);
         const image = await makeDemoImage({ images: body.images, width: body.width, height: body.height });
@@ -218,6 +224,7 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         body.engine === 'custom' || (!body.engine && backends.engine === 'custom');
 
       if (wantCustom) {
+        if (probe) throw new HttpError(400, '探针只测 Workers AI，自定义通道请用「测试连通」');
         const profile = await readProfile(env);
         if (!profile.ready) throw new HttpError(400, '自定义模型尚未配置完整');
         assertThreeImages(body.images);
@@ -257,6 +264,7 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         width: body.width || 1024,
         height: body.height || 1024,
         seed: body.seed,
+        probe,
         env,
         aiRun: aiRun || env.AI?.run?.bind(env.AI),
       });
@@ -265,6 +273,8 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         model: out.model,
         ms: out.ms ?? Date.now() - started,
         prompt: out.prompt,
+        probe,
+        images: out.images,
       });
     } catch (e) {
       const status = e instanceof HttpError ? e.status : 500;

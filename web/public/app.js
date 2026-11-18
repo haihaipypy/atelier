@@ -1043,7 +1043,11 @@ async function generate() {
         // Ray ID 是提工单的唯一凭据，哪怕没有错误码也要露出来
         if (d.ray) bits.push(`Ray ${d.ray}`);
         const tag = !d.upstreamStatus && bits.length ? `（${bits.join(' · ')}）` : '';
-        throw new Error(`${j.error || `生成失败（HTTP ${r.status}）`}${tag}`);
+        // 3043 这类错误光看文案没法定位，顺手把探针入口指出来
+        const tip = d.probeUnsupported || /3043/.test(String(d.code || j.error || ''))
+          ? '。可点下方「诊断：不带图试一次」判断是图的问题还是上游的问题'
+          : '';
+        throw new Error(`${j.error || `生成失败（HTTP ${r.status}）`}${tag}${tip}`);
       }
     }
 
@@ -1057,6 +1061,64 @@ async function generate() {
   } catch (e) {
     $('#hint').textContent = e.message;
     $('#hint').classList.add('error');
+  } finally {
+    setBusy(false);
+  }
+}
+
+/**
+ * 诊断探针：不带参考图，只发提示词 + 画幅调一次 Workers AI。
+ *
+ * 报 3043 / Internal server error 时，光看报错分不清是什么坏了，三个常见原因：
+ * ① 模型或上游这次就是挂了；② 画幅/尺寸不被接受；③ 多图输入有问题（某张图太大、
+ * 格式不认、三张一起就撑不住）。探针把 ①②③ 里的 ③ 摘出去：
+ *
+ *   - 探针成功 → 模型和画幅都没问题，问题在多图输入，该查送出的三张图；
+ *   - 探针失败 → 跟图无关，是上游或额度，别再改提示词。
+ *
+ * 它不该被误当成「免费测额度」的按钮，所以结果只写一行字，不出图。
+ */
+async function probeOnce() {
+  if (state.busy) return;
+  const ratio = $('#ratio').value;
+  const [width, height] = RATIO_MAP[ratio] || [1024, 1024];
+  const hint = $('#hint');
+  if (state.engine === 'custom') {
+    hint.classList.add('error');
+    hint.textContent = '探针只测 Workers AI。自定义通道请用「配置自定义模型」里的「测试连通」。';
+    return;
+  }
+  setBusy(true, `正在不带图试一次（${width}×${height}）…`);
+  try {
+    const r = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        probe: true,
+        images: [],
+        width,
+        height,
+        prompt: $('#promptOverride').value.trim()
+          || 'a plain grey studio backdrop, empty, no people',
+        model: $('#model')?.value || undefined,
+        engine: 'cloudflare',
+      }),
+    });
+    const j = await r.json();
+    hint.classList.remove('error');
+    if (r.ok && j.image) {
+      hint.textContent = `探针通过：模型和画幅（${width}×${height}）都没问题，耗时 ${((j.ms ?? 0) / 1000).toFixed(1)}s。`
+        + '所以报错出在多图输入上——换一组素材或换模型再试。';
+      return;
+    }
+    const d = j.detail || {};
+    const bits = [d.code ? `错误码 ${d.code}` : '', d.ray ? `Ray ${d.ray}` : ''].filter(Boolean);
+    hint.classList.add('error');
+    hint.textContent = `探针也失败了：${j.error || `HTTP ${r.status}`}${bits.length ? `（${bits.join(' · ')}）` : ''}`
+      + '。说明跟参考图无关，是上游或额度的问题。';
+  } catch (e) {
+    hint.classList.add('error');
+    hint.textContent = `探针请求没发出去：${e.message}`;
   } finally {
     setBusy(false);
   }
@@ -1545,3 +1607,4 @@ async function clearCfg() {
 $('#cfgSave')?.addEventListener('click', saveCfg);
 $('#cfgTest')?.addEventListener('click', testCfg);
 $('#cfgClear')?.addEventListener('click', clearCfg);
+$('#probeBtn')?.addEventListener('click', probeOnce);

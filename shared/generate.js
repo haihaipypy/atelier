@@ -120,10 +120,10 @@ export function buildPrompt({
   // 骨架/轮廓/否定说明，权重被摊薄后模型挑了最省事的做法——整张图不用。
   const subject =
     gender === 'male'
-      ? 'The person is an adult man: male facial structure, male body proportions, flat chest, no makeup. ' +
+      ? 'The person is an adult man: flat chest, no makeup. ' +
         'Reference image 3 is drawn on a female artist mannequin: give its skeleton a male body and ' +
         'ignore only the mannequin\'s bust and hip curve, because the pose itself is copied as drawn.'
-      : 'The person is an adult woman: female facial structure, female body proportions.';
+      : 'The person is an adult woman.';
 
   // 姿势段：男女共用同一句主干。
   //
@@ -138,6 +138,15 @@ export function buildPrompt({
   //   不是抬错位置，是整段忽略，点名字之后才有东西可抓。）
   // 肢体例子从这一段搬到了 stanceGuard（那里本来就有一句「手放哪儿就留在哪儿」）。
   // 两处都写等于同一件事说了两遍，白白吃掉 120 字符——而 T5 只认前 512 token。
+  //
+  // 抬头/转头单独点名，因为它是**唯一一个会被脸约束主动抹掉的姿势信息**：
+  // 图2 是证件照式的正面脸，图3 的头是空白蛋形（没有五官可对），两者一比，
+  // 模型只剩一个选择——把身体转到正面、让脸正对镜头。于是身体的扭转、低头的角度
+  // 一起消失：双脚方向、手的位置都对，唯独头是「证件照」。这就是「动作差不多，
+  // 但头部动作和侧转都没有」。
+  //
+  // 写进 stanceGuard（提示词最后一段）而不是上面：那里已经写着「别把胯肩摆正对镜头」，
+  // 头部说明放同一段才收得住，否则同一件事分成两处说，模型各听一半。
   const poseRef =
     'Reference image 3 defines the POSE AND CAMERA ANGLE ONLY: reproduce its body posture, limb ' +
     'placement, leg crossing, hand positions and viewpoint exactly, limb by limb.';
@@ -198,9 +207,11 @@ export function buildPrompt({
     ? ''
     : 'The stance must follow image 3, not a default catalogue pose. Do not straighten the legs, ' +
       'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
-      'and do not drop the arms flat against the sides, unless image 3 itself shows exactly that. ' +
-      'Whatever image 3 does with the arms — raised overhead, bent at the elbow, hands clasped ' +
-      'behind the head — stays exactly that way.';
+      'and do not drop the arms flat against the sides. ' +
+      'Whatever image 3 does with the arms — raised overhead, bent at the elbow, clasped behind ' +
+      'the head — stays that way. Its blank head still shows where the face points: tilt and turn ' +
+      'the head that way, keep any downward or sideways gaze, and do not square the body to the ' +
+      'camera to face the viewer front-on.';
 
   // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
   // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
@@ -247,9 +258,8 @@ export function buildPrompt({
     poseRef,
     // 两句合一：line-art 那句本来就属于「图3 只给姿势」，末尾的 anatomy 要求也是同一个意思。
     // 分开写多花 100 字符，而 T5 的有效窗口只到 512 token，省下的字数要留给末尾的站姿反例。
-    'Ignore the line-art style, blank head and simplified proportions of image 3 — render a ' +
-      'finished image: outfit from 1, face from 2, pose from 3, with correct anatomy and natural ' +
-      'proportions.',
+    'Ignore the line-art style and simplified proportions of image 3 — render a finished photo: ' +
+      'outfit from 1, face from 2, pose from 3, natural anatomy.',
     // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
     hintLine,
     framing,
@@ -475,8 +485,15 @@ export function buildCloudflareForm({ images, prompt, modelId, width = 1024, hei
  * @param {object}   p.env     Worker 的 env（读 AI binding 与 FLUX_MODEL）
  * @param {Function} p.aiRun   env.AI.run 的绑定版本（丢失 this 会报错，必须 bind）
  */
-export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, gender, poseHint, halfBody }) {
-  assertThreeImages(images);
+export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, gender, poseHint, halfBody, probe = false }) {
+  // probe：只发 prompt + 尺寸，不带任何参考图。
+  //
+  // 诊断用。报 3043 / 500 时，最常见的三种原因是「模型不支持多图」「输入图太大/格式不认」
+  // 「上游瞬时就挂了」。光看报错分不出是哪一种，但把它们拆开就很容易：
+  // 探针成功 → 模型和尺寸没问题，问题在多图输入（或某一张图）；探针也失败 → 上游/额度，
+  // 跟图无关，别再去改提示词。
+  if (!probe) assertThreeImages(images);
+  const imgs = probe ? [] : images;
 
   if (typeof aiRun !== 'function') {
     throw new HttpError(501, '未绑定 Workers AI（缺少 [ai] binding）', {
@@ -497,7 +514,7 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
 
   let lastErr = null;
   for (let attempt = 0; attempt < 2; attempt += 1) {
-    const { form } = buildCloudflareForm({ images, prompt: finalPrompt, modelId, width, height, seed });
+    const { form } = buildCloudflareForm({ images: imgs, prompt: finalPrompt, modelId, width, height, seed });
     const serialized = new Response(form);
     try {
       res = await aiRun(modelId, {
@@ -522,13 +539,14 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
       ray,
       model: modelId,
       size: `${width}×${height}`,
-      images: images.length,
+      images: imgs.length,
+      probe,
     });
   }
 
   // 官方返回 { image: base64 }；不同封装可能给 Uint8Array 或 data: URI，统一收口
   const raw = res?.image ?? res?.result?.image ?? res;
-  const meta = { model: modelId, prompt: finalPrompt, ms: Date.now() - started };
+  const meta = { model: modelId, prompt: finalPrompt, ms: Date.now() - started, images: imgs.length, probe };
 
   if (typeof raw === 'string') {
     const b64 = raw.startsWith('data:') ? raw.split(',')[1] : raw;

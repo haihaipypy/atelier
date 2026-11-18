@@ -700,6 +700,39 @@ drawn. No legwear in image 1 means bare legs; no footwear means plain flat shoes
 男性套装是长裤，而原清单里只有「丝袜、长袜、袜子」，还跟着一句「图 1 没有腿袜就光腿」。
 按字面理解，长裤不算 legwear，于是坐姿/躺姿真的会出一条光腿。
 
+#### 头为什么总是摆回正面
+
+现象：姿势整体对了——双脚的方向、手落的位置、身体的重心都对，唯独**头**是证件照式的正面，
+线稿里那个明显的转头/低头不见了。用户会说「动作差不多，但原姿势头部动作和侧转都没有」。
+
+原因是三张图里有一组天然冲突：
+
+| 图 | 头是什么样 |
+|---|---|
+| 图 2（脸） | 正面、平视、看镜头 |
+| 图 3（姿势线稿） | 空白蛋形，**没有五官可以对齐** |
+
+模型要同时满足「脸必须是图 2 这个人」和「姿势照玩图 3」。脸那张是正对镜头的，
+蛋形头又没给任何五官信息，最省事的解法就是把**整个人转到正面**——脸对上了，
+身体和头的侧转一起消失。
+
+所以提示词里必须把「头」从「脸」里拆出来单独说：
+
+```
+Its blank head still shows where the face points: tilt and turn the head that way, keep any
+downward or sideways gaze, and do not square the body to the camera to face the viewer front-on.
+```
+
+三点讲究：
+
+1. **先说清空白头还有用**（`still shows where the face points`）。不解释，模型就把它当无信息的球体。
+2. **给可执行的量**（`tilt and turn`、`downward or sideways gaze`），而不是「保持头部姿势」这种抽象话。
+3. **给一个反面**（`do not square the body to the camera`）。只要求转头时，模型会**同时**把身体摆正，
+   头和身体各转一半，看起来仍然不对。
+
+这句话放在提示词最后一段（站姿反例那一段）。理由和前面几条一样：它和「别把胯肩摆正对镜头」
+说的是同一件事，放同一段才收得住；分成两处说，模型各听一半。
+
 #### 男性坐姿为什么要单独提「地面」
 
 男性库的 181 条姿势里，坐姿 26、侧坐 15、跪姿 16、蹲姿 12、躺姿 13——**全是地面姿势**，
