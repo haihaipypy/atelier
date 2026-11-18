@@ -1,0 +1,192 @@
+/**
+ * 姿势描述「看图重写」的数据表（2026-11-18 晚，v2026.11.18.15）。
+ *
+ * 为什么要有这张表：第一版描述是按中文/日文**标题**逐条译的，标题只描述一个显著特征，
+ * 为了让句子完整而补出来的部分（另一只手、站姿、朝向）全是猜的。
+ * 实例：P020 线稿是「一手扶后脑 + 一手叉腰 + 双脚分开」，标题只写了前半句，
+ * 我补了一句 "the other arm relaxed at her side"，成品就真的垂在身侧、并腿站直。
+ * 所以这一版改成：**逐个看图写**，只在图上看得见的事实（手落点、肘向、脚位、重心、朝向）。
+ *
+ * 表里 key 是去机位后缀的组 id（full_single_P020_diag → P020），
+ * 这样同一姿势的 5 个机位（正面/斜/俯/仰/横）共用一句话，不会出现五条互相打架的描述。
+ * 女性库与男性库分开两张表：两边编号会重号，且男性库有一批独立的 SP-* 编号。
+ */
+export const FEMALE = {
+  // ── 坐地面（full_single 系列）──
+  P001: 'sitting on the floor leaning her upper body back, one knee raised and bent with that foot flat on the floor, the other leg stretched forward, one hand planted on the floor behind her and the other resting on her raised knee',
+  P002: 'sitting on the floor with one hand planted on the floor behind her, both legs stretched forward together at a slight angle with the knees softly bent, and her other hand lying on her own thigh',
+  P003: 'sitting on the floor with both hands planted on the floor behind her, fingers pointing back, her chest open and pushed forward, both legs stretched forward together with the knees softly bent',
+  P004: 'sitting on the floor with both knees pulled up and folded over to her left side, hugging her shins with both arms',
+  P005: 'sitting on the floor with her right leg stretched forward and her left knee raised, one hand lifted to the side of her head near the ear with that elbow held out horizontally, her other hand resting on her raised knee',
+  P006: 'sitting on the floor with one hand planted on the floor behind her and the other hand on her waist, both legs stretched forward together at an angle',
+  P007: 'half lying on the floor propped on both forearms, her upper body lowered behind her, both legs stretched forward with the knees softly bent',
+  P008: 'sitting on the floor with one knee raised and bent, both hands placed flat on the back of her head with both elbows spread wide out to the sides',
+  P009: 'sitting on the floor tilted over to her right side and propped on her right elbow, both legs stretched forward together with the knees softly bent',
+  P010: 'sitting on the floor with both legs stretched forward and the knees softly bent, one hand reaching down to rest on her own ankle',
+  P011: 'sitting on the floor with both hands on the back of her head and both elbows spread wide, her chest arched up and her upper body leaning back, both knees bent and raised',
+  P012: 'sitting on the floor with one leg stretched forward and one knee raised, her chin propped on one fist with that elbow resting on her raised knee',
+  P013: 'sitting on the floor leaning back on both forearms, both legs raised off the floor together with the knees softly bent and the toes pointing up',
+  P014: 'sitting on the floor with one leg stretched forward and the other knee raised, one hand planted on the floor behind her while her other hand holds the ankle of her raised leg',
+  P041: 'sitting on the floor in a W-sit with both legs folded back to either side and her seat on the floor, both hands resting one on each thigh',
+  P042: 'sitting on the floor in a W-sit with both legs folded to either side and her upper body leaning forward, both hands planted on the floor in front of her',
+  P043: 'sitting on the floor in a W-sit with both legs folded to either side, both hands placed on the back of her head with both elbows spread wide',
+  P044: 'sitting on the floor in a W-sit with both legs folded to either side, one hand planted on the floor behind her and the other resting near her knee',
+  P045: 'sitting on the floor with both legs folded together over to her right side, one hand planted on the floor beside her and the other resting on her knee',
+  P046: 'sitting on the floor with both legs folded to one side, one hand resting against her cheek with that elbow propped up, her other hand planted on the floor in front of her',
+  P047: 'sitting on the floor with both legs folded to one side, one arm stretched up diagonally overhead with the hand open, her other arm resting at her side',
+  P048: 'sitting on the floor in a W-sit with both legs folded to either side, one hand resting at the base of her neck near the collarbone, her other hand on her knee',
+  P049: 'lying on her back on the floor with both arms stretched above her head along the floor and the hands open, both legs straight out',
+  P050: 'lying on her side on the floor with her head propped on one hand and that elbow on the floor, her other hand resting in front of her belly, both legs together with the knees softly bent',
+  P051: 'lying face down on the floor propped on both forearms with her chest lifted, both knees bent with the lower legs raised and the soles facing the ceiling',
+  P052: 'sitting on the floor leaning back with one leg stretched forward and the other knee raised with that foot flat on the floor, one hand planted on the floor behind her',
+  P054: 'lying on her side on the floor with one arm stretched out in front of her along the floor and her other hand resting by her hip, both legs together with the knees softly bent',
+  P056: 'lying on her back on the floor with both legs straight up toward the ceiling together, both arms lying at her sides on the floor',
+  P057: 'lying on her side on the floor with one arm stretched above her head along the floor and her other hand resting by her hip, both legs together with the knees softly bent',
+  P058: 'lying face down on the floor with both arms folded under her head like a pillow and her cheek resting on them, both legs straight out',
+  P059: 'lying on her back on the floor with both arms stretched above her head, her chest arched so her hips lift off the floor, both knees bent',
+  // ── 蹲 / 前倾 ──
+  P061: 'squatting down low with both hands resting one on each knee, both feet apart with the heels lifted off the floor',
+  P062: 'squatting down low with one hand planted on the floor in front of her and the other hand on her knee, both feet apart',
+  P063: 'squatting down low with one fist propping up her chin, that elbow resting on one knee, her other hand on the other knee',
+  P064: 'squatting down low with one hand lifted to the side of her head and her other hand on her knee',
+  P065: 'squatting down low up on her toes with both hands planted on the floor in front of her',
+  P066: 'squatting down low with her upper body leaning forward and her head turned to look over her shoulder behind her, both hands on her knees',
+  P067: 'standing with her upper body bent forward, both hands resting on her knees',
+  P068: 'standing with her upper body bent forward, one hand reaching down to touch her own shin',
+  P069: 'standing with her upper body bent forward and her head lifted to look ahead, one hand on her hip and the other hanging down',
+  P070: 'standing with her upper body bent forward and her hips pushed back, one hand resting on her own thigh',
+  P071: 'standing with her upper body bent forward, both arms hanging straight down toward the floor',
+  P072: 'standing with her upper body bent forward, one leg lifted behind her with the knee bent, both arms hanging down toward the floor',
+  P073: 'standing with her upper body arched backward, her chest lifted and her shoulders drawn back, both hands raised to the back of her head',
+  P074: 'kneeling upright on both knees with her thighs vertical, leaning her upper body back and planting both hands on the floor behind her',
+  P075: 'standing with her upper body arched backward and both arms raised high overhead',
+  P077: 'standing with her upper body twisted to one side and both arms opened straight out to the sides, both feet apart',
+  P078: 'kneeling upright on both knees with her thighs vertical, her upper body twisted and her head turned to look back over her shoulder, both hands on her thighs',
+  P079: 'sitting on the floor with both knees bent, her upper body twisted to one side with the shoulders turned the same way, both hands resting on her thighs one in front of the other',
+  // ── 站立 ──
+  P015: 'standing with both feet apart about shoulder width and the toes turned slightly out, her weight on one leg and that hip pushed out, one hand on her waist and the other hanging at her side',
+  P016: 'standing with both feet apart, both hands lifted to the top of her head with the fingers combing through her hair, both elbows lifted out and up',
+  P017: 'standing with her body turned away from the camera and her head turned back over her shoulder toward the camera, one hand resting on her thigh and the other hanging at her side, one foot placed in front of the other',
+  P018: 'standing with both feet apart about shoulder width and her weight on one leg, both hands on her waist with both elbows opened out',
+  P019: 'standing with both arms raised straight up overhead and both feet apart about shoulder width',
+  P020: 'standing with one hand raised to the back of her head, that elbow held out to the side, her other hand on her hip with that elbow opened out, both feet planted wide apart with the weight on one leg and the toes of the other foot touching the floor',
+  P021: 'standing with one hand lifted to the side of her neck with the back of the hand against it, her other hand resting on her thigh with the fingers down, both feet apart about shoulder width',
+  P022: 'standing with both hands placed behind her back against her lower back, her chest pushed forward, both feet apart about shoulder width',
+  P024: 'standing on one leg with the other leg lifted behind her and the knee bent, one hand lifted to the side of her head and the other hanging at her side, the supporting toes turned slightly out',
+  P025: 'standing with both feet planted wider than her shoulders and the toes turned outward, both hands on her waist with both elbows opened out, her weight even between both legs',
+  P026: 'standing with one arm raised straight up with the hand open, her other hand on her waist, her hip pushed out to one side, both feet apart with the weight on one leg',
+  P027: 'standing with both hands lifted to the back of her neck with the palms against it, both elbows spread wide out to the sides, both feet apart about shoulder width',
+  P029: 'standing with one hand lifted to the side of her head holding her hair and the other on her waist, one foot placed in front of the other across a wide stance',
+  P030: 'standing up on her toes with both arms raised diagonally overhead in a V shape and both hands open, both feet apart',
+  // ── 女性库 SP-*（旧编号，标题与线稿已逐个核对）──
+  'SP-P001': 'sitting on the floor leaning back with one knee raised and bent and that foot flat on the floor, the other leg stretched forward, one hand planted behind her and the other near her raised knee',
+  'SP-P002': 'lying on her back on the floor with one hand tucked behind her head and the other resting on her belly',
+  'SP-P003': 'lying on her side on the floor with one hand raised to her head and the other planted on the floor in front of her, both knees bent',
+  'SP-P004': 'sitting cross-legged on the floor with both hands resting one on each knee and her back straight',
+  'SP-P005': 'standing with both hands on the back of her head and both elbows spread wide, her chest lifted, both feet apart',
+  'SP-P006': 'standing with one hand on the side of her head and the other on her waist, her weight on one leg with the other foot slightly forward',
+  'SP-P007': 'standing with one hand on the back of her head, that elbow out to the side, the other hand on her waist with that elbow out, both feet apart with her weight on one leg',
+  'SP-P008': 'standing with one hand lifted to the side of her neck against it and the other hand on her thigh, both feet apart with one foot forward',
+  'SP-P009': 'standing with both arms opened behind her and her shoulder blades drawn together, her chest pushed forward, both feet apart',
+  'SP-P010': 'bending forward with her upper body, one leg stretched forward and the other bent, both hands reaching down to hold her ankles',
+  'SP-P011': 'sitting on the floor with both legs stretched forward together, both hands on the back of her head and both elbows spread wide, her chest lifted',
+  'SP-P012': 'sitting on the floor with one leg stretched forward and one knee raised, her chin propped on her hand with that elbow resting on her raised knee, the other hand on her thigh',
+  'SP-P013': 'sitting on the floor with both hands planted behind her, both legs raised off the floor together with the knees bent',
+  'SP-P014': 'sitting on the floor with one leg stretched forward and one knee raised, one hand holding the ankle of her raised leg',
+  'SP-P015': 'standing with one hand on her waist and the other hanging at her side, one foot in front of the other with her weight on the back leg',
+  'SP-P016': 'standing with both hands lifted to the top of her head pulling her hair up, both feet together',
+  'SP-P017': 'standing with her body turned away from the camera and her head turned back over her shoulder, both arms hanging at her sides, both feet together',
+  'SP-P018': 'standing with both hands on her waist and both elbows opened out, one foot in front of the other with the back toe touching the floor',
+  'SP-P019': 'standing with both arms raised straight overhead and the hands joined above her head, both feet together',
+  'SP-P020': 'standing with one hand raised to the back of her head, that elbow out to the side, the other hand on her waist with that elbow out, both feet apart with her weight on one leg',
+  'SP-P021': 'standing with one hand lifted to the side of her neck and the other resting on her thigh, both feet apart',
+  'SP-P022': 'standing with both arms opened down and behind her with the shoulder blades drawn together, her chest pushed forward, both feet together',
+  'SP-P024': 'standing on one leg with the other leg lifted behind her with the knee bent and the toes pointing down, one hand on the side of her head and the other on her waist',
+  'SP-P025': 'standing with both feet wider than her shoulders and the toes turned outward, both hands on her waist with both elbows opened out',
+  'SP-P026': 'standing with one arm raised diagonally overhead with the hand open, her other hand on her waist, her upper body twisted and her hip pushed out to one side',
+  'SP-P027': 'standing with both hands lifted to the back of her neck with the palms against it, both elbows spread wide, both feet together',
+  'SP-P029': 'standing with one hand lifted to the side of her head touching her hair and the other arm reaching down and out, one foot crossed in front of the other',
+  'SP-P030': 'standing up on her toes with both arms raised diagonally overhead in a V shape and both hands open, both feet together',
+  'SP-P031': 'kneeling upright on both knees with her thighs vertical, both hands resting one on each thigh',
+  'SP-P032': 'kneeling upright on both knees with her thighs vertical, both hands on the back of her head and both elbows spread wide',
+  'SP-P033': 'kneeling on one knee with the other knee raised and its foot flat on the floor in front of her, both hands resting on her raised knee',
+  'SP-P034': 'kneeling with her lower legs behind her, her upper body folded down low with her head toward the floor and both hands down by her feet',
+  'SP-P035': 'kneeling upright on both knees with both arms raised straight overhead and the hands joined',
+  'SP-P036': 'kneeling upright on both knees with her thighs vertical, one hand on the side of her head and the other on her waist',
+  'SP-P037': 'kneeling on one knee with the other knee raised and that foot flat in front, her upper body leaning back and her head tilted up to look upward, one hand on her raised knee and the other hanging at her side',
+  'SP-P039': 'sitting back on her heels with both lower legs behind her, both hands resting on her thighs and her back straight',
+  'SP-P040': 'kneeling upright on both knees with one arm raised straight overhead, her other hand on her waist, her upper body twisted to one side',
+  'SP-P041': 'sitting on the floor in a W-sit with both legs folded to either side, both hands resting one on each thigh',
+  'SP-P042': 'sitting on the floor in a W-sit with both legs folded to either side and her upper body leaning forward, both hands planted on the floor in front of her',
+  'SP-P043': 'sitting on the floor in a W-sit with both hands on the back of her head and both elbows spread wide so they read as a V from the front',
+  'SP-P045': 'sitting on the floor with both legs folded together to one side, one hand planted beside her and the other on her knee',
+  'SP-P046': 'sitting on the floor with both legs folded to one side, one hand resting against her cheek with that elbow propped up, her other hand planted beside her',
+  'SP-P047': 'sitting on the floor with both legs folded to one side, one arm raised straight up with the hand open, the other hand planted on the floor behind her',
+  'SP-P044': 'sitting on the floor in a W-sit with both legs folded to either side, one hand planted on the floor behind her and the other resting near her knee',
+  'SP-P048': 'sitting on the floor in a W-sit with both legs folded to either side, one hand at the base of her neck near the collarbone, her other hand on her knee',
+  'SP-P049': 'lying on her back on the floor with both arms stretched above her head along the floor, both legs raised straight up together toward the ceiling',
+  'SP-P050': 'sitting on the floor half reclined with one hand propping up her cheek and that elbow resting on her thigh, both knees bent with one leg extended toward the camera',
+  'SP-P051': 'lying face down on the floor propped on both forearms with her chest lifted, both knees bent with the lower legs raised together and the soles facing the ceiling',
+  'SP-P053': 'lying on her side on the floor with her body stretched out along the floor, both hands folded together in front of her head and her face turned down',
+  'SP-P054': 'lying on her back on the floor with both legs raised straight up together, both arms at her sides',
+  'SP-P055': 'reclining on the floor propped on one forearm, the other arm stretched straight above her head, both legs straight out together',
+  'SP-P056': 'lying face down on the floor with her head lifted and both arms braced on the floor in front of her, both legs straight out together',
+  'SP-P058': 'squatting down low with both hands clasped together in front of her knees',
+  'SP-P059': 'squatting down low with one hand planted on the floor in front of her and the other on her knee',
+  'SP-P060': 'squatting down low with one hand propping up her cheek and that elbow resting on her knee, the other hand on her other knee',
+  'SP-P061': 'squatting down low with one hand on the side of her head and that elbow resting on her knee, the other hand on the other knee',
+  'SP-P062': 'squatting down low up on her toes with both hands planted on the floor in front of her',
+  'SP-P063': 'squatting down low with her upper body leaning forward and her head turned to look behind her, both hands in front of her',
+  'SP-P064': 'standing with her upper body bent forward, both hands resting on her knees, both feet together',
+  'SP-P065': 'standing with her upper body bent low forward, both hands reaching down to her shins',
+  'SP-P066': 'standing with her upper body leaning back and her head tilted up, one hand on her waist and the other hanging at her side, one foot in front of the other',
+  'SP-P067': 'standing with her upper body bent forward and her hips pushed back, both hands resting on her own thighs',
+  'SP-P068': 'standing with her upper body bent forward, both arms hanging down toward the floor',
+  'SP-P069': 'standing with her upper body bent forward and one leg lifted behind her with the knee bent, both arms hanging toward the floor',
+  'SP-P073': 'standing facing the camera with both arms opened straight out to the sides, both feet together',
+  'SP-P074': 'sitting back on her heels with her upper body twisted and her head turned back over her shoulder, both hands braced beside her hips',
+  'SP-P075': 'sitting on the floor with both knees bent and both legs drawn to one side, her upper body twisted to one side with one hand planted behind her and the other on her leg',
+  // ── 上半身库（线稿只到胸部，所以只写手势）──
+  U001: 'both hands brought to the center of her chest making a small heart shape with the fingers touching and the thumbs meeting, both elbows opened out',
+  U002: 'both arms raised above her head with the hands meeting overhead to form a heart shape, both elbows opened wide',
+  U003: 'one hand lifted beside her cheek pinching a small finger-heart between the thumb and index finger, her other hand on her waist',
+  U004: 'both hands raised under her chin making two V peace signs with the fingertips pointing up',
+  U005: 'one hand raised beside her head in a V peace sign with the back of the hand facing the camera, that arm bent at a sharp angle, her other hand on her waist',
+  U006: 'both fists pressed one against each cheek with both elbows tucked in to her sides',
+  U007: 'both hands raised beside the top of her head with the palms facing forward like bunny ears, both elbows opened out',
+  U008: 'one hand lifted beside her ear with the fingers curled forward like a cat paw, her other hand in a loose fist in front of her chest',
+  U009: 'both hands raised in front of her, one on each side, with the fingers spread and curled like claws and the palms facing the camera',
+  U010: 'one index finger held upright in front of her lips with the palm facing inward, her other hand on her waist',
+  U011: 'her head tilted to one side and one hand held beside her temple making a V sign with two fingers, her other hand on her waist',
+  U012: 'one hand held open and flat in front of her face with the palm up as if offering a blown kiss, her other hand resting on her chest',
+  U013: 'both hands opened under her chin with the palms up and the fingers spread apart, like a flower resting under her face',
+  U014: 'one index finger poking her own cheek, her other arm folded across her body holding that arm',
+  U015: 'both hands folded together in front of her mouth with her sleeves covering the backs of her hands, both elbows tucked down and in',
+  U016: 'both palms pressed together in front of her chest with the fingertips pointing up, both elbows tucked down',
+  U017: 'both arms crossed and folded over her own chest, each hand gripping the opposite arm',
+  U018: 'both hands raised in front of her face with the thumbs and index fingers squared off to form a rectangular frame, one hand horizontal and the other vertical',
+  U019: 'one hand lifted beside her ear tucking her hair behind it, her other hand raised in front of her chest',
+  U020: 'both palms cupping her cheeks from the sides with both elbows pointing down',
+  U021: 'one hand raised to her forehead in a salute, her other hand on her waist',
+  U022: 'one hand reaching forward with the index finger pointing straight at the camera, her other arm drawn back behind her',
+  U023: 'one hand lifted to her mouth with the palm inward, her other arm raised diagonally upward with the fingers spread',
+  U024: 'one hand in front of her chest pinching a small finger-heart, her other hand pressed to her own chest',
+  U025: 'both hands raised in front of her face with the palms open and the fingers spread apart, peeking at the camera through the gaps between them',
+};
+
+/**
+ * 男性库：线稿与女性库同一批（shisei），编号体系是 SP-Pxxx / SP-Uxxx，
+ * 其中 SP-P001..P075 与女性库的 SP-P0xx 是同一批姿势，直接复用上面的文案；
+ * 只有 SP-U035 / SP-U040 是男性库独有的两条，单独看图写。
+ */
+export const MALE = (() => {
+  const out = {};
+  for (const [k, v] of Object.entries(FEMALE)) {
+    if (/^SP-[PU]\d+$/.test(k)) out[k] = v;      // SP-P001 … SP-P075 直接同名复用
+    else if (k.startsWith('U')) out[`SP-${k}`] = v; // 女性 upper80v2 的 U001…U025 对男性库的 SP-U001…U025
+  }
+  // 男性库独有：两条不在女性库里
+  out['SP-U035'] = 'both hands placed flat on her collarbones with the fingers spread, her shoulders lifted slightly';
+  out['SP-U040'] = 'sitting with one elbow propped on her raised knee and her chin resting on that hand';
+  return out;
+})();

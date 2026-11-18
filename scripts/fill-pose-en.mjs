@@ -28,6 +28,11 @@
  * 归属规则：SP-* 是上游自带的人工描述，永不覆盖；full_single_* / upper80v2_* 是本脚本
  * 生成的，每次重跑都按当前表重写（内容相同 → 结果不变，仍是幂等）。
  *
+ * ⚠️ 2026-11-18 晚起，正式描述已改成「逐个看图写」，见 scripts/pose-descs.mjs +
+ * scripts/apply-pose-descs.mjs。本脚本退化为「新增条目时的初版草稿」：
+ * 它按标题译，标题没写的部位它也不会写，所以只能当草稿，不能当成品。
+ * 两个脚本都跑过一次的话，以 apply-pose-descs.mjs 为准。
+ *
  * 用法：node scripts/fill-pose-en.mjs [--dry]
  */
 import { readFileSync, writeFileSync } from 'node:fs';

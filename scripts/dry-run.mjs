@@ -509,8 +509,44 @@ check('描述里不再有臆测的「另一只手垂在身侧」',
 // P020 的 id 命名在三套库里重号（upper80v2_P020 是另一个姿势），所以按前缀精确匹配
 const p020 = poseData.items.filter((it) => /^(SP-P020|full_single_P020)/.test(it.id));
 check('P020（单手扶头）的描述与线稿一致（另一只手在腰上、双脚分开）',
-  p020.every((it) => /other hand on her hip/.test(it.pose.en) && /feet apart/.test(it.pose.en)),
+  p020.every((it) => /(other hand on her (hip|waist))/.test(it.pose.en) && /feet (planted wide )?apart/.test(it.pose.en)),
   p020.map((it) => `${it.id}: ${it.pose.en}`).join(' | '));
+
+// 2026-11-18 晚（v15）：描述从「按标题译」改成「逐个看图写」。
+// 这一版的表在 scripts/pose-descs.mjs，写入靠 scripts/apply-pose-descs.mjs。
+const descSrc = await readFile(path.join(ROOT, 'scripts/pose-descs.mjs'), 'utf8');
+const applySrc = await readFile(path.join(ROOT, 'scripts/apply-pose-descs.mjs'), 'utf8');
+check('看图描述表存在且两种性别都有', /export const FEMALE/.test(descSrc) && /export const MALE/.test(descSrc));
+check('写入脚本幂等（第二次运行写入 0 条）', /if \(it\.pose\.en !== en\)/.test(applySrc));
+check('写入脚本对表里缺失的条目报错退出', /process\.exitCode = 1/.test(applySrc));
+// 描述必须是「看图写的事实」：至少说出一个肢体的落点或姿态词
+const factual = /\b(hand|hands|arm|arms|elbow|elbows|palm|palms|fist|fingers|fingertips|finger|knee|knees|thigh|ankle|forearm|chin|cheek|cheeks|temple|collarbone|neck|lips|shin)\b/i;
+check('女性库每条描述都写到了具体肢体',
+  poseData.items.every((it) => factual.test(it.pose.en)),
+  poseData.items.filter((it) => !factual.test(it.pose.en)).map((it) => it.id).slice(0, 5).join(','));
+check('男性库每条描述都写到了具体肢体',
+  poseMaleData.items.every((it) => factual.test(it.pose?.en || '')),
+  poseMaleData.items.filter((it) => !factual.test(it.pose?.en || '')).map((it) => it.id).slice(0, 5).join(','));
+// 全身库必须交代身体基准（站/坐/跪/蹲/躺）。不写，模型就退回「服装展示照」的正面站直。
+// 上半身库的线稿只到胸部、没有腿和地面，只要求「手势写清部位」，不参与这条。
+const BASE = /^standing|^kneeling|^squatting|^lying|^sitting|^half lying|^reclining|^bending|^sitting back|^standing up/;
+const fullBody = poseData.items.filter((it) => !/^upper80v2/.test(it.id));
+check('全身库描述都点明了身体基准（站/坐/跪/蹲/躺）',
+  fullBody.every((it) => BASE.test(it.pose.en)),
+  fullBody.filter((it) => !BASE.test(it.pose.en)).map((it) => `${it.id}: ${it.pose.en}`).slice(0, 3).join(' | '));
+const halfBodyRows = poseData.items.filter((it) => /^upper80v2/.test(it.id));
+check('上半身库描述都是从手势写起的',
+  halfBodyRows.every((it) => /^(both|one|her)\b/.test(it.pose.en)),
+  halfBodyRows.filter((it) => !/^(both|one|her)\b/.test(it.pose.en)).map((it) => it.id).slice(0, 3).join(','));
+// 同一组 5 个机位必须同一句话（否则同一姿势会有五条互相打架的描述）
+const byTitle = {};
+for (const it of poseData.items) (byTitle[it.title] ||= new Set()).add(it.pose.en);
+check('同一姿势的各机位描述完全一致', Object.values(byTitle).every((s) => s.size === 1),
+  Object.entries(byTitle).filter(([, s]) => s.size > 1).map(([t]) => t).slice(0, 5).join(','));
+// 描述里不再出现「猜的」那些措辞
+check('女性库描述里没有「另一只手自然垂在身侧」这类臆测',
+  !poseData.items.some((it) => /other arm relaxed|arm hanging relaxed|one arm relaxed at her side/i.test(it.pose.en)),
+  poseData.items.filter((it) => /other arm relaxed|arm hanging relaxed|one arm relaxed at her side/i.test(it.pose.en)).map((it) => it.id).slice(0, 3).join(','));
 
 console.log('\n[8a3] 图片传递与两条通道一致（不依赖模式）');
 const htmlLoc = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
@@ -529,7 +565,7 @@ check('上传的自定义线稿也能取到高清 full',
   /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appUniq));
 
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.14', /tag: '2026\.11\.18\.14'/.test(versionSrc));
+check('版本号已递增到 2026.11.18.15', /tag: '2026\.11\.18\.15'/.test(versionSrc));
 
 console.log('\n[8a6] 回归修复：让 agnes 的请求体与本地脚本一致');
 // 用户实测：同一个模型、同一组素材，本地 agnes-image 脚本一次成型，网站却各种问题；
