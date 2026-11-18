@@ -562,6 +562,56 @@ check('直连查询参数带 minimal', /minimal: isMinimal\(\) \? '1' : '0'/.tes
 check('中转 payload 带 minimal', /minimal: isMinimal\(\)/.test(appMinSrc));
 check('直连兜底也跟随模式', /if \(isMinimal\(\)\)/.test(appMinSrc));
 
+console.log('\n[8a2] 本地对齐模式：照 agnes 本地跑通的配置来');
+// 2026-11-18 用户用同一个模型在本地生成，效果好得多。对照两边请求，差异是四件事：
+// ① ref 顺序 姿势→脸→服装（网站原来 服装→脸→姿势）
+// ② 姿势图用原图（网站压到 300px 缩略图 + JPEG0.9，线稿细线全糊）
+// ③ 尺寸 2K 官方档（网站传 960x1280 会被静默标准化）
+// ④ 提示词是逐图正面描述、POSE 段最前且声明 absolute authority
+const pLoc = buildPrompt({
+  gender: 'female', poseHint: 'standing with both hands on her hips, elbows out',
+  extra: 'warm beige backdrop', local: true,
+});
+check('本地版声明三图顺序（姿势第 1）', /1 = pose line-art, 2 = face, 3 = outfit/.test(pLoc));
+check('本地版 POSE 段是最高优先级', /POSE — HIGHEST PRIORITY \(reference image 1\)/.test(pLoc));
+check('本地版把线稿立为姿势绝对权威', /absolute authority for body posture/.test(pLoc));
+check('本地版用上姿势要点', /both hands on her hips/.test(pLoc));
+check('本地版脸段明确忽略正面角度', /ignore its frontal angle and flat lighting/.test(pLoc));
+check('本地版服装段照抄且不枚举清单', /copy every garment head to toe/.test(pLoc) && !/trousers, jeans/.test(pLoc));
+check('本地版保留用户补充描述且在最后', /warm beige backdrop$/.test(pLoc.trim()));
+check('本地版长度接近本地案例', pLoc.length > 700 && pLoc.length < 1400, `${pLoc.length} 字符`);
+check('本地版男性不注入要点（男性库文字与线稿错位）',
+  !/both hands on her hips/.test(buildPrompt({ gender: 'male', poseHint: 'standing with both hands on her hips', local: true })));
+check('本地版半身仍给裁切', /crop like image 1 at mid-thigh/.test(buildPrompt({ local: true, halfBody: true, frame: [1024, 1024] })));
+check('详细版与极简版不受影响',
+  /Reference image 1 defines the OUTFIT ONLY/.test(buildPrompt({ gender: 'female' }))
+  && /Image 1 is the outfit/.test(buildPrompt({ minimal: true })));
+
+let locCaptured = null;
+await generate({
+  images: [], probe: true, local: true,
+  poseHint: 'standing with both hands on her hips',
+  env: {}, aiRun: async (mid, input) => { locCaptured = input; return { image: 'aGVsbG8=' }; },
+});
+const locBody = await new Response(locCaptured.multipart.body).text();
+check('服务端中转实际送出本地对齐提示词', /POSE — HIGHEST PRIORITY/.test(locBody), locBody.slice(0, 200));
+const routerLocSrc = await readFile(path.join(ROOT, 'shared/router.js'), 'utf8');
+check('路由 /api/prompt 读 local', /url\.searchParams\.get\('local'\)/.test(routerLocSrc));
+check('路由 /api/generate 透传 local', /local: body\.local === true/.test(routerLocSrc));
+const appLocSrc = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+const htmlLoc = await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8');
+check('页面默认选中本地对齐', /<option value="local" selected>/.test(htmlLoc));
+check('本地版参考图顺序是 姿势→脸→服装', /const LOCAL_SLOTS = \['pose', 'face', 'outfit'\]/.test(appLocSrc));
+check('非本地版仍走原顺序', /const slots = isLocal\(\) \? LOCAL_SLOTS : SLOTS/.test(appLocSrc));
+check('姿势图改用 full 原图而非缩略图', /hiRes \? \(s\.full \|\| s\.thumb\)/.test(appLocSrc));
+check('高清线稿只给自定义模型（Workers AI 有 <512px 约束）',
+  /const hiRes = isLocal\(\) && k === 'pose' && state\.engine === 'custom'/.test(appLocSrc));
+check('姿势图缩放上限提到 1024', /const maxSide = hiRes \? 1024 : MAX_SIDE/.test(appLocSrc));
+check('姿势图 JPEG 质量提到 0.98', /hiRes \? 0\.98 : REF_QUALITY/.test(appLocSrc));
+check('2K 尺寸表按官方档位', /'3:4': '1728x2304'/.test(appLocSrc) && /'9:16': '1472x2624'/.test(appLocSrc));
+check('仅本地对齐模式使用 2K 尺寸', /size: isLocal\(\) \? \(AGNES_2K\[ratio\]/.test(appLocSrc));
+check('直连兜底也有本地版', /if \(isLocal\(\)\) \{[\s\S]*?absolute authority/.test(appLocSrc));
+
 console.log('\n[8b] 诊断探针：不带图也能调模型');
 // 3043 分不清是「模型不支持多图」「某张图太大/格式不认」还是「上游挂了」。
 // 探针只发 prompt + 尺寸，把这三个原因拆开：探针过 → 问题在多图；探针挂 → 跟图无关。

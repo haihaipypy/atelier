@@ -161,6 +161,7 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
     // 半身姿势要换一套取景规则，服务端按这个标记拼 FRAMING 段
     halfBody: halfBody ? '1' : '0',
     minimal: isMinimal() ? '1' : '0',
+    local: isLocal() ? '1' : '0',
   });
   if (frame) {
     q.set('w', String(frame[0]));
@@ -177,6 +178,13 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
   }
   const who = state.gender === 'male' ? '成年男性' : '成年女性';
   // 兜底也要跟着模式走，否则 /api/prompt 一挂，A/B 就变成了两套不同的东西
+  if (isLocal()) {
+    return 'Combine the three reference images into one photorealistic full-body portrait. '
+      + 'Image 1 is the pose line-art and is the absolute authority for body posture and camera angle; '
+      + 'image 2 gives the face and hair; image 3 gives the outfit. Reproduce the pose exactly, '
+      + 'copy every garment, and use a clean seamless studio backdrop.'
+      + (halfBody ? ' Crop at mid-thigh like image 1, with both hands visible.' : '');
+  }
   if (isMinimal()) {
     return '图1是服装，图2是脸与发型，图3是姿势与机位。把三者合成到同一个人身上。'
       + (halfBody ? '按图3 的裁切出半身像。' : '')
@@ -310,8 +318,18 @@ async function generateDirect({ images, prompt, size }) {
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-// 极简模式：只交代三张图分别是什么，姿势完全交给模型看图，不写任何关键词
-const isMinimal = () => $('#promptMode')?.value === 'minimal';
+// 提示词/参考图配置：local 对齐本地跑通的那套 agnes 用法（默认）
+const promptMode = () => $('#promptMode')?.value || 'local';
+const isMinimal = () => promptMode() === 'minimal';
+const isLocal = () => promptMode() === 'local';
+// 本地成功案例的 --ref 顺序是 姿势 → 脸 → 服装。网站原来把姿势放最后一张，
+// 而「服装一直对、姿势一直不对」正好对应这个权重差。
+const LOCAL_SLOTS = ['pose', 'face', 'outfit'];
+// agnes 官方尺寸表的 2K 档。传 960x1280 这种自定精确值会被静默标准化，
+// 本地用的是 --size 2K --ratio 3:4 → 1728x2304。
+const AGNES_2K = {
+  '3:4': '1728x2304', '1:1': '2048x2048', '9:16': '1472x2624', '4:3': '2304x1728',
+};
 const el = (tag, attrs = {}, ...kids) => {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -911,9 +929,13 @@ function prefetchReference(it) {
 
 /** 任意图片来源 → 统一尺寸的 PNG dataURL（兜底 JPEG，避免 PNG 过大）。
  *  上游图片一律走本站 /api/proxy，避免跨域图读进 canvas 时偶发卡死。 */
-async function toReference(src) {
+async function toReference(src, { hiRes = false } = {}) {
   const img = await loadImage(proxied(src));
-  const scale = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
+  // 姿势线稿是细线条，480px + JPEG 0.9 会把叉腰的手、胯部的轻微扭转全糊掉。
+  // 本地案例用的是原图，这里把姿势图提到 1024px / JPEG 0.98。
+  // 仍然不用 PNG：canvas 输出是 RGBA，部分推理后端遇到会抛 3043（见下方注释）。
+  const maxSide = hiRes ? 1024 : MAX_SIDE;
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
   const w = Math.max(64, Math.round(img.width * scale));
   const h = Math.max(64, Math.round(img.height * scale));
   const canvas = document.createElement('canvas');
@@ -929,7 +951,7 @@ async function toReference(src) {
   //   1. canvas 的 PNG 是 RGBA（带 alpha 通道），部分推理后端遇到会直接抛 3043；
   //   2. 480px 照片 PNG 约 400–700KB，JPEG 只要 40–70KB，三张一起能让请求体小一个量级，
   //      而请求体过大同样是 3043 的常见诱因。
-  return { dataUrl: canvas.toDataURL('image/jpeg', REF_QUALITY), w, h };
+  return { dataUrl: canvas.toDataURL('image/jpeg', hiRes ? 0.98 : REF_QUALITY), w, h };
 }
 
 /** 外链图片改走本站代理；data: / blob: 与同源地址原样返回 */
@@ -985,19 +1007,27 @@ async function generate() {
   setBusy(true, '正在准备参考图…');
   try {
     // 三张并行处理：串行等待时每张都要单独跨域往返，累计很容易触发超时
+    const slots = isLocal() ? LOCAL_SLOTS : SLOTS;
     const images = await Promise.all(
-      SLOTS.map(async (k) => {
+      slots.map(async (k) => {
         const s = state.selected[k];
         if (!s) throw new Error('素材未选齐');
-        // 参考图最长边只需 480px，图库缩略图（300–360px）已够用且体积小、加载快；
-        // 直接用原图会拖来 1MB+ 的 PNG，三张并发容易超时。上传的图没有原图之分，用 thumb。
-        const first = s.origin === 'upload' ? s.thumb : s.thumb || s.full;
-        const fallback = s.full && s.full !== first ? s.full : null;
+        // 本地对齐模式下姿势图要拿 full（w900）而不是 300px 缩略图；
+        // 其余两张保持原来的小图，控制请求体体积。
+        // 只给自定义模型（agnes）提分辨率：Workers AI FLUX.2 有 <512px 的约束，
+        // 给它 1024px 线稿会直接报 3043。演示模式也不需要。
+        const hiRes = isLocal() && k === 'pose' && state.engine === 'custom';
+        const first = s.origin === 'upload'
+          ? s.thumb
+          : hiRes ? (s.full || s.thumb) : (s.thumb || s.full);
+        const fallback = hiRes
+          ? (s.thumb && s.thumb !== first ? s.thumb : null)
+          : (s.full && s.full !== first ? s.full : null);
         try {
-          return (await toReference(first)).dataUrl;
+          return (await toReference(first, { hiRes })).dataUrl;
         } catch (e) {
           if (!fallback) throw e;
-          return (await toReference(fallback)).dataUrl;
+          return (await toReference(fallback, { hiRes })).dataUrl;
         }
       }),
     );
@@ -1020,7 +1050,7 @@ async function generate() {
         images,
         prompt: $('#promptOverride').value.trim()
           || (await buildPromptOnServer({ halfBody, frame: [width, height] })),
-        size: `${width}x${height}`,
+        size: isLocal() ? (AGNES_2K[ratio] || `${width}x${height}`) : `${width}x${height}`,
       });
     } else {
       const payload = {
@@ -1034,6 +1064,7 @@ async function generate() {
         poseHint: poseHintFor(),
         halfBody,
         minimal: isMinimal(),
+        local: isLocal(),
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
       };

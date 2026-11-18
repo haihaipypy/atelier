@@ -87,7 +87,50 @@ export function buildPrompt({
   halfBody = false,
   frame = null,
   minimal = false,
+  local = false,
 } = {}) {
+  // 本地对齐模式：照 2026-11-18 用户在本地用 agnes-image-2.5-flash 跑通的那套配置来。
+  // 同一模型、同一组素材，本地效果好得多。差异不在「文字多不多」，而在四件事：
+  //   ① 参考图顺序是 姿势→脸→服装（网站一直是 服装→脸→姿势）；
+  //   ② 姿势图用原图（网站压到 300px 缩略图 + JPEG，线稿细线全糊了）；
+  //   ③ 尺寸用 2K 官方档位（网站传 960x1280 这种会被静默标准化的精确值）；
+  //   ④ 提示词是「逐图正面描述」：POSE 段放最前、声明 absolute authority，
+  //      而不是一堆「别并腿、别贴身」的否定约束。
+  // 本地那版提示词约 1800 字符，比网站的还长——所以「文字是干扰」的假设不成立，
+  // 真正的问题是文字写的是抽象约束，不是画面内容。
+  if (local) {
+    const lines = [
+      'Photorealistic full-body fashion portrait of one person, head-to-toe, centered, feet fully visible.',
+      'Three reference images are given in this order: 1 = pose line-art, 2 = face, 3 = outfit.',
+    ];
+    // 男性库的 pose.en 来自上游、与线稿不严格对应（SP-P021），照旧不注入
+    const poseText = poseHint && gender !== 'male' ? ` ${poseHint}` : '';
+    lines.push(
+      'POSE — HIGHEST PRIORITY (reference image 1):'
+      + (poseText ? ` the figure is${poseText.replace(/^\s+/, ' ')}.` : ' reproduce the exact body posture.')
+      + ' Reference image 1 is the absolute authority for body posture, limb placement, head tilt, '
+      + 'body orientation and camera angle; reproduce it exactly, do not square the body to the '
+      + 'camera, do not mirror the arms, and do not drop the arms.',
+    );
+    lines.push(
+      'FACE and HAIR (reference image 2): take ONLY the facial identity and hairstyle from it — '
+      + 'ignore its frontal angle and flat lighting.',
+    );
+    lines.push(
+      'OUTFIT (reference image 3): copy every garment head to toe exactly as shown — same type, '
+      + 'same length, same colors, fabric, pattern and accessories. The bare legs of the line-art '
+      + 'mannequin are not a styling choice.',
+    );
+    if (gender === 'male') lines.push('The person is an adult man with a male body, keeping the pose of image 1.');
+    if (halfBody) lines.push('FRAMING: crop like image 1 at mid-thigh; do not invent legs or a full-length stance, and keep both hands visible.');
+    lines.push(
+      'STYLE: clean seamless studio backdrop, soft even lighting, natural skin texture, sharp '
+      + 'focus, editorial fashion photography, vertical composition, no text, no watermark.',
+    );
+    if (style === 'anime') lines.push('Anime illustration style.');
+    if (extra) lines.push(extra);
+    return lines.join(' ');
+  }
   // 极简模式：只交代三张图分别是什么，剩下全交给模型自己看图组合。
   //
   // 这条分支是为「多图融合模型到底需不需要我们用文字解释姿势」准备的对照实验。
@@ -511,7 +554,7 @@ export function buildCloudflareForm({ images, prompt, modelId, width = 1024, hei
  * @param {object}   p.env     Worker 的 env（读 AI binding 与 FLUX_MODEL）
  * @param {Function} p.aiRun   env.AI.run 的绑定版本（丢失 this 会报错，必须 bind）
  */
-export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, extra = '', gender, poseHint, halfBody, probe = false, minimal = false }) {
+export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, extra = '', gender, poseHint, halfBody, probe = false, minimal = false, local = false }) {
   // probe：只发 prompt + 尺寸，不带任何参考图。
   //
   // 诊断用。报 3043 / 500 时，最常见的三种原因是「模型不支持多图」「输入图太大/格式不认」
@@ -527,7 +570,7 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
     });
   }
 
-  const finalPrompt = prompt || buildPrompt({ style, extra, gender, poseHint, halfBody, minimal, frame: [width, height] });
+  const finalPrompt = prompt || buildPrompt({ style, extra, gender, poseHint, halfBody, minimal, local, frame: [width, height] });
   // 优先级：请求里显式指定（白名单校验）→ 环境变量 → 默认
   const allowed = new Set(Object.values(MODELS).map((m) => m.modelId));
   const wanted = model || env.FLUX_MODEL || DEFAULT_MODEL;

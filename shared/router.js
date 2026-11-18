@@ -147,8 +147,9 @@ export async function handleRequest(request, env = {}, aiRun = null) {
     // 上半身姿势要换一套取景规则（裁到大腿中部、手必须露出），详见 buildPrompt 的 framing 段
     const halfBody = url.searchParams.get('halfBody') === '1';
     const minimal = url.searchParams.get('minimal') === '1';
+    const local = url.searchParams.get('local') === '1';
     const frame = [Number(url.searchParams.get('w')) || 0, Number(url.searchParams.get('h')) || 0];
-    return json({ prompt: buildPrompt({ style, extra, gender, poseHint, halfBody, minimal, frame }) });
+    return json({ prompt: buildPrompt({ style, extra, gender, poseHint, halfBody, minimal, local, frame }) });
   }
 
   /**
@@ -267,6 +268,7 @@ export async function handleRequest(request, env = {}, aiRun = null) {
         seed: body.seed,
         probe,
         minimal: body.minimal === true,
+        local: body.local === true,
         env,
         aiRun: aiRun || env.AI?.run?.bind(env.AI),
       });
