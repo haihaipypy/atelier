@@ -209,9 +209,10 @@ export function buildPrompt({
       'do not close the gap between the feet, do not square the hips and shoulders to the camera, ' +
       'and do not drop the arms flat against the sides. ' +
       'Whatever image 3 does with the arms — raised overhead, bent at the elbow, clasped behind ' +
-      'the head — stays that way. Its blank head still shows where the face points: tilt and turn ' +
-      'the head that way, keep any downward or sideways gaze, and do not square the body to the ' +
-      'camera to face the viewer front-on.';
+      'the head — stays that way. Count the arms in image 3: one hand in front means most of the ' +
+      'other arm hangs at the side, not forward. Its blank head still shows where the face points: ' +
+      'tilt and turn the head that way, keep any downward or sideways gaze, and do not square the ' +
+      'body to the camera to face the viewer front-on.';
 
   // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
   // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
@@ -245,21 +246,21 @@ export function buildPrompt({
       'far apart as drawn. No legwear in image 1 means bare legs; no footwear means plain flat shoes.';
 
   const parts = [
-    'Compose one new image of one person from the three reference images below.',
+    'Compose one person from the three reference images below.',
     subject,
     'Reference image 1 defines the OUTFIT ONLY: copy its garments, colors, fabric, patterns, ' +
-      'accessories and footwear exactly as shown. Ignore whatever body is inside it — do not render ' +
-      'a mannequin and do not leave the torso hollow. Its pose means nothing: take NO body posture, ' +
-      'leg position or camera from image 1, even when image 1 shows a person standing straight.',
+      'accessories and footwear exactly as shown. Ignore the mannequin body inside it — render a ' +
+      'real person, no hollow torso. Its pose means nothing: take NO posture, leg position or ' +
+      'camera from image 1, even if it stands straight.',
     // 腿脚服装由下面这段单独交代，所以这里不再写「衣服覆盖全身」——那句话既与「姿态一律不要」
     // 挨在一起容易互相抵消，又和 legwearLine 重复。
     legwearLine,
-    'Reference image 2 defines the FACE ONLY: use its exact face identity, hairstyle and hair color.',
+    'Reference image 2 gives the FACE ONLY: this exact identity, hairstyle and hair color.',
     poseRef,
     // 两句合一：line-art 那句本来就属于「图3 只给姿势」，末尾的 anatomy 要求也是同一个意思。
     // 分开写多花 100 字符，而 T5 的有效窗口只到 512 token，省下的字数要留给末尾的站姿反例。
-    'Ignore the line-art style and simplified proportions of image 3 — render a finished photo: ' +
-      'outfit from 1, face from 2, pose from 3, natural anatomy.',
+    'Ignore the line-art style and simplified proportions of image 3 — a finished photo: outfit ' +
+      'from 1, face from 2, pose from 3, natural anatomy.',
     // 姿态要点放在职责说明之后，避免抢掉「图1只给衣服、图2只给脸」的强约束
     hintLine,
     framing,
@@ -270,9 +271,32 @@ export function buildPrompt({
     floorLine,
     frameLine,
     styleLine,
-    extra,
+    // 补充描述放在最后：这是全文权重最高的位置，用户亲眼看过成品后写的纠正应该落在这里。
+    // 关键词只在「用户自己写了东西」时注射，没写就一个字都不加——不然等于替所有人生成一遍。
+    extra ? withPoseKeywords(extra, poseHint) : '',
   ];
   return parts.filter(Boolean).join(' ');
+}
+
+/**
+ * 把姿势要点里的关键词缀在用户的补充描述之后。
+ *
+ * 起因是一类很顽固的偏差：图3 一只手扶颈、另一只手**垂在体侧**，成品两只手都抬到了颈边。
+ * 这不是「听错」，是「补齐」——线稿是女性素体，第二只手常常被躯干挡住只露出一截，
+ * 模型就把它理解成「两只手都在这儿」。
+ *
+ * 提示词里已经写了这一条，但用户亲手写的那句话在末尾、权重最高。所以把要点里的
+ * 动作短语缀在它后面，让「用户纠正」和「姿势细节」落在同一个高权重位置。
+ *
+ * 只在用户在补充描述里写了东西时才缀：没写就一个字都不加，否则等于替所有人改稿。
+ * 另外用一个固定的开头把两者隔开，模型不会把用户的风格描述（比如「暖光」）
+ * 当成姿势的一部分。
+ */
+export function withPoseKeywords(extra, poseHint) {
+  const text = String(extra || '').trim();
+  const hint = clipPoseHint(poseHint);
+  if (!text || !hint) return text;
+  return `${text} Pose details, straight from the reference: ${hint}.`;
 }
 
 /**

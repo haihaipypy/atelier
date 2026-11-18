@@ -162,6 +162,14 @@ console.log('\n[5] prompt 结构');
 const p = buildPrompt({ style: 'photorealistic', extra: 'add a straw hat' });
 check('包含三张图分工', /OUTFIT ONLY/.test(p) && /FACE ONLY/.test(p) && /POSE AND CAMERA ANGLE ONLY/.test(p));
 check('包含补充描述', p.includes('add a straw hat'));
+// 补充描述在末尾（权重最高），要点关键词只在这个位置补一次：用户亲眼看过成品再写的
+// 纠正，不该被前面的通用约束稀释。没写补充描述时一个字都不加。
+// p 没有 poseHint（上面的 prompt 结构检查），所以补一个带要点的样例来验
+const pExtra = buildPrompt({ gender: 'female', poseHint: 'standing, one hand on the hip', extra: 'add a straw hat' });
+check('补充描述带上姿势关键词', /add a straw hat Pose details, straight from the reference: standing, one hand on the hip\.$/.test(pExtra),
+  pExtra.slice(-120));
+check('没写补充描述就不加后缀', !/Pose details, straight from the reference/.test(buildPrompt({ gender: 'female' })),
+  buildPrompt({ gender: 'female' }).slice(-200));
 check('无拼写错误 dresed', !p.includes('dresed'));
 
 console.log('\n[5b] 男性姿势：文字不得压过线稿');
@@ -237,7 +245,7 @@ const pPose = buildPrompt({ gender: 'female', poseHint: '站立｜双腿分开�
 const appSrcPose = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
 check('风格句不再写死景别', !/full-body/i.test(pPose), pPose.match(/[^.]*full-body[^.]*/i)?.[0]);
 check('服装句不再提站姿', !/standing front view/i.test(pPose));
-check('服装句明确不取图1的姿态', /NO body posture, leg position or camera from image 1/.test(pPose));
+check('服装句明确不取图1的姿态', /NO posture, leg position or camera from image 1/.test(pPose));
 check('姿态要点改为命令口吻', /The stance must follow image 3/.test(pPose));
 check('点出模型默认滑向的四种站姿', /straighten the legs[\s\S]*close the gap between the feet[\s\S]*square the hips/.test(pPose));
 check('男性版同样带反默认站姿约束', /The stance must follow image 3/.test(buildPrompt({ gender: 'male', poseHint: '站立' })));
@@ -336,6 +344,11 @@ check('半身取景段没被腿袜段顶掉', /cropped at mid-thigh/.test(pUp));
 // 上限从 2200 提到 2250：新增的「类型和长度照搬」一句值这 50 字符——
 // 它挡的是「长裤被改成短裙」这类整体性错误，比省 token 重要得多。
 check('提示词仍在合理长度内', pSit.length < 2250, `${pSit.length} 字符`);
+// 手数：图3 一只手扶颈、另一只手垂在体侧，成品两只手都抬到了颈边。
+// 不是听错，是补齐——素体线稿的第二只手常被躯干挡住，模型读成「两只手都在这儿」。
+check('要求数清图3 的手臂', /Count the arms in image 3/.test(pSit));
+check('点明另一只手是垂着的，不是往前', /one hand in front means most of the\s+other arm hangs at the side/.test(pSit.replace(/\s+/g, ' ')));
+check('男性版也有手数约束', /Count the arms in image 3/.test(buildPrompt({ gender: 'male' })));
 // 头部朝向是「姿势」里最容易被脸约束抹掉的一项：图2 是正面证件照，图3 的头是空白蛋形，
 // 模型为了对上脸会把整个人摆正对镜头——脚和手都对，唯独头没了侧转与俯仰。
 check('点名图3 的头部朝向', /blank head still shows where the face points/.test(pSit));
