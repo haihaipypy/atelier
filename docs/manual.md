@@ -1253,6 +1253,35 @@ The line-art figure has legs her left knee raised with the shin dropped so that 
 
 语法通顺、三个部位都在、总长 1942 字符（比上一版少 7）。
 
+#### `v2026.11.18.18`：坐姿又被立起来了——骨头句子把「腿」写成了「手」
+
+用户第三次报坐姿问题，这次是 P045「双腿折向一侧坐·一手撑地」，成品仍是完整站姿、手撑在身前地面上。
+把这次提示词抄下来逐句读，找到四个互相叠加的原因，**没有一个是模型的问题**：
+
+| # | 现象 | 根因 |
+|---|---|---|
+| 1 | `legs her hand planted on the floor beside her and the other` | 骨架句的过滤把「以 sitting/standing 开头的片段整条丢弃」，而「sitting on the floor with both legs folded …」正好是腿所在的那一段 → 腿槽被**手**的片段占满，模型读到「legs + 手在地上」 |
+| 2 | `head-to-toe, centered, feet fully visible` | 开头这句是最强的构图锚点，模型宁可把人立起来也要满足「从头到脚、双脚可见」 |
+| 3 | 插入语排在骨架句之后、写的是完整 200~460 字符要点 | 后读到的才是「最终解释」：最后一句是「手撑地」，模型就把站姿的手画到地上 |
+| 4 | FACE 段 `turn that head the way image 1 turns it` | 被读成「把脸摆正」，几次坐姿成品都是正视镜头的正脸 |
+
+改法：
+
+- 骨架句改为**按分句**归属：先把描述切成真正的分句（逗号 / 分号 / `and her…`），
+  一个分句只归第一个匹配上的部位槽；词头（`sitting on the floor with`）单独剥掉，
+  剩下的 `both legs folded …` 进腿槽。回指分句（`the other resting on her knee`）单独成句读不通，丢弃。
+- 开头去掉 `head-to-toe / feet fully visible`，换成 `the whole body in frame and centered`，
+  并在姿势段最前面加一句正向约束：**图1 是坐在地上，成品就是坐在地上**。
+- 插入语不再复述要点，只用姿势名字（`The pose is 「…」`）。中文名字原样塞进英文句子是故意的：
+  T5 对没见过的汉字串按「标签」处理，不会像英文那样被并入语法。
+  副作用是提示词短了 500 字符（P001 那条 460 字符的描述从 2113 → 1627）。
+- FACE 段地面姿势改成 `at that angle her head and her line of sight follow image 1 exactly`。
+
+站点统计了 `pose.json` 里 567 条描述的长度：p95 = 192 字符，超 200 的有 24 条，最长 460。
+所以「整句复述 + 骨架句」从来都是双份预算，这次一并去掉。
+
+自检相应更新了视线断言（改成正向匹配 + 禁止 camera/镜头字样）。
+
 ### 使用边界
 
 - **上游三家（服装/脸型/姿势）**：不存储、不再分发图片，只保存元数据索引

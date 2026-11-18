@@ -570,7 +570,8 @@ check('地面姿势带 GROUND CONTACT 段（地面承重、身体低）',
   /GROUND CONTACT — she is on the floor/.test(pGround) && /her weight rests on the ground/.test(pGround));
 check('站姿不带 GROUND CONTACT 段', !/GROUND CONTACT/.test(buildPrompt({ gender: 'female', poseHint: 'standing with both hands on her hips' })));
 check('地面姿势的视线跟随图1（不写「看向镜头」）',
-  /turn that head and eyes the way image 1 turns them/.test(pGround));
+  /at that angle her head and her line of sight follow image 1 exactly/.test(pGround)
+  && !/camera|lens|looking at the viewer/i.test(pGround.slice(pGround.indexOf('FACE and HAIR'), pGround.indexOf('OUTFIT'))));
 // 描述写长了会被 T5 截断，截掉的正好是排在后面的部位——所以先用一句骨架点名 legs/hands/head
 check('长描述先用骨架句点名部位（legs / hands / head）',
   /The line-art figure has legs .*hands .*head /i.test(buildPrompt({
@@ -601,7 +602,7 @@ check('上传的自定义线稿也能取到高清 full',
   /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appUniq));
 
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.17', /tag: '2026\.11\.18\.17'/.test(versionSrc));
+check('版本号已递增到 2026.11.18.18', /tag: '2026\.11\.18\.18'/.test(versionSrc));
 
 console.log('\n[8a6] 回归修复：让 agnes 的请求体与本地脚本一致');
 // 用户实测：同一个模型、同一组素材，本地 agnes-image 脚本一次成型，网站却各种问题；

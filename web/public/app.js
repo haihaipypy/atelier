@@ -158,6 +158,8 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
     extra: $('#extra').value.trim(),
     gender: state.gender,
     poseHint,
+    // 姿势名（中文短语）：提示词里当「标志特征」，比整段要点短得多，先给骨架、再点名
+    poseName: String(state.selected.pose?.pose?.name || state.selected.pose?.title || '').trim(),
     // 半身姿势要换一套取景规则，服务端按这个标记拼 FRAMING 段
     halfBody: halfBody ? '1' : '0',
   });

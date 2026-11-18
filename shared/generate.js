@@ -88,10 +88,52 @@ export function describePoseBones(text) {
   // 1) 片段只做「尾词完整」的截断，砍完若以 and/with/so that/the 之类收尾就继续往前退；
   // 2) 每个部位槽最多两条，长度按剩余预算分配，宁可短也不能拼出病句；
   // 3) 补主语时先看片段本身有没有主语（her/one hand/the hand），有就不再补。
-  const strip = (c) => c
-    .replace(/^(and|so that|with)\s+/i, '')
-    .replace(/^(her|the|one)\s+/i, '')
-    .trim();
+  // 2026-11-18 晚第四次修（用户实测 P045「双腿折向一侧坐・一手撑地」）：
+  // 上一版把「以 sitting/standing 开头的片段一律丢弃」，本意是避免骨架句里重复姿势大类，
+  // 但这些描述几乎每条都是「大类 + 腿怎么放」挤在第一个逗号前：
+  //   sitting on the floor with both legs folded together over to her right side, one hand …
+  // 结果腿的片段被整条扔掉，骨架句只剩手的部分：
+  //   legs her hand planted on the floor beside her and the other; hands her hand planted on the floor
+  // ——"legs" 后面接的是手，模型读到的就是「手在地上」，坐姿又退回站直。
+  // 现在反过来：**保留**以大类开头的片段，只把「sitting on the floor」「standing」这类
+  // 只讲状态的词头切掉，剩下的「both legs folded …」正是最该被提前强调的部分。
+  // 词头按「大类 + 姿态副词 + 一个介词短语」定位（on the floor / back on her heels /
+  // on a chair）；不用 [\s\w]* 那种宽匹配，那会把 "both arms raised overhead and her palms…"
+  // 里的 with 抓错，剩下一句残渣。
+  const POSTURE = /^(sitting|standing|kneeling|squatting|lying|half lying|reclining)(?:\s+(?:back|down|up|low|sideways|upright|straight|still|tall))*\s+(?:on|in|with|against|over|at|to|beside|near|by)\b/i;
+  const PREP = /^(on|in|with|against|over|at|to|beside|near|by)$/i;
+  /** 介词短语里允许出现的词：冠词/物主 + 实词（floor / heels / chair / her side …） */
+  const DET = /^(the|a|an|her|his|both|its|their|one|two|each)$/i;
+  /** 把 "sitting on the floor with both legs …" 的介词短语整段吃掉，只留后面的动作 */
+  const postureHead = (c) => {
+    if (!POSTURE.test(c)) return c;
+    const words = c.split(/\s+/);
+    const lead = /^(sitting|standing|kneeling|squatting|lying|half|reclining)$/i;
+    // 注意不能把 on 当副词：on 是介词，被副词吃掉后面就剥不动了
+    const adv = /^(back|down|up|low|sideways|upright|straight|still|tall|forward)$/i;
+    let i = 0;
+    // 1) 动作词 + 姿态副词（kneeling back / lying down / squatting low）
+    while (i < words.length && (lead.test(words[i]) || adv.test(words[i]))) i += 1;
+    // 2) 一个介词短语：介词 + 至多一个定语 + 至多两个实词，遇 with/and 停
+    if (i < words.length && PREP.test(words[i])) {
+      let content = 0;
+      while (i < words.length && content < 2) {
+        const w = words[i];
+        if (/^(with|and|or)$/i.test(w)) break;
+        if (DET.test(w)) { i += 1; continue; }
+        if (/^[\w'-]+$/i.test(w)) { i += 1; content += 1; } else break;
+      }
+    }
+    const rest = words.slice(i).join(' ').trim();
+    // 剥完至少要有两个词，否则说明这只是一句状态（"sitting on the floor"），整条不要
+    return rest.split(/\s+/).length >= 2 ? rest : '';
+  };
+  const CUT = /^(and|so that|with)\s+/i;
+  /**
+   * 片段清洗：先切掉「sitting on the floor with」这类只讲状态的词头，再剥一次连接词和冠词。
+   * 连剥两次会把 "her other hand" 剥成 "other hand"，所以冠词只剥一次。
+   */
+  const strip = (c) => postureHead(c).replace(CUT, '').replace(/^(her|the|one)\s+/i, '').trim();
   // 末尾的介词/连接词一律退掉：单独一个 behind / on / with 收尾看着像被截断的句子，
   // 退到名词为止（"hand planted flat on the floor behind her" → "…on the floor"）
   const DANGLING = /\b(and|or|with|so that|that|the|a|an|her|his|its|their|of|to|in|at|for|from|by|on|onto|over|under|behind|beside|near|against|toward|towards|around|along|which|while|so|this|these|those)$/i;
@@ -101,14 +143,28 @@ export function describePoseBones(text) {
     while (DANGLING.test(out) && /\s/.test(out)) out = out.replace(/\s+\S+$/, '').trim();
     return out;
   };
-  const join = (arr) => arr.map((c) => (/^(her|his|one|both|two|the)\b/i.test(c) ? c : `her ${c}`));
+  const join = (arr) => arr.map((c) => (/^(her|his|one|both|two|the|both hands)\b/i.test(c) ? c : `her ${c}`));
   const HEAD_OK = /^head (lowered|turned|tilted|propped|lifted|bowed|raised|dropped)\b/i;
-  const pick = (re, max, n) => chunks
-    .filter((c) => re.test(c) && !/^(sitting|standing|kneeling|squatting|lying|half lying|reclining)\b/i.test(c))
+  /**
+   * 挑片段：同一条描述里的主句常常并排写了手和腿（"… with both legs folded …, one hand
+   * planted …, the other resting …"），按部位正则筛会把同一个片段重复塞进两个槽
+   * （腿槽里出现手、手槽里出现 "the other"）。所以先把描述切成**真正的分句**，
+   * 一个问题只归给第一个匹配上的部位槽。
+   */
+  const SUB = /\s*,\s*|\s*;\s*|\s+and\s+(?=her\s|his\s|one\s|both\s|the\s)/;
+  const clauses = chunks
+    .flatMap((c) => c.split(SUB))
+    .map((x) => x.trim())
+    .filter(Boolean);
+  const used = new Set();
+  const pick = (re, max, n) => clauses
+    .filter((x) => re.test(x) && !used.has(x))
+    // 「the other resting on her knee」这类回指分句单独成句读不通，前面那句才带部位名词
+    .filter((x) => !/^(the|her|his)\s+other\b/i.test(x))
     .slice(0, max)
-    .map((c) => clip(strip(c), n))
+    .map((x) => { used.add(x); return clip(strip(x), n); })
     // 残片（截完不足 12 字符，或只剩一个词）不如不写
-    .filter((c) => c.length >= 12 && /\s/.test(c));
+    .filter((x) => x.length >= 12 && /\s/.test(x));
   const legs = pick(/\b(leg|legs|knee|knees|thigh|thighs|shin|feet|foot|heel|heels)\b/i, 2, 52);
   const hands = pick(/\bhands?\b/i, 2, 46);
   const head = pick(/\bhead (lowered|turned|tilted|propped|lifted|bowed|raised|dropped)\b/i, 1, 42);
@@ -150,6 +206,7 @@ export function buildPrompt({
   gender = 'female',
   poseHint = '',
   halfBody = false,
+  poseName = '',
   frame = null,
 } = {}) {
   // ────────────────────────────────────────────────────────────────────────────
@@ -181,7 +238,10 @@ export function buildPrompt({
   const lines = [
     halfBody
       ? 'Photorealistic fashion portrait of one person, framed from the head down to mid-thigh, centered on the body.'
-      : 'Photorealistic full-body fashion portrait of one person, head-to-toe, centered, feet fully visible.',
+      // 2026-11-18 晚第五次（P045 实测）：head-to-toe 与 feet fully visible 是**最强**的构图锚点，
+      // 模型宁可把人立起来也要满足它——线稿明明是坐在地上，成品却是完整站姿。
+      // 构图锚点只保留「全身、居中、别裁切」，站/坐交给姿势段的线稿权威。
+      : 'Photorealistic full-body fashion portrait of one person, the whole body in frame and centered.',
     'Three reference images are given in this order: 1 = pose line-art, 2 = face, 3 = outfit.',
   ];
 
@@ -214,12 +274,24 @@ export function buildPrompt({
 
   lines.push(
     'POSE — HIGHEST PRIORITY (reference image 1): copy this exact pose.'
+    // 「整张画面 = 图1 的姿态与机位」：加在图之前，因为被截断时丢的是后面的插入语，
+    // 而这一句是全局约束，不能丢。它也替代了原来的 head-to-toe 构图锚点——
+    // 线稿是坐姿时，成品就必须是坐姿，不能为了「全身入框」把人立起来。
+    + (halfBody ? '' : ' The portrait shows the whole body in the same posture as image 1: if the line-art figure is sitting on the floor, the portrait shows her sitting on the floor.')
     + (poseBones ? ` The line-art figure has ${poseBones}, and the portrait matches it exactly.` : '')
+    // 后半句塞「名字」而不是「要点」：要点已经在骨架句里（前面、短、不会被截断），
+    // 这里再整句复述一次，等于把 200 字符的同一段话塞两遍，预算全被它吃掉；
+    // 而且顺序颠倒是 P045 翻车的直接原因——最后读到的「标志特征」是手撑地，
+    // 模型就画成站着把手撑在地上。
+    // 名字缺失时退回完整要点（老条目没有 pose.zh，不能因此丢掉描述）。
+    // 有名字时**不再整句复述要点**：要点已经由骨架句提前说了，再说一遍只是把 200~460 字符
+    // 的同一段话塞两遍（P001 那条描述 460 字符，去掉复述后总长从 2113 降到 1570）。
     + (poseText
-      // 半身时收「this crop」：裁到大腿中部，说 rest of the body 会把画面往全身推
       ? halfBody
-        ? ` Its signature feature — ${poseText} — is one part of the pose, and the rest of the gesture also comes from image 1.`
-        : ` Its signature feature — ${poseText} — is one part of the pose, and the rest of the body also comes from image 1.`
+        ? ` Its signature feature — ${poseName || poseText} — is one part of the pose, and the rest of the gesture also comes from image 1.`
+        : poseName
+          ? ` The pose is 「${poseName}」, and the rest of the body also comes from image 1.`
+          : ` Its signature feature — ${poseText} — is one part of the pose, and the rest of the body also comes from image 1.`
       : ` The whole body comes from image 1: ${poseChecklist}.`)
     + (halfBody
       ? ' Every hand gesture from image 1 is reproduced and clearly readable.'
@@ -245,8 +317,11 @@ export function buildPrompt({
 
   lines.push(
     'FACE and HAIR (reference image 2): take only the facial identity and hairstyle from it, and '
+    // 2026-11-18 晚第五次：原句是「把这张脸的头转向图1的方向」，被模型读成「把脸摆正」——
+    // 坐姿被抹平的那几次，成品都是正视镜头的正脸。地面姿势改成「连视线也照抄图1」，
+    // 不写相机/镜头，免得模型顺手把人拉正。
     + (groundPose
-      ? 'turn that head and eyes the way image 1 turns them. '
+      ? 'at that angle her head and her line of sight follow image 1 exactly. '
       : 'turn that head the way image 1 turns it. '),
   );
 

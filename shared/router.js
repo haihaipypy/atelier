@@ -146,8 +146,11 @@ export async function handleRequest(request, env = {}, aiRun = null) {
     const poseHint = clipHint(url.searchParams.get('poseHint'));
     // 上半身姿势要换一套取景规则（裁到大腿中部、手必须露出），详见 buildPrompt 的 framing 段
     const halfBody = url.searchParams.get('halfBody') === '1';
+    // 姿势的名字（「双腿折向一侧坐·一手撑地」）。提示词里用它替掉整段要点：
+    // 要点已经由骨架句提前说了，整段再复述一遍会把预算吃光、还会把部位顺序颠倒。
+    const poseName = clipHint(url.searchParams.get('poseName'));
     const frame = [Number(url.searchParams.get('w')) || 0, Number(url.searchParams.get('h')) || 0];
-    return json({ prompt: buildPrompt({ style, extra, gender, poseHint, halfBody, frame }) });
+    return json({ prompt: buildPrompt({ style, extra, gender, poseHint, halfBody, poseName, frame }) });
   }
 
   /**
