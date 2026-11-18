@@ -513,3 +513,16 @@ a { color: inherit; }
   /* 手机上底部可能是安全区，抬高一点免得被手势条压住 */
   .build-tag { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); font-size: 10px; }
 }
+
+/* 「本次实际提示词」：默认收起，展开后占整行。字体小、可换行、可滚动，
+   不挤掉上面那排模型/耗时/下载信息。 */
+.prompt-peek { flex-basis: 100%; }
+.prompt-peek summary { cursor: pointer; color: var(--ink-2); padding: 2px 0; user-select: none; }
+.prompt-peek summary:hover { color: var(--sel); }
+.prompt-peek pre {
+  margin: 6px 0 0; padding: 9px 11px; max-height: 240px; overflow: auto;
+  white-space: pre-wrap; word-break: break-word; line-height: 1.55;
+  font: 11px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--ink-2); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px;
+}

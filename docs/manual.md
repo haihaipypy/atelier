@@ -700,6 +700,50 @@ drawn. No legwear in image 1 means bare legs; no footwear means plain flat shoes
 男性套装是长裤，而原清单里只有「丝袜、长袜、袜子」，还跟着一句「图 1 没有腿袜就光腿」。
 按字面理解，长裤不算 legwear，于是坐姿/躺姿真的会出一条光腿。
 
+#### 别把「不想要」的动作写进否定句
+
+`v2026.11.18.5` 把姿势约束移到末尾之后，**腿分开了**（原来并拢），手却还是垂在身侧。
+同一段提示词里一半生效一半没生效，说明不是权重问题，是那半句自己写反了。
+
+原来的站姿兜底结尾是：
+
+```
+… and the arms not hanging flat against the sides when image 3 puts them somewhere else.
+```
+
+CLIP/T5 对否定词的权重极低，它读进去的是后半截那个**具体画面**：
+`arms hanging flat against the sides`。于是手真的垂在身侧。这在男性版很早就踩过一次——
+「不要替换成站姿」写进否定句，成品就出站姿——当时修好了，回滚时又带了回来。
+
+现在这一句**整个删掉**，只留可执行的正面量：
+
+```
+The stance must follow image 3, not a default catalogue pose: legs as wide as drawn,
+feet where drawn, hips and shoulders not squared to the camera.
+```
+
+规则：想让手去哪儿，就在末尾正面说「She is … both hands on her hips」；
+不要写「别把手放下」。想否定的东西，用「别摆成目录照」这种**不含具体动作名**的说法。
+
+顺带把要点句从元描述改成画面描述：
+
+```
+（旧）Exact pose, matching image 3: standing in a wide stance with legs apart, both hands on her hips.
+（新）She is standing in a wide stance with legs apart, both hands on her hips.
+```
+
+前者在**谈论一张图**，模型当备注；后者在**描述要画的东西**，是图像模型熟悉的句式。
+女性库 127 条英文要点全部能接在 `She is` 之后（121 条 `-ing` 开头，6 条 `in a …` 开头）；
+中文小标题和半身库里的名词短语（如 `peace sign at the cheek`）接不上，仍走标签式。
+
+#### 「好像和刚才一样」先查提示词
+
+结果区现在多了一个可展开的「本次实际提示词」，里面是服务端**这次请求实际送出**的全文。
+版本 tag 只能证明代码上线，证明不了这次请求真的用了新文案（缓存、旧实例、
+自定义 Prompt 框里残留了内容，都会让改动看起来没生效）。
+
+排查顺序：右下角 tag → 展开提示词看末尾那句姿势描述 → 再判断是不是模型能力问题。
+
 #### 姿势为什么非要在最后一句
 
 回滚到 1380 字符之后，服装回来了，姿势又不行了：线稿双手叉腰、双腿分开，成品双手垂在

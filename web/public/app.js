@@ -1155,6 +1155,15 @@ function showResult(j) {
   const dl = el('a', { href: src, download: `atelier-${Date.now()}.png` }, '下载');
   meta.append(dl);
   if (j.requestId) meta.append(el('span', {}, `#${j.requestId}`));
+  // 「还是不行」「好像和刚才一样」这类反馈，第一件事要排掉的是「线上到底跑的是哪一版
+  // 提示词」。版本 tag 只能证明代码上线，证明不了这次请求真的用了新文案；把服务端
+  // 实际送出的 prompt 原样摆出来，一眼就能对上（尤其是末尾那句姿势描述）。
+  if (j.prompt) {
+    const peek = el('details', { class: 'prompt-peek' });
+    peek.append(el('summary', {}, '本次实际提示词'));
+    peek.append(el('pre', {}, j.prompt));
+    meta.append(peek);
+  }
 }
 
 /* ─────────────────────────── 其它交互 ─────────────────────────── */

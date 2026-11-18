@@ -157,6 +157,10 @@ check('页面上有诊断探针按钮', /id="probeBtn"/.test(await readFile(path
 check('探针按钮已接线', /\$\('#probeBtn'\)\?\.addEventListener\('click', probeOnce\)/.test(appProbe));
 check('探针请求标了 probe 且不带图', /probe: true,\s*\n\s*images: \[\]/.test(appProbe));
 check('探针结果分两种结论', /探针通过/.test(appProbe) && /探针也失败了/.test(appProbe));
+// 用户说「好像和刚才一样」时，先要能自证这次请求到底用了哪一版提示词
+check('结果区能展开本次实际提示词', /class: 'prompt-peek'/.test(appProbe) && /j\.prompt/.test(appProbe));
+check('提示词样式已定义', /\.prompt-peek/.test(await readFile(path.join(ROOT, 'web/public/styles.css'), 'utf8')));
+
 
 // 取服装段（image 1 那几句）用于「服装段不许提姿态」这类检查
 const pOutfitSection = (txt) => (txt.match(/Reference image 1[\s\S]*?Reference image 2/) || [''])[0];
@@ -207,6 +211,26 @@ check('「换身体」只在性别声明里说一次', (pMale.match(/give its sk
   && !/ignore that mannequin/i.test(pMale));
 check('男性版不再用「别退回站姿」的否定句', !/Do not replace the pose with a standing/i.test(pMale));
 check('要点超长会截断', clipPoseHint('x'.repeat(500)).length <= 201);
+
+// 手臂反例是「手垂身侧」的元凶：T5 对否定词权重极低，
+// 「arms not hanging flat against the sides」被读成后半截那个具体画面。
+check('站姿段不再出现手臂否定句', !/arms not hanging|not hanging flat/.test(
+  buildPrompt({ gender: 'female', poseHint: 'standing' })));
+check('腿脚与胯肩的正面量仍在', /legs as wide as drawn/.test(pFemale)
+  && /hips and shoulders not squared/.test(pFemale));
+
+// 英文要点改「画面叙事句」，中文/名词短语要点保持标签式
+const pEn = buildPrompt({ gender: 'female', poseHint: 'standing in a wide stance with legs apart, both hands on her hips' });
+check('英文要点写成 She is 叙事句', /She is standing in a wide stance with legs apart, both hands on her hips\.$/.test(pEn.trim()),
+  pEn.slice(-130));
+check('叙事句落在最末一句', /She is [^.]*\.$/.test(pEn.trim()));
+check('中文要点仍走标签式（不产生中英混杂）',
+  /Exact pose, matching image 3: /.test(pFemale) && !/She is /.test(pFemale));
+check('名词短语要点仍走标签式（She is peace sign 不通）',
+  !/She is peace sign/.test(buildPrompt({ gender: 'female', poseHint: 'peace sign at the cheek', halfBody: true, frame: [1024, 1024] })));
+check('in a 开头也能接 She is', /She is in a deep squat/.test(
+  buildPrompt({ gender: 'female', poseHint: 'in a deep squat up on the balls of her feet' })));
+
 
 // 已知的数据错位：P021 线稿是单臂高举，上游文字却写「手扶颈侧与大腿」
 const malePoseJsonEarly = JSON.parse(await readFile(path.join(ROOT, 'web/public/data/pose-male.json'), 'utf8'));

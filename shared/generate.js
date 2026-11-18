@@ -151,12 +151,15 @@ export function buildPrompt({
   const hint = clipPoseHint(poseHint);
   // 措辞是「同一姿势的另一种说法」，不是「用来核对图3」——后一种写法把文字降成了检查项，
   // 模型读完该忽略还是忽略（图3 双手在脑后、成品双手垂在身侧，就是这么来的）。
-  // 措辞从「also given in words, matching image 3 exactly」改成断言式标签。
-  // "also" 把它降级成补充信息，"matching" 又暗示这是一句待核对的描述——
-  // 两处都让模型觉得「可以不信」。写成标签（Exact pose, matching image 3: X）
-  // 才是约束的口吻。
+  // 从「元描述」改成「画面描述」。`Exact pose, matching image 3: X` 是在**谈论**一张图，
+  // 模型会把它当备注；`She is X.` 是在**描述要画的内容**，这才是图像模型熟悉的句式。
+  // 女性库 127 条英文要点全部能接在 She is 之后（121 条 -ing 开头，
+  // 6 条 in a ... 开头，「She is in a deep squat」同样成立）。
+  // 440 条没有 en 的条目回退到中文小标题，接 She is 会变成中英混杂，保持标签式不变。
   const hintLine = hint && gender !== 'male'
-    ? `Exact pose, matching image 3: ${hint}.`
+    ? (/^[\x00-\x7F]*$/.test(hint) && /^(standing|sitting|lying|kneeling|squatting|crouching|leaning|in a)\b/.test(hint)
+        ? `She is ${hint.replace(/\.$/, '')}.`
+        : `Exact pose, matching image 3: ${hint}.`)
     : '';
 
   // 上半身姿势是另一套取景规则。
@@ -197,11 +200,15 @@ export function buildPrompt({
   // 曾经在这段里加过「数手臂」「头的朝向」「手放哪儿就留在哪儿」三类细则。
   // 结果是整体崩：姿势段的权重被摊薄后，模型开始同时走错服装和姿势。
   // 这类细则要么进 extra（末尾、权重最高），要么就别加。
+  // 手臂反例**删掉了**。这是这次的真因：CLIP/T5 对否定词权重极低，
+  // 「arms not hanging flat against the sides」送进去，模型读到的是后半截那个具体画面
+  // 「arms hanging flat against the sides」——于是手真的垂在身侧。男性版很早就踩过
+  // 同样的坑（「不要替换成站姿」写进否定句，成品就出站姿），当时修好了，
+  // 回滚时又把这句带了回来。腿脚与胯肩那几句都是正面量，实测有效（这次腿分开了），保留。
   const stanceGuard = halfBody
     ? ''
     : 'The stance must follow image 3, not a default catalogue pose: legs as wide as drawn, ' +
-      'feet where drawn, hips and shoulders not squared to the camera, and the arms not hanging ' +
-      'flat against the sides when image 3 puts them somewhere else.';
+      'feet where drawn, hips and shoulders not squared to the camera.';
 
   // 男性库有 26 条坐姿、15 条侧坐、16 条跪姿、12 条蹲姿、13 条躺姿，全是**地面**姿势，
   // 线稿里没有椅子。模型对「坐下」的默认联想是椅子，很容易给人加一张凳子、或者干脆
