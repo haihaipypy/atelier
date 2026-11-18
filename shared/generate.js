@@ -86,7 +86,29 @@ export function buildPrompt({
   poseHint = '',
   halfBody = false,
   frame = null,
+  minimal = false,
 } = {}) {
+  // 极简模式：只交代三张图分别是什么，剩下全交给模型自己看图组合。
+  //
+  // 这条分支是为「多图融合模型到底需不需要我们用文字解释姿势」准备的对照实验。
+  // agnes-image-2.5-flash 这类模型本来就吃三张原图，姿势文字（poseHint）反而可能与
+  // 线稿打架：SP-P021 线稿单臂高举、上游文字写扶颈贴腿，成品照的是文字。
+  // 男性版去掉要点后没再出问题，女性版一直保留要点，姿势问题就从没断过。
+  //
+  // 所以这里一个字的姿势描述都不写，也没有站姿反例、腿装清单、85mm 之类的风格长句——
+  // 那些都是「模型做错了就用文字补」攒出来的，补一句挤掉一句。
+  if (minimal) {
+    const lines = [
+      'Combine the three reference images into one photorealistic photo of one person.',
+      'Image 1 is the outfit, image 2 is the face and hair, image 3 is the pose and camera angle.',
+    ];
+    if (gender === 'male') lines.push("The person is an adult man: keep image 3's pose with a male body.");
+    if (halfBody) lines.push('Crop the shot like image 3; do not invent legs or a full-length stance.');
+    if (style === 'anime') lines.push('Anime illustration style.');
+    // 补充描述是用户自己写的，任何模式下都原样保留在最后
+    if (extra) lines.push(extra);
+    return lines.join(' ');
+  }
   // 镜头信息里绝不能出现 "full-body" 这类景别词。
   // 原因：图3 是姿势参考，图1 的服装常常是连衣裙/半身裙，两样一起给的时候模型
   // 会去找一个"能把整套衣服完整展示"的安全站姿——最省事的就是正面站直、双手贴身。
@@ -489,7 +511,7 @@ export function buildCloudflareForm({ images, prompt, modelId, width = 1024, hei
  * @param {object}   p.env     Worker 的 env（读 AI binding 与 FLUX_MODEL）
  * @param {Function} p.aiRun   env.AI.run 的绑定版本（丢失 this 会报错，必须 bind）
  */
-export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, gender, poseHint, halfBody, probe = false }) {
+export async function generate({ images, prompt, model, env = {}, aiRun, width, height, seed, style, extra = '', gender, poseHint, halfBody, probe = false, minimal = false }) {
   // probe：只发 prompt + 尺寸，不带任何参考图。
   //
   // 诊断用。报 3043 / 500 时，最常见的三种原因是「模型不支持多图」「输入图太大/格式不认」
@@ -505,7 +527,7 @@ export async function generate({ images, prompt, model, env = {}, aiRun, width, 
     });
   }
 
-  const finalPrompt = prompt || buildPrompt({ style, gender, poseHint, halfBody, frame: [width, height] });
+  const finalPrompt = prompt || buildPrompt({ style, extra, gender, poseHint, halfBody, minimal, frame: [width, height] });
   // 优先级：请求里显式指定（白名单校验）→ 环境变量 → 默认
   const allowed = new Set(Object.values(MODELS).map((m) => m.modelId));
   const wanted = model || env.FLUX_MODEL || DEFAULT_MODEL;

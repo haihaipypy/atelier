@@ -147,6 +147,13 @@
       <button class="primary" id="genBtn" disabled>
         <span class="spinner" hidden></span><span class="label">生成合成图</span>
       </button>
+      <!-- 提示词模式：A/B 对照用。极简版只说三张图分别是什么，不给任何姿势文字 -->
+      <label class="prompt-mode-row">提示词模式
+        <select id="promptMode">
+          <option value="detailed" selected>详细（全部约束）</option>
+          <option value="minimal">极简（只说三张图是什么）</option>
+        </select>
+      </label>
       <p class="hint" id="hint">从左侧选齐 服装 / 脸 / 姿势 三个素材后即可生成。</p>
       <!-- 诊断探针：不要素材，只发提示词 + 画幅。报 3043 时用它分辨「模型/上游的问题」
            还是「多图输入的问题」——探针过 → 问题在图，探针挂 → 跟图无关。 -->

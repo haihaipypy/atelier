@@ -160,6 +160,7 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
     poseHint,
     // 半身姿势要换一套取景规则，服务端按这个标记拼 FRAMING 段
     halfBody: halfBody ? '1' : '0',
+    minimal: isMinimal() ? '1' : '0',
   });
   if (frame) {
     q.set('w', String(frame[0]));
@@ -175,6 +176,12 @@ async function buildPromptOnServer({ halfBody = isHalfBodyPose(), frame = null }
     /* 落到下面的兜底 */
   }
   const who = state.gender === 'male' ? '成年男性' : '成年女性';
+  // 兜底也要跟着模式走，否则 /api/prompt 一挂，A/B 就变成了两套不同的东西
+  if (isMinimal()) {
+    return '图1是服装，图2是脸与发型，图3是姿势与机位。把三者合成到同一个人身上。'
+      + (halfBody ? '按图3 的裁切出半身像。' : '')
+      + `输出一张真实感强的${who}照片。`;
+  }
   const poseLine = poseHint ? `（${poseHint}）` : '';
   // 兜底文案同样不能写死「全身照」：图3 裁到哪就是哪，写死景别等于让模型自己
   // 挑一个能装下整身的姿势——通常就是并腿站直
@@ -303,6 +310,8 @@ async function generateDirect({ images, prompt, size }) {
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+// 极简模式：只交代三张图分别是什么，姿势完全交给模型看图，不写任何关键词
+const isMinimal = () => $('#promptMode')?.value === 'minimal';
 const el = (tag, attrs = {}, ...kids) => {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -1024,6 +1033,7 @@ async function generate() {
         // 姿势参考图是女性素体线稿，光给图模型经常直接退回站姿；把「大约什么动作」也写成文字
         poseHint: poseHintFor(),
         halfBody,
+        minimal: isMinimal(),
         model: state.engine === 'cloudflare' ? $('#model')?.value || undefined : undefined,
         engine: state.engine,
       };

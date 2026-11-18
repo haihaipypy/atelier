@@ -338,7 +338,7 @@ check('站立条目不会被误判为半身', standFemale.length === 0, `${stand
 
 check('选半身姿势会自动切方图', /sel\.value = isHalfBodyPose\(\) \? RATIO_HALF : '3:4'/.test(appUpper));
 check('用户改过画幅就不再自动切', /if \(state\.ratioTouched\) return;/.test(appUpper));
-check('半身标记送进中转通道', /halfBody,\n\s*model:/.test(appUpper));
+check('半身标记送进中转通道', /halfBody,\n\s*minimal: isMinimal\(\),/.test(appUpper));
 check('半身标记送进 /api/prompt', /halfBody: halfBody \? '1' : '0'/.test(appUpper));
 
 console.log('\n[5g] 腿部服装被丢掉的回归');
@@ -510,6 +510,57 @@ check('非法 model 回落到默认', captured.modelId === DEFAULT_MODEL, captur
 check('传入 multipart 入参', !!captured.input.multipart?.body && !!captured.input.multipart?.contentType);
 check('返回 base64 与耗时', out.b64 === 'aGVsbG8=' && typeof out.ms === 'number');
 check('返回所用 prompt', typeof out.prompt === 'string' && out.prompt.includes('OUTFIT ONLY'));
+
+console.log('\n[8a] 极简提示词：只说三张图分别是什么');
+// 多图融合模型本来就吃三张原图。SP-P021 线稿单臂高举、上游文字写扶颈贴腿，
+// 成品照的是文字——模型听文字不听线稿。男性版去掉要点后没再出问题，
+// 女性版一直留着要点，姿势问题就没断过。所以给一个干净的 A/B 开关。
+const minimalOpt = {
+  gender: 'female',
+  poseHint: 'standing in a wide stance with legs apart, both hands on her hips',
+  extra: 'soft afternoon light',
+  minimal: true,
+};
+const pMin = buildPrompt(minimalOpt);
+check('极简版只有三图职责', /Image 1 is the outfit, image 2 is the face and hair, image 3 is the pose and camera angle/.test(pMin));
+check('极简版不注入姿势文字', !/wide stance|hands on her hips|standing/.test(pMin), pMin);
+check('极简版不写站姿反例', !/catalogue pose|legs as wide|squared to the camera/.test(pMin));
+check('极简版不写服装细则', !/same type, same length|mannequin|legwear/.test(pMin));
+check('极简版不写风格长句', !/85mm|editorial fashion photography/.test(pMin));
+check('极简版保留用户补充描述且在最后', /soft afternoon light$/.test(pMin.trim()), pMin.slice(-80));
+check('极简版足够短', pMin.length < 250, `${pMin.length} 字符`);
+const pMinFull = buildPrompt({ ...minimalOpt, minimal: false });
+check('详细版仍注入姿势文字', /wide stance|hands on her hips/.test(pMinFull));
+check('详细版仍是长提示词', pMinFull.length > 1000, `${pMinFull.length} 字符`);
+check('极简版男性仍说明换身体', /adult man/.test(buildPrompt({ gender: 'male', minimal: true })));
+check('极简版半身仍给裁切', /Crop the shot like image 3/.test(buildPrompt({ minimal: true, halfBody: true, frame: [1024, 1024] })));
+check('极简版二次元仍带风格', /Anime illustration/.test(buildPrompt({ minimal: true, style: 'anime' })));
+
+// 两条通道都要真的送出极简文案，不能只是前端有个下拉框
+let minimalCaptured = null;
+await generate({
+  images: [], probe: true, minimal: true,
+  poseHint: 'standing with both hands on her hips',
+  env: {}, aiRun: async (mid, input) => { minimalCaptured = input; return { image: 'aGVsbG8=' }; },
+});
+// aiRun 收到的是序列化后的 multipart 流，提示词在 form 的 prompt 字段里
+const minimalBody = await new Response(minimalCaptured.multipart.body).text();
+check('服务端中转实际送出极简提示词',
+  /Image 1 is the outfit/.test(minimalBody) && !/hands on her hips/.test(minimalBody),
+  minimalBody.slice(0, 220));
+let minCap = null;
+await generate({ images: [], probe: true, minimal: true, extra: 'soft afternoon light', env: {},
+  aiRun: async (mid, input) => { minCap = input; return { image: 'aGVsbG8=' }; } });
+const minExtraBody = await new Response(minCap.multipart.body).text();
+check('极简模式也保留 extra', /soft afternoon light/.test(minExtraBody), minExtraBody.slice(0, 220));
+const routerMinSrc = await readFile(path.join(ROOT, 'shared/router.js'), 'utf8');
+check('路由 /api/prompt 读 minimal', /url\.searchParams\.get\('minimal'\)/.test(routerMinSrc));
+check('路由 /api/generate 透传 minimal', /minimal: body\.minimal === true/.test(routerMinSrc));
+const appMinSrc = await readFile(path.join(ROOT, 'web/public/app.js'), 'utf8');
+check('页面有提示词模式开关', /id="promptMode"/.test(await readFile(path.join(ROOT, 'web/public/index.html'), 'utf8')));
+check('直连查询参数带 minimal', /minimal: isMinimal\(\) \? '1' : '0'/.test(appMinSrc));
+check('中转 payload 带 minimal', /minimal: isMinimal\(\)/.test(appMinSrc));
+check('直连兜底也跟随模式', /if \(isMinimal\(\)\)/.test(appMinSrc));
 
 console.log('\n[8b] 诊断探针：不带图也能调模型');
 // 3043 分不清是「模型不支持多图」「某张图太大/格式不认」还是「上游挂了」。
