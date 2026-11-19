@@ -461,6 +461,17 @@ npm run sync:offline      # 离线：写入内置样例，不发网络请求
 node scripts/sync-catalogs.mjs --only pose   # 只同步一个板块
 ```
 
+> **默认不再自动同步（v2026.11.19.2 起）。** `.github/workflows/sync-catalogs.yml` 的
+> `schedule` 定时触发已删除，只保留 Actions 页面的手动 Run workflow，权限降为 `contents: read`，
+> 跑完只打印 diff、不写回仓库。
+>
+> 原因是两套数据在打架：上游索引是整份重建的，而姿势描述（`it.pose.en`，748 条逐张看图写的）
+> 只存在于本地。自动同步等于每天拿上游清单覆盖本地数据；脚本虽然会按 id 把描述搬回来
+> （`LOCAL_FIELDS` / `preserveLocalFields`），但只要上游改编号、下架条目或调整机位后缀，
+> 本地写好的描述就对不上了，分类与排序也会被静默改动。
+>
+> 要新素材时的正确姿势：手动跑一次 → 看 diff → 确认描述、分类、条目数都没被动过 → 自己 commit。
+
 产出 `web/public/data/{outfit,face,pose}.json`，**只含 ID、分类、标签、图片地址，共约 1MB**。
 
 **不同步图片本体**，原因有两个：
@@ -1312,6 +1323,25 @@ The line-art figure has legs her left knee raised with the shin dropped so that 
 端到端复跑：在临时副本里真跑一次线上同步，`pose.json` 567/567 条描述齐全，
 与同步前的条目内容**逐字段完全一致**（只有 `generatedAt` 变），全量自检 282 项通过。
 
+#### `v2026.11.19.2`：直接取消自动同步
+
+`v2026.11.19.1` 只是让同步「不再清空描述」，但更根本的问题是**同步这件事本身**：
+上游索引整份重建，本地姿势数据是逐张看线稿写的，两者天生是两套数据。
+只要上游改编号、下架条目、调整机位后缀，本地描述立刻对不上，而且整份重写还会静默改动分类与排序。
+所以把定时触发删掉：
+
+| 改动 | 说明 |
+|---|---|
+| 删除 `schedule: cron: '17 3 * * *'` | 不再每天自动拉上游；需要新素材时在 Actions 页面手动 Run workflow |
+| `permissions` 从 `contents: write` 降为 `contents: read` | 即使有人手滑，workflow 也没有写仓库的权限 |
+| 提交步骤换成「差异预览」 | 只打印 `git diff --stat` 和 pose.json 的前 120 行差异，附一条 notice 提示自行提交 |
+
+自检相应改了三条：不再有 `schedule/cron`、只保留 `workflow_dispatch`、无 `git push/commit` 且权限为 read；
+另加一条「手动同步仍然先同步再自检」。文档里 `docs/about.md` 三处「每天自动更新」也改成「索引固定在仓库里」。
+
+代价是素材不会自己变新。判断标准很简单：**姿势库的价值在描述，不在数量**——
+多 10 张没描述的线稿，不如现有的 748 条描述准确。服装和脸型若要更新，手动跑 `--only outfit` / `--only face` 即可。
+
 ### 使用边界
 
 - **上游三家（服装/脸型/姿势）**：不存储、不再分发图片，只保存元数据索引
@@ -1367,7 +1397,7 @@ atelier/
 │   ├── preview-server.mjs  #   本地预览（静态 + API 单端口）
 │   └── dry-run.mjs         #   端到端自检（250+ 项断言，无需密钥）
 ├── .github/workflows/
-│   └── sync-catalogs.yml   #   每日自动同步
+│   └── sync-catalogs.yml   #   手动同步（默认不定时触发）
 ├── wrangler.jsonc          # 部署配置
 ├── THIRD-PARTY-NOTICES.md  # 第三方素材与许可
 └── LICENSE                 # MIT

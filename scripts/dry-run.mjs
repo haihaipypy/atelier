@@ -602,7 +602,7 @@ check('上传的自定义线稿也能取到高清 full',
   /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appUniq));
 
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.19.1', /tag: '2026\.11\.19\.1'/.test(versionSrc));
+check('版本号已递增到 2026.11.19.2', /tag: '2026\.11\.19\.2'/.test(versionSrc));
 
 console.log('\n[8a6] 回归修复：让 agnes 的请求体与本地脚本一致');
 // 用户实测：同一个模型、同一组素材，本地 agnes-image 脚本一次成型，网站却各种问题；
@@ -1036,13 +1036,17 @@ console.log('\n[21] 文档拆分');
   check('上游自己带了 pose 就不覆盖', fresh[1].pose.en === 'upstream text', fresh[1].pose.en);
   check('新增条目没旧记录也不报错', fresh[2].pose === undefined);
   check('同步脚本可被 import（不自动跑网络同步）', /pathToFileURL\(process\.argv\[1\]\)/.test(sync));
-  // CI 的顺序不能反：先同步、再自检、最后提交；反了就会把「描述被清空」的数据提交上去
+  // 2026-11-19：取消定时同步。上游索引是整份重建的，每天都在拿上游清单覆盖本地的姿势描述，
+  // 属于「两套数据打架」——干脆不自动跑，需要新素材时手动触发、看过 diff 再提交。
   const wf = await readFile(path.join(ROOT, '.github/workflows/sync-catalogs.yml'), 'utf8');
+  check('定时同步已取消（没有 schedule / cron）', !/^\s*schedule:/m.test(wf) && !/cron:/.test(wf));
+  check('同步工作流只保留手动触发', /workflow_dispatch:/.test(wf)
+    && (wf.match(/^\s{2}([a-z_]+):/gm) || []).filter((l) => /schedule|push|pull_request/.test(l)).length === 0);
+  check('同步工作流不再往仓库写数据（read 权限 + 没有 git push）',
+    /permissions:\s*\n\s*contents:\s*read/.test(wf) && !/git push/.test(wf) && !/git commit/.test(wf));
   const iSync = wf.indexOf('sync-catalogs.mjs');
   const iCheck = wf.indexOf('dry-run.mjs');
-  const iCommit = wf.indexOf('git commit');
-  check('CI 顺序：同步 → 自检 → 提交', iSync > 0 && iCheck > iSync && iCommit > iCheck,
-    `${iSync}/${iCheck}/${iCommit}`);
+  check('手动同步仍然先同步再自检', iSync > 0 && iCheck > iSync, `${iSync}/${iCheck}`);
 }
 
 console.log(`\n结果：${pass} 通过，${fail} 失败\n`);
