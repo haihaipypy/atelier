@@ -23,6 +23,7 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { zh, zhCats, zhTags } from '../web/public/i18n.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -165,6 +166,31 @@ async function fetchCatalog(kind) {
   return kind === 'outfit' ? normalizeOutfit(list, src.homepage) : normalizePose(list, src.homepage);
 }
 
+/**
+ * 上游索引里没有、只有本地才有的字段。同步时按 id 从上一版数据搬回来。
+ *
+ * 只搬「上游绝不可能提供」的字段：目前就是 pose（看图写的动作描述，en/src），
+ * 上游条目的 pose 一定是空的，所以「新条目已有值就不覆盖」这条规则足够安全。
+ * 新增本地字段（比如人工校正的分类名）时把它加进这里即可，不用再改同步逻辑。
+ */
+export const LOCAL_FIELDS = ['pose'];
+
+export function preserveLocalFields(items, prevItems) {
+  const byId = new Map((prevItems || []).map((it) => [it.id, it]));
+  let filled = 0;
+  for (const it of items) {
+    const old = byId.get(it.id);
+    if (!old) continue;
+    for (const f of LOCAL_FIELDS) {
+      if (old[f] && !it[f]) {
+        it[f] = old[f];
+        filled += 1;
+      }
+    }
+  }
+  return filled;
+}
+
 async function syncOne(kind, { offline }) {
   const src = SOURCES[kind];
   const fixture = path.join(ROOT, 'scripts/fixtures', `${kind}.sample.json`);
@@ -193,14 +219,22 @@ async function syncOne(kind, { offline }) {
 
   items.sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
-  // 上游索引是整份重建的，本地用 sync-shisei.mjs 补进来的 Shisei 素材（src: 'shisei'）
-  // 不在上游里，直接覆盖就会把 275 条女性/中性装冲掉，且没有任何报错提示。
+  // 上游索引是整份重建的，本地补进去的东西不在上游里，直接覆盖就会静默冲掉：
+  //   ① sync-shisei.mjs 补的 Shisei 素材（src: 'shisei'，outfit 275 条、pose 127 条）；
+  //   ② 本地「看图写」的姿势描述（it.pose.en，440 条）——2026-11-19 CI 就是被这一条搞红的：
+  //      同步把 440 条描述整段清空，紧接着的自检断言「女性姿势库全部带英文动作描述」失败，
+  //      于是 job 红、当天索引也没提交。上游永远不会有这些字段，只能由本地按 id 搬回来。
   const outPath = path.join(OUT_DIR, `${kind}.json`);
-  // 服装和姿势都补过 Shisei 素材（outfit 275 条、pose 127 条），
-  // 它们不在上游索引里，整份重写会被静默覆盖，页面看着素材变少却查不出原因。
-  if ((kind === 'outfit' || kind === 'pose') && existsSync(outPath)) {
+  let prev = null;
+  if (existsSync(outPath)) {
     try {
-      const prev = JSON.parse(await readFile(outPath, 'utf8'));
+      prev = JSON.parse(await readFile(outPath, 'utf8'));
+    } catch {
+      /* 旧文件读不出来就按上游原样写，下次跑 sync-shisei 还能补回来 */
+    }
+  }
+  if (prev) {
+    if (kind === 'outfit' || kind === 'pose') {
       const bundled = (prev.items || []).filter((it) => it.src === 'shisei');
       const seen = new Set(items.map((it) => it.id));
       const keep = bundled.filter((it) => !seen.has(it.id));
@@ -208,9 +242,9 @@ async function syncOne(kind, { offline }) {
         items = items.concat(keep).sort((a, b) => String(a.id).localeCompare(String(b.id)));
         console.log(`  · 保留 ${keep.length} 条 Shisei 补充素材`);
       }
-    } catch {
-      /* 旧文件读不出来就按上游原样写，下次跑 sync-shisei 还能补回来 */
     }
+    const filled = preserveLocalFields(items, prev.items || []);
+    if (filled) console.log(`  · 保留 ${filled} 条本地补充字段（看图写的姿势描述）`);
   }
 
   await writeFile(
@@ -254,7 +288,10 @@ async function main() {
   console.log('完成。');
 }
 
-main().catch((e) => {
-  console.error('同步失败：', e);
-  process.exit(1);
-});
+// 只有直接运行时才执行；被 dry-run 当模块 import（测 preserveLocalFields）时不跑网络同步
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((e) => {
+    console.error('同步失败：', e);
+    process.exit(1);
+  });
+}

@@ -602,7 +602,7 @@ check('上传的自定义线稿也能取到高清 full',
   /const first = hiRes \? \(s\.full \|\| s\.thumb\) : \(s\.thumb \|\| s\.full\);/.test(appUniq));
 
 const versionSrc = await readFile(path.join(ROOT, 'shared/version.js'), 'utf8');
-check('版本号已递增到 2026.11.18.18', /tag: '2026\.11\.18\.18'/.test(versionSrc));
+check('版本号已递增到 2026.11.19.1', /tag: '2026\.11\.19\.1'/.test(versionSrc));
 
 console.log('\n[8a6] 回归修复：让 agnes 的请求体与本地脚本一致');
 // 用户实测：同一个模型、同一组素材，本地 agnes-image 脚本一次成型，网站却各种问题；
@@ -1015,6 +1015,34 @@ console.log('\n[21] 文档拆分');
   // 定时同步是整份重写：服装和姿势都补过 Shisei 条目，漏一个就会被静默覆盖
   const sync = await readFile(path.join(ROOT, 'scripts/sync-catalogs.mjs'), 'utf8');
   check('定时同步不会覆盖 Shisei 姿势', /kind === 'outfit' \|\| kind === 'pose'/.test(sync));
+
+  // 2026-11-19 的 CI 红：同步整份重写把 440 条「看图写的姿势描述」清空，紧跟着的自检失败。
+  // 这里直接**跑一遍**合并函数，不靠源码里有没有某几个字来判断。
+  const { preserveLocalFields } = await import(path.join(ROOT, 'scripts/sync-catalogs.mjs'));
+  const fresh = [
+    { id: 'a', title: '上游条目（没有描述）' },
+    { id: 'b', title: '上游条目（上游自己给了 pose）', pose: { en: 'upstream text' } },
+    { id: 'c', title: '上游新增条目' },
+  ];
+  const pre = [
+    { id: 'a', pose: { en: 'sitting on the floor with one hand planted', src: 'lineart-v3' } },
+    { id: 'b', pose: { en: 'local text' } },
+  ];
+  const filledN = preserveLocalFields(fresh, pre);
+  check('定时同步会保留本地写的姿势描述', filledN === 1
+    && fresh[0].pose?.src === 'lineart-v3'
+    && /one hand planted/.test(fresh[0].pose.en),
+  `filled=${filledN}`);
+  check('上游自己带了 pose 就不覆盖', fresh[1].pose.en === 'upstream text', fresh[1].pose.en);
+  check('新增条目没旧记录也不报错', fresh[2].pose === undefined);
+  check('同步脚本可被 import（不自动跑网络同步）', /pathToFileURL\(process\.argv\[1\]\)/.test(sync));
+  // CI 的顺序不能反：先同步、再自检、最后提交；反了就会把「描述被清空」的数据提交上去
+  const wf = await readFile(path.join(ROOT, '.github/workflows/sync-catalogs.yml'), 'utf8');
+  const iSync = wf.indexOf('sync-catalogs.mjs');
+  const iCheck = wf.indexOf('dry-run.mjs');
+  const iCommit = wf.indexOf('git commit');
+  check('CI 顺序：同步 → 自检 → 提交', iSync > 0 && iCheck > iSync && iCommit > iCheck,
+    `${iSync}/${iCheck}/${iCommit}`);
 }
 
 console.log(`\n结果：${pass} 通过，${fail} 失败\n`);
